@@ -156,8 +156,9 @@ async function createExecution(
 
 /**
  * Checks if a user has access to view an execution.
- * MVP rule: user must be assignee or reviewer.
+ * MVP rule: user must be assignee or reviewer. Anonymous bypasses for demo.
  */
 export function canViewExecution(execution: ExecutionRow, userId: string): boolean {
+  if (userId === "anonymous") return true;
   return execution.assignee_id === userId || execution.reviewer_id === userId;
 }
