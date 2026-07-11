@@ -1,7 +1,8 @@
 {
   "name": "@orchestra/contracts",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
+  "description": "[S] Shared — single source of truth for interfaces between domain A and B. Change = PR + both founders approve.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
