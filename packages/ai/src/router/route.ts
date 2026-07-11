@@ -25,7 +25,7 @@ export function routeDecision(input: RouteDecisionInput): RouteDecisionResult {
     };
   }
 
-  const top = input.scoring.candidates[0];
+  const top = firstCandidate(input.scoring.candidates);
   if (top.fit < config.minimumFit) {
     return withTop(input.scoring, {
       verdict: "escalate",
@@ -72,7 +72,7 @@ export function routeDecision(input: RouteDecisionInput): RouteDecisionResult {
 
 function routeAmbiguous(scoring: Extract<ScoringResult, { scorable: true }>): RouteDecisionResult {
   const [first, second] = scoring.candidates;
-  if (second === undefined) {
+  if (first === undefined || second === undefined) {
     throw new RouterError("Ambiguous scoring result requires at least two candidates");
   }
 
@@ -98,7 +98,7 @@ function withTop(
   scoring: Extract<ScoringResult, { scorable: true }>,
   result: Omit<RouteDecisionResult, "topCandidateId" | "topFit" | "ambiguity">,
 ): RouteDecisionResult {
-  const top = scoring.candidates[0];
+  const top = firstCandidate(scoring.candidates);
 
   return {
     ...result,
@@ -106,6 +106,15 @@ function withTop(
     topFit: top.fit,
     ambiguity: scoring.ambiguity,
   };
+}
+
+function firstCandidate(candidates: ScoredCandidate[]): ScoredCandidate {
+  const candidate = candidates[0];
+  if (candidate === undefined) {
+    throw new RouterError("Scorable result requires at least one candidate");
+  }
+
+  return candidate;
 }
 
 function isAmbiguous(ambiguity: number | null, config: RouterConfig): boolean {
@@ -184,8 +193,8 @@ function validateCandidate(candidate: ScoredCandidate): void {
 
 function validateRanking(candidates: ScoredCandidate[]): void {
   for (let index = 1; index < candidates.length; index += 1) {
-    const previous = candidates[index - 1];
-    const current = candidates[index];
+    const previous = candidates[index - 1]!;
+    const current = candidates[index]!;
 
     if (current.fit - previous.fit > ROUTER_EPSILON) {
       throw new RouterError(
@@ -217,7 +226,7 @@ function validateAmbiguity(scoring: Extract<ScoringResult, { scorable: true }>):
     );
   }
 
-  const expectedAmbiguity = Math.max(0, scoring.candidates[0].fit - scoring.candidates[1].fit);
+  const expectedAmbiguity = Math.max(0, scoring.candidates[0]!.fit - scoring.candidates[1]!.fit);
   if (Math.abs(scoring.ambiguity - expectedAmbiguity) > ROUTER_EPSILON) {
     throw new RouterError(
       `Invalid ambiguity: expected top fit delta ${expectedAmbiguity}, received ${scoring.ambiguity}`,

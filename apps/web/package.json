@@ -12,6 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.110",
+    "@orchestra/ai": "workspace:*",
     "@orchestra/contracts": "workspace:*",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",

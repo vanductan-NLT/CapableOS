@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // packages/contracts is shipped as raw TS source → let Next transpile it.
-  transpilePackages: ["@orchestra/contracts"],
+  // Workspace packages are shipped as raw TS source → let Next transpile them.
+  transpilePackages: ["@orchestra/contracts", "@orchestra/ai"],
   reactStrictMode: true,
   experimental: {
     typedRoutes: true,

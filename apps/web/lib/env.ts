@@ -11,6 +11,9 @@ export const supabaseAnonKey = () =>
   req("NEXT_PUBLIC_SUPABASE_ANON_KEY", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 export const supabaseServiceRoleKey = () =>
   req("SUPABASE_SERVICE_ROLE_KEY", process.env.SUPABASE_SERVICE_ROLE_KEY);
+export const qwenApiKey = () => req("QWEN_API_KEY", process.env.QWEN_API_KEY);
+export const qwenBaseUrl = () => req("QWEN_BASE_URL", process.env.QWEN_BASE_URL);
+export const qwenModel = () => req("QWEN_MODEL", process.env.QWEN_MODEL);
 
 /** True when Supabase is configured — pages can show a friendly "cần cấu hình" state. */
 export const hasSupabase = () =>
