@@ -16,3 +16,10 @@ export { AgentAvatar } from "./avatar";
 export { SegmentedControl, type SegmentOption } from "./segmented";
 export { Reveal, Stagger, StaggerItem, Lift, CountUp } from "./motion";
 export { ease, dur, spring, reveal, staggerContainer, staggerItem, cardHover } from "./motion-tokens";
+export {
+  RoutingPipeline,
+  EmptyBoardArt,
+  EmptyPoolArt,
+  EmptyDashboardArt,
+  EmptyRecentArt,
+} from "./illustrations";

@@ -9,6 +9,7 @@ import {
   Card,
   ClockIcon,
   CountUp,
+  EmptyDashboardArt,
   EmptyState,
   ErrorState,
   EstimatedTag,
@@ -75,7 +76,8 @@ export function DashboardView() {
     return (
       <EmptyState
         title="Chưa có dữ liệu đo lường"
-        hint="Khi task được định tuyến (domain A) và có feedback, các chỉ số sẽ xuất hiện ở đây."
+        hint="Khi task được định tuyến và có feedback, các chỉ số sẽ xuất hiện ở đây."
+        illustration={<EmptyDashboardArt />}
       />
     );
   }
@@ -169,7 +171,7 @@ function Allocation({ split, total }: { split: AllocationSplit; total: number })
                 <span className="h-2.5 w-2.5 flex-none rounded-[3px]" style={{ background: v.color }} aria-hidden />
                 {v.label}
               </span>
-              <Meter value={count} max={max} color={v.color} minFill={4} label={`${v.label}: ${count}`} />
+              <Meter value={count} max={max} color={v.color} label={`${v.label}: ${count}`} />
               <span className="w-8 text-right font-mono text-sm tabular-nums text-ink2">{count}</span>
             </li>
           );

@@ -10,6 +10,7 @@ import {
   Card,
   CheckIcon,
   CloseIcon,
+  EmptyPoolArt,
   EmptyState,
   ErrorState,
   Field,
@@ -58,7 +59,7 @@ export function PoolView() {
             <EmptyState
               title="Pool trống"
               hint="Thêm người hoặc AI agent ở form bên phải."
-              icon={<PoolIcon size={22} />}
+              illustration={<EmptyPoolArt />}
             />
           ) : (
             <div className="flex flex-col gap-2.5">

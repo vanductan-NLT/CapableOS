@@ -7,25 +7,32 @@ export function EmptyState({
   title,
   hint,
   icon,
+  illustration,
   action,
   className,
 }: {
   title: string;
   hint?: string;
   icon?: ReactNode;
+  /** Large inline-SVG art (max-w capped); replaces the icon chip when set. */
+  illustration?: ReactNode;
   action?: ReactNode;
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border border-dashed border-line bg-grad-mesh px-6 py-14 text-center",
+        "relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border border-dashed border-line bg-grad-mesh px-6 py-12 text-center",
         className,
       )}
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-grad-brand text-white shadow-glow-b">
-        {icon ?? <InboxIcon size={22} />}
-      </span>
+      {illustration ? (
+        <div className="w-full max-w-[300px]">{illustration}</div>
+      ) : (
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-grad-brand text-white shadow-glow-b">
+          {icon ?? <InboxIcon size={22} />}
+        </span>
+      )}
       <p className="font-medium text-ink">{title}</p>
       {hint ? <p className="max-w-sm text-sm text-muted">{hint}</p> : null}
       {action}

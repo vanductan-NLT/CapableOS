@@ -110,6 +110,42 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Illustration animations (packages/ui) — stilled under reduced-motion below. */
+@keyframes orch-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+.orch-flow {
+  stroke-dasharray: 6 10;
+  animation: orch-flow 1.5s linear infinite;
+}
+@keyframes orch-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.orch-blink {
+  animation: orch-blink 1.1s step-end infinite;
+}
+@keyframes orch-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+.orch-float {
+  animation: orch-float 6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

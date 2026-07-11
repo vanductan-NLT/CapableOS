@@ -10,6 +10,7 @@ import {
   CheckIcon,
   ChevronRightIcon,
   CloseIcon,
+  EmptyBoardArt,
   EmptyState,
   ErrorState,
   Lift,
@@ -62,7 +63,13 @@ export function TaskBoard() {
     return <ErrorState message={error instanceof HttpError ? error.message : "Không tải được board"} onRetry={refetch} />;
   }
   if (!tasks || tasks.length === 0) {
-    return <EmptyState title="Board trống" hint="Tạo task ở trang Command để nó xuất hiện ở đây." />;
+    return (
+      <EmptyState
+        title="Board trống"
+        hint="Tạo task ở trang Command để nó xuất hiện ở đây."
+        illustration={<EmptyBoardArt />}
+      />
+    );
   }
 
   const byStatus = new Map(BOARD_COLUMNS.map((s) => [s, [] as Task[]]));

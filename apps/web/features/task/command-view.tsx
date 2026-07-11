@@ -9,14 +9,15 @@ import {
   Badge,
   Button,
   Card,
-  CheckIcon,
   CommandIcon,
+  EmptyRecentArt,
   EmptyState,
   ErrorState,
   Field,
   HumanIcon,
   Input,
   Reveal,
+  RoutingPipeline,
   ShieldCheckIcon,
   Skeleton,
   SparkIcon,
@@ -37,6 +38,11 @@ export function CommandView() {
         lead="Nhập bằng ngôn ngữ thường. Hệ thống phân tích → định tuyến người/AI → thực thi thật → đo lường, trong một câu lệnh."
         icon={<CommandIcon size={20} />}
       />
+      <Reveal>
+        <Card className="overflow-hidden bg-grad-mesh">
+          <RoutingPipeline className="mx-auto max-w-2xl" />
+        </Card>
+      </Reveal>
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
         <CommandInput />
         <RecentTasks />
@@ -262,7 +268,7 @@ function RecentTasks() {
       ) : isError ? (
         <ErrorState message={error instanceof HttpError ? error.message : "Không tải được"} onRetry={refetch} />
       ) : !data || data.length === 0 ? (
-        <EmptyState title="Chưa có task nào" hint="Tạo task đầu tiên ở ô bên trái." />
+        <EmptyState title="Chưa có task nào" hint="Tạo task đầu tiên ở ô bên trái." illustration={<EmptyRecentArt />} />
       ) : (
         <ul className="flex flex-col gap-2">
           {data.slice(0, 6).map((t) => (
