@@ -18,3 +18,5 @@ export type {
   Governance,
   Decision,
 } from "./decision";
+
+export type { PoolCandidate } from "./agent";
