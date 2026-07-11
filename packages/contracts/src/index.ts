@@ -26,6 +26,38 @@ export type {
   DecisionResponse,
 } from "./decision";
 
+// ── Execution domain (Feature 4.1, domain A owns) ───────────
+export {
+  TERMINAL_STATUSES,
+  ACTIVE_STATUSES,
+  EXECUTOR_TYPES,
+  CAPABILITY_EXECUTOR_MAP,
+  ALLOWED_TRANSITIONS,
+} from "./execution";
+export type {
+  ExecutionStatus,
+  ExecutorType,
+  ExecutionEvent,
+  Execution,
+  CreateExecutionInput,
+  RetryExecutionInput,
+  ExecutionResult,
+  ExecutionErrorCode,
+  ExecutionError,
+  TransitionRule,
+  HumanSubmitResultInput,
+  HumanSubmitResult,
+  ReviewOutcome,
+  ReviewInput,
+  ReviewResult,
+  ExecuteResponse,
+  ExecuteAiSuccess,
+  ExecuteAiFailed,
+  ExecuteHumanPending,
+  ExecuteEscalate,
+  ExecuteExisting,
+} from "./execution";
+
 // ── Workspace domain (domain B owns) ────────────────────────
 export type { TaskStatus, Task, Feedback } from "./task";
 export type { AgentType, CapabilityMap, Agent, NewAgentInput, AgentPatch, PoolCandidate } from "./agent";
