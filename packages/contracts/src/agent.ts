@@ -1,3 +1,14 @@
+import type { Capability } from "./capabilities";
+
+export interface PoolCandidate {
+  id: string;
+  type: "human" | "ai";
+  name: string;
+  trust: number;
+  cost: number;
+  minutes: number;
+  caps: Partial<Record<Capability, number>>;
+}
 // [S] Shared contract — Capability Pool member. Derived from DB schema `agents` (Playbook mục 09).
 // Founder B is primary author (owns the agents table). FR-13 manages this via POST/PATCH /agents.
 
