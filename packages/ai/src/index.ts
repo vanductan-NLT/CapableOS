@@ -21,3 +21,5 @@ export type {
   RouterConfig,
   RouterReasonCode,
 } from "./router";
+export { decideTask } from "./decision-pipeline";
+export type { DecideTaskInput, DecideTaskResult } from "./decision-pipeline";
