@@ -14,6 +14,10 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  // @orchestra/prompts uses fs.readFileSync + import.meta.url to load .md files.
+  // Webpack mangles import.meta.url → must run natively in Node, not bundled.
+  // @orchestra/ai must also be external because it transitively imports prompts.
+  serverExternalPackages: ["@orchestra/prompts", "@orchestra/ai"],
 };
 
 export default nextConfig;
