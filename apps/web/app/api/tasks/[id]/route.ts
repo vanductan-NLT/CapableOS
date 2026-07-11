@@ -14,5 +14,16 @@ export const PATCH = route<Ctx>(async (req, ctx) => {
   const { data, error } = await sb.from("tasks").update(patch).eq("id", id).select("*").maybeSingle();
   if (error) throw new ApiFail("internal_error", error.message);
   if (!data) throw new ApiFail("not_found", `Không tìm thấy task ${id}`);
+
+  // Observability (mục 24) + enables flow metrics (lead time): log status transitions.
+  if (patch.status) {
+    const { error: logErr } = await sb.from("logs").insert({
+      kind: "status",
+      task_id: id,
+      trace_id: crypto.randomUUID(),
+      payload: { status: patch.status },
+    });
+    if (logErr) console.error("status log failed (non-fatal):", logErr.message);
+  }
   return ok<Task>(toTask(data as TaskRow));
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeBreakdown, computeMetrics, emptySplit, type TaskRecord } from "./metrics";
+import { computeBreakdown, computeFlow, computeMetrics, emptySplit, type DoneEvent, type TaskRecord } from "./metrics";
 
 describe("computeMetrics", () => {
   it("empty inputs → all zero, empty split", () => {
@@ -58,5 +58,29 @@ describe("computeBreakdown", () => {
     expect(ai.quality).toBe(1); // 1 pass, 0 fail among rated
     expect(ai.feedbackCount).toBe(1);
     expect(ai.estimated).toBe(false);
+  });
+});
+
+describe("computeFlow", () => {
+  const NOW = 10 * 86_400_000; // day 10
+  it("empty → zeros", () => {
+    expect(computeFlow([], NOW)).toEqual({
+      completed: 0,
+      leadTimeMsP50: 0,
+      leadTimeMsAvg: 0,
+      throughput: 0,
+      windowDays: 7,
+    });
+  });
+  it("median lead time resists outliers; throughput counts within window", () => {
+    const events: DoneEvent[] = [
+      { leadMs: 1000, doneAt: NOW - 1 * 86_400_000 }, // in window
+      { leadMs: 3000, doneAt: NOW - 2 * 86_400_000 }, // in window
+      { leadMs: 100000, doneAt: NOW - 9 * 86_400_000 }, // outside 7d window
+    ];
+    const f = computeFlow(events, NOW, 7);
+    expect(f.completed).toBe(3);
+    expect(f.leadTimeMsP50).toBe(3000); // median, not skewed by 100000
+    expect(f.throughput).toBe(2); // only 2 within 7 days
   });
 });

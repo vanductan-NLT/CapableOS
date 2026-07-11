@@ -16,9 +16,7 @@ export type { Verdict, Risk, RequiredCapability, Candidate, Governance, Decision
 
 // ── Workspace domain (domain B owns) ────────────────────────
 export type { TaskStatus, Task, Feedback } from "./task";
-export type { AgentType, CapabilityMap, Agent, NewAgentInput, AgentPatch } from "./agent";
-
-export type { PoolCandidate } from "./agent";
+export type { AgentType, CapabilityMap, Agent, NewAgentInput, AgentPatch, PoolCandidate } from "./agent";
 export type {
   ApiErrorCode,
   ApiError,

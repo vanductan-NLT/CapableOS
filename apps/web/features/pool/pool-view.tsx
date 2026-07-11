@@ -4,11 +4,14 @@ import { useState } from "react";
 import type { Agent, AgentType } from "@orchestra/contracts";
 import { Badge, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { HttpError } from "@/lib/http";
+import type { Reputation } from "@/lib/reputation";
 import { useAgents } from "@/features/task/hooks";
+import { useReputation } from "@/features/dashboard/hooks";
 import { useCreateAgent, useUpdateAgent } from "./hooks";
 
 export function PoolView() {
   const { data, isLoading, isError, error, refetch } = useAgents();
+  const rep = useReputation();
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div>
@@ -27,7 +30,7 @@ export function PoolView() {
         ) : (
           <div className="flex flex-col gap-2">
             {data.map((a) => (
-              <AgentRow key={a.id} agent={a} />
+              <AgentRow key={a.id} agent={a} rep={rep.data?.[a.id]} />
             ))}
           </div>
         )}
@@ -48,7 +51,25 @@ function TrustBar({ value }: { value: number }) {
   );
 }
 
-function AgentRow({ agent }: { agent: Agent }) {
+function ReputationLine({ rep }: { rep?: Reputation }) {
+  if (!rep || rep.n === 0) {
+    return <p className="mt-1.5 text-xs text-muted">Uy tín kiểm chứng: chưa có đánh giá</p>;
+  }
+  const arrow = rep.trend === "up" ? "↗" : rep.trend === "down" ? "↘" : "→";
+  const tone = rep.trend === "up" ? "text-good" : rep.trend === "down" ? "text-bad" : "text-muted";
+  return (
+    <p className="mt-1.5 flex items-center gap-1.5 text-xs" title="Wilson lower-bound của tỉ lệ 'đạt' — phạt mẫu nhỏ">
+      <span className="text-muted">Uy tín kiểm chứng:</span>
+      <span className="font-mono font-semibold">{Math.round(rep.wilson * 100)}%</span>
+      <span className={tone} aria-label={`xu hướng ${rep.trend}`}>
+        {arrow}
+      </span>
+      <span className="text-muted">({rep.n} đánh giá · EWMA {Math.round(rep.ewma * 100)}%)</span>
+    </p>
+  );
+}
+
+function AgentRow({ agent, rep }: { agent: Agent; rep?: Reputation }) {
   const update = useUpdateAgent();
   const caps = Object.entries(agent.caps).sort((a, b) => b[1] - a[1]);
   return (
@@ -67,6 +88,7 @@ function AgentRow({ agent }: { agent: Agent }) {
               </span>
             ))}
           </div>
+          <ReputationLine rep={rep} />
         </div>
         <div className="flex flex-col items-end gap-1.5">
           <TrustBar value={agent.trust} />
