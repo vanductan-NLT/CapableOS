@@ -1,0 +1,116 @@
+[
+  {
+    "id": "human-anna-writer",
+    "type": "human",
+    "name": "Anna Writer",
+    "trust": 86,
+    "cost": 0,
+    "minutes": 45,
+    "caps": {
+      "summarization": 0.55,
+      "research": 0.62,
+      "email_drafting": 0.7,
+      "translation": 0.2,
+      "meeting_notes": 0.48,
+      "writing": 0.88,
+      "analysis": 0.58,
+      "coding": 0.05,
+      "design": 0.36
+    }
+  },
+  {
+    "id": "human-minh-designer",
+    "type": "human",
+    "name": "Minh Designer",
+    "trust": 79,
+    "cost": 0,
+    "minutes": 60,
+    "caps": {
+      "summarization": 0.34,
+      "research": 0.4,
+      "email_drafting": 0.28,
+      "translation": 0.18,
+      "meeting_notes": 0.42,
+      "writing": 0.44,
+      "analysis": 0.5,
+      "coding": 0.08,
+      "design": 0.92
+    }
+  },
+  {
+    "id": "human-linh-researcher",
+    "type": "human",
+    "name": "Linh Researcher",
+    "trust": 91,
+    "cost": 0,
+    "minutes": 75,
+    "caps": {
+      "summarization": 0.64,
+      "research": 0.9,
+      "email_drafting": 0.46,
+      "translation": 0.22,
+      "meeting_notes": 0.52,
+      "writing": 0.57,
+      "analysis": 0.8,
+      "coding": 0.1,
+      "design": 0.3
+    }
+  },
+  {
+    "id": "ai-scribe-summarizer",
+    "type": "ai",
+    "name": "Scribe Summarizer",
+    "trust": 83,
+    "cost": 0.01,
+    "minutes": 3,
+    "caps": {
+      "summarization": 0.95,
+      "research": 0.52,
+      "email_drafting": 0.66,
+      "translation": 0.55,
+      "meeting_notes": 0.9,
+      "writing": 0.72,
+      "analysis": 0.63,
+      "coding": 0.04,
+      "design": 0.2
+    }
+  },
+  {
+    "id": "ai-polyglot-translator",
+    "type": "ai",
+    "name": "Polyglot Translator",
+    "trust": 78,
+    "cost": 0.02,
+    "minutes": 4,
+    "caps": {
+      "summarization": 0.58,
+      "research": 0.45,
+      "email_drafting": 0.52,
+      "translation": 0.96,
+      "meeting_notes": 0.5,
+      "writing": 0.6,
+      "analysis": 0.48,
+      "coding": 0.02,
+      "design": 0.18
+    }
+  },
+  {
+    "id": "ai-draft-emailer",
+    "type": "ai",
+    "name": "Draft Emailer",
+    "trust": 82,
+    "cost": 0.03,
+    "minutes": 5,
+    "caps": {
+      "summarization": 0.62,
+      "research": 0.54,
+      "email_drafting": 0.94,
+      "translation": 0.5,
+      "meeting_notes": 0.57,
+      "writing": 0.9,
+      "analysis": 0.55,
+      "coding": 0.03,
+      "design": 0.22
+    }
+  }
+]
