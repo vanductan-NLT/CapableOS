@@ -1,7 +1,25 @@
 "use client";
 
 import type { AllocationSplit } from "@orchestra/contracts";
-import { Badge, Card, EmptyState, ErrorState, EstimatedTag, Skeleton } from "@/components/ui";
+import {
+  ActivityIcon,
+  AgentAvatar,
+  Badge,
+  BoltIcon,
+  Card,
+  ClockIcon,
+  CountUp,
+  EmptyState,
+  ErrorState,
+  EstimatedTag,
+  GaugeIcon,
+  LayersIcon,
+  Meter,
+  Reveal,
+  Skeleton,
+  StatTile,
+  WalletIcon,
+} from "@orchestra/ui";
 import type { SideStat } from "@/lib/metrics";
 import { HttpError } from "@/lib/http";
 import { useBreakdown, useFlow, useMetrics } from "./hooks";
@@ -33,9 +51,9 @@ export function DashboardView() {
 
   if (m.isLoading || b.isLoading) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-24" />
+          <Skeleton key={i} className="h-28" />
         ))}
       </div>
     );
@@ -64,82 +82,95 @@ export function DashboardView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section aria-label="KPI" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Tự động hoá" value={pct(metrics.automation)} hint="AI + Hybrid / tổng" />
-        <StatTile label="Chi phí tiết kiệm" value={num(metrics.cost_saving)} estimated />
-        <StatTile label="Thời gian TB / lần" value={`${num(metrics.avg_ms)} ms`} />
-        <StatTile
-          label="Chất lượng"
-          value={feedbackCount ? pct(metrics.quality) : "—"}
-          hint={feedbackCount ? `${feedbackCount} đánh giá` : "chưa có đánh giá"}
-        />
-      </section>
-
-      {flow.data && flow.data.completed > 0 ? (
-        <section aria-label="Flow (DORA)" className="grid gap-3 sm:grid-cols-3">
-          <StatTile label="Việc hoàn thành" value={num(flow.data.completed)} hint="tổng luỹ kế" />
-          <StatTile label="Lead time (P50)" value={dur(flow.data.leadTimeMsP50)} hint="tạo → xong, trung vị" />
+      <Reveal>
+        <section aria-label="KPI" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatTile
-            label={`Throughput ${flow.data.windowDays} ngày`}
-            value={num(flow.data.throughput)}
-            hint="việc xong gần đây"
+            label="Tự động hoá"
+            value={<CountUp value={metrics.automation * 100} format={(v) => `${Math.round(v)}%`} />}
+            hint="AI + Hybrid / tổng"
+            icon={<BoltIcon size={17} />}
+            accent="a"
+          />
+          <StatTile
+            label="Chi phí tiết kiệm"
+            value={<CountUp value={metrics.cost_saving} format={(v) => num(Math.round(v))} />}
+            icon={<WalletIcon size={17} />}
+            accent="good"
+            estimated
+          />
+          <StatTile
+            label="Thời gian TB / lần"
+            value={<CountUp value={metrics.avg_ms} format={(v) => `${num(Math.round(v))} ms`} />}
+            icon={<ClockIcon size={17} />}
+            accent="b"
+          />
+          <StatTile
+            label="Chất lượng"
+            value={feedbackCount ? <CountUp value={metrics.quality * 100} format={(v) => `${Math.round(v)}%`} /> : "—"}
+            hint={feedbackCount ? `${feedbackCount} đánh giá` : "chưa có đánh giá"}
+            icon={<GaugeIcon size={17} />}
+            accent="gold"
           />
         </section>
+      </Reveal>
+
+      {flow.data && flow.data.completed > 0 ? (
+        <Reveal>
+          <section aria-label="Flow (DORA)" className="grid gap-4 sm:grid-cols-3">
+            <StatTile
+              label="Việc hoàn thành"
+              value={<CountUp value={flow.data.completed} format={(v) => num(Math.round(v))} />}
+              hint="tổng luỹ kế"
+              icon={<LayersIcon size={17} />}
+              accent="b"
+            />
+            <StatTile
+              label="Lead time (P50)"
+              value={dur(flow.data.leadTimeMsP50)}
+              hint="tạo → xong, trung vị"
+              icon={<ClockIcon size={17} />}
+              accent="a"
+            />
+            <StatTile
+              label={`Throughput ${flow.data.windowDays} ngày`}
+              value={<CountUp value={flow.data.throughput} format={(v) => num(Math.round(v))} />}
+              hint="việc xong gần đây"
+              icon={<ActivityIcon size={17} />}
+              accent="good"
+            />
+          </section>
+        </Reveal>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Allocation split={metrics.split} total={total} />
-        {b.data ? <Breakdown human={b.data.human} ai={b.data.ai} /> : null}
-      </div>
+      <Reveal>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Allocation split={metrics.split} total={total} />
+          {b.data ? <Breakdown human={b.data.human} ai={b.data.ai} /> : null}
+        </div>
+      </Reveal>
     </div>
-  );
-}
-
-function StatTile({
-  label,
-  value,
-  hint,
-  estimated,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  estimated?: boolean;
-}) {
-  return (
-    <Card>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted">{label}</span>
-        {estimated ? <EstimatedTag /> : null}
-      </div>
-      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
-    </Card>
   );
 }
 
 function Allocation({ split, total }: { split: AllocationSplit; total: number }) {
   const max = Math.max(1, ...VERDICTS.map((v) => split[v.key]));
   return (
-    <Card>
-      <h2 className="text-sm font-semibold">Phân bổ quyết định</h2>
-      <p className="mb-3 text-xs text-muted">Người vs AI vs Hybrid vs Escalate ({total} quyết định)</p>
-      <ul className="flex flex-col gap-2.5" role="list">
+    <Card className="flex flex-col gap-4">
+      <div>
+        <h2 className="text-sm font-semibold text-ink">Phân bổ quyết định</h2>
+        <p className="mt-0.5 text-xs text-muted">Người · AI · Hybrid · Escalate — {total} quyết định</p>
+      </div>
+      <ul className="flex flex-col gap-3" role="list">
         {VERDICTS.map((v) => {
           const count = split[v.key];
           return (
-            <li key={v.key} className="grid grid-cols-[80px_1fr_auto] items-center gap-2">
-              <span className="flex items-center gap-1.5 text-sm">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: v.color }} aria-hidden />
+            <li key={v.key} className="grid grid-cols-[84px_1fr_auto] items-center gap-3">
+              <span className="flex items-center gap-2 text-sm text-ink2">
+                <span className="h-2.5 w-2.5 flex-none rounded-[3px]" style={{ background: v.color }} aria-hidden />
                 {v.label}
               </span>
-              <span className="h-3 overflow-hidden rounded-full bg-line" role="img" aria-label={`${v.label}: ${count}`}>
-                <span
-                  className="block h-full rounded-full"
-                  style={{ width: `${(count / max) * 100}%`, background: v.color, minWidth: count ? 4 : 0 }}
-                />
-              </span>
-              <span className="w-10 text-right font-mono text-sm tabular-nums">{count}</span>
+              <Meter value={count} max={max} color={v.color} minFill={4} label={`${v.label}: ${count}`} />
+              <span className="w-8 text-right font-mono text-sm tabular-nums text-ink2">{count}</span>
             </li>
           );
         })}
@@ -149,14 +180,14 @@ function Allocation({ split, total }: { split: AllocationSplit; total: number })
 }
 
 function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
-  const rows: { label: string; icon: string; s: SideStat }[] = [
-    { label: "Người", icon: "🧑", s: human },
-    { label: "AI", icon: "🤖", s: ai },
+  const rows: { label: string; type: "human" | "ai"; s: SideStat }[] = [
+    { label: "Người", type: "human", s: human },
+    { label: "AI", type: "ai", s: ai },
   ];
   return (
-    <Card>
-      <h2 className="text-sm font-semibold">Người vs AI · cùng đơn vị</h2>
-      <div className="mt-3 overflow-x-auto">
+    <Card className="flex flex-col gap-3">
+      <h2 className="text-sm font-semibold text-ink">Người vs AI · cùng đơn vị</h2>
+      <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left font-mono text-[10px] uppercase tracking-wide text-muted">
@@ -168,18 +199,19 @@ function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ label, icon, s }) => (
-              <tr key={label} className="border-b border-line/60">
-                <td className="py-2.5 pr-2">
-                  <span className="flex items-center gap-1.5">
-                    <span aria-hidden>{icon}</span> {label}
+            {rows.map(({ label, type, s }) => (
+              <tr key={label} className="border-b border-line/60 last:border-0">
+                <td className="py-3 pr-2">
+                  <span className="flex items-center gap-2">
+                    <AgentAvatar type={type} size="sm" />
+                    <span className="font-medium text-ink2">{label}</span>
                     {s.estimated ? <EstimatedTag /> : null}
                   </span>
                 </td>
-                <td className="py-2.5 pr-2 tabular-nums">{s.tasks}</td>
-                <td className="py-2.5 pr-2 tabular-nums">{s.tasks ? num(s.avgMinutes) : "—"}</td>
-                <td className="py-2.5 pr-2 tabular-nums">{s.tasks ? num(s.totalCost) : "—"}</td>
-                <td className="py-2.5 tabular-nums">
+                <td className="py-3 pr-2 tabular-nums text-ink2">{s.tasks}</td>
+                <td className="py-3 pr-2 tabular-nums text-ink2">{s.tasks ? num(s.avgMinutes) : "—"}</td>
+                <td className="py-3 pr-2 tabular-nums text-ink2">{s.tasks ? num(s.totalCost) : "—"}</td>
+                <td className="py-3 tabular-nums">
                   {s.feedbackCount ? (
                     <Badge tone={s.quality >= 0.6 ? "good" : "bad"}>{pct(s.quality)}</Badge>
                   ) : (
@@ -191,7 +223,7 @@ function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-muted">Chi phí/thời gian của người là ESTIMATED; của AI đo từ log thực thi.</p>
+      <p className="text-xs text-muted">Chi phí/thời gian của người là ESTIMATED; của AI đo từ log thực thi.</p>
     </Card>
   );
 }

@@ -1,12 +1,16 @@
+import { DashboardIcon } from "@orchestra/ui";
+import { PageHeader } from "@/components/page-header";
 import { DashboardView } from "@/features/dashboard/dashboard-view";
 
 export default function DashboardPage() {
   return (
-    <div>
-      <div className="mb-4">
-        <h1 className="text-lg font-semibold">Performance Dashboard</h1>
-        <p className="text-sm text-muted">Năng suất người và AI trên cùng thước đo.</p>
-      </div>
+    <div className="flex flex-col gap-7">
+      <PageHeader
+        eyebrow="Performance"
+        title="Năng suất người & AI"
+        lead="Đo sự thật công bằng trên cùng một thước đo — phân bổ quyết định, dòng chảy (DORA) và chất lượng."
+        icon={<DashboardIcon size={20} />}
+      />
       <DashboardView />
     </div>
   );

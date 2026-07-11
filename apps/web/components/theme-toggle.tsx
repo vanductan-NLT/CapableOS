@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { IconButton, MoonIcon, SunIcon } from "@orchestra/ui";
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
+    setMounted(true);
   }, []);
   function toggle() {
     const next = !dark;
@@ -18,13 +21,15 @@ export function ThemeToggle() {
     }
   }
   return (
-    <button
-      type="button"
+    <IconButton
+      variant="secondary"
+      size="sm"
       onClick={toggle}
       aria-label={dark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-      className="rounded-lg border border-line px-2.5 py-1.5 text-sm text-ink2 hover:bg-line/60"
+      title={dark ? "Chế độ sáng" : "Chế độ tối"}
     >
-      {dark ? "☀️" : "🌙"}
-    </button>
+      {/* render-stable icon until mounted to avoid hydration mismatch */}
+      {mounted && dark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
+    </IconButton>
   );
 }

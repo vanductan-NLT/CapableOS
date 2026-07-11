@@ -9,7 +9,7 @@ config({ path: resolve(__dirname, "../../.env.local") });
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Workspace packages are shipped as raw TS source → let Next transpile them.
-  transpilePackages: ["@orchestra/contracts", "@orchestra/ai"],
+  transpilePackages: ["@orchestra/contracts", "@orchestra/ai", "@orchestra/ui"],
   reactStrictMode: true,
   experimental: {
     typedRoutes: true,
