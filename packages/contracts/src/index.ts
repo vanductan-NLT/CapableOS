@@ -56,7 +56,12 @@ export type {
   ExecuteHumanPending,
   ExecuteEscalate,
   ExecuteExisting,
+  ExecuteDenied,
 } from "./execution";
+
+// ── Governance domain (Phase 5 MVP, domain A owns) ──────────
+export { checkGovernance, resolveGovernanceAction } from "./governance";
+export type { GovernanceGate, GovernanceCheckInput, GovernanceCheckResult } from "./governance";
 
 // ── Workspace domain (domain B owns) ────────────────────────
 export type { TaskStatus, Task, Feedback } from "./task";
