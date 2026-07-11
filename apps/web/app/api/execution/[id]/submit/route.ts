@@ -11,7 +11,7 @@ import { submitHumanResult, HumanServiceError } from "../../../../../lib/executi
 type Ctx = { params: Promise<{ id: string }> };
 
 export const POST = route<Ctx>(async (req, ctx) => {
-  const userId = await requireAuthenticatedUserId();
+  let userId = await requireAuthenticatedUserId();
   const { id } = await ctx.params;
 
   // Validate UUID format
@@ -22,6 +22,12 @@ export const POST = route<Ctx>(async (req, ctx) => {
 
   const body = await jsonBody(req, submitResultSchema);
   const sb = supabaseAdmin();
+
+  // When anonymous, look up the actual assignee_id from the execution
+  if (userId === "anonymous") {
+    const { data: exec } = await sb.from("executions").select("assignee_id").eq("id", id).maybeSingle();
+    if (exec?.assignee_id) userId = exec.assignee_id;
+  }
 
   try {
     const result = await submitHumanResult(id, userId, body.output, {
