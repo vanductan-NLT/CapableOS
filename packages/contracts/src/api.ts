@@ -1,7 +1,7 @@
 // [S] Shared contract — API envelope + endpoint request/response shapes (Playbook mục 11).
 // Envelope is FIXED: { ok, data?, error? }. See docs/ADR/0001 for deviation from Nhi standard.
 
-import type { Decision } from "./decision";
+import type { DecisionResponse } from "./decision";
 import type { TaskStatus, Feedback } from "./task";
 import type { NewAgentInput, AgentPatch } from "./agent";
 
@@ -65,4 +65,4 @@ export type PatchAgentBody = AgentPatch;
 export interface RouteBody {
   task_id: string;
 }
-export type RouteResult = Decision;
+export type RouteResult = DecisionResponse;

@@ -47,7 +47,7 @@ export function scoreCandidates(input: ScoreCandidatesInput): ScoringResult {
     scorable: true,
     candidates,
     ambiguity:
-      candidates.length >= 2 ? Math.max(0, candidates[0].fit - candidates[1].fit) : null,
+      candidates.length >= 2 ? Math.max(0, candidates[0]!.fit - candidates[1]!.fit) : null,
   };
 }
 

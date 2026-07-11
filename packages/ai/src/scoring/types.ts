@@ -1,4 +1,6 @@
-import type { PoolCandidate, RequiredCapability } from "@orchestra/contracts";
+import type { PoolCandidate, RequiredCapability, ScoredCandidate } from "@orchestra/contracts";
+
+export type { ScoredCandidate } from "@orchestra/contracts";
 
 export interface ScoringWeights {
   match: number;
@@ -9,18 +11,6 @@ export interface ScoreCandidatesInput {
   required: RequiredCapability[];
   candidates: PoolCandidate[];
   weights?: ScoringWeights;
-}
-
-export interface ScoredCandidate {
-  id: string;
-  type: "human" | "ai";
-  name: string;
-  trust: number;
-  normalizedTrust: number;
-  cost: number;
-  minutes: number;
-  match: number;
-  fit: number;
 }
 
 export type ScoringFailureReason = "NO_REQUIRED_CAPABILITIES" | "NO_CANDIDATES";

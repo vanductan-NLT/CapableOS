@@ -1,7 +1,8 @@
 import { ApiFail, jsonBody, ok, route } from "@/lib/api";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { patchAgentSchema } from "@/lib/schemas";
-import { toAgent, type AgentRow } from "@/lib/db-types";
+import type { AgentRow } from "@/lib/db-types";
+import { toAgent } from "@/lib/row-mappers";
 import type { Agent } from "@orchestra/contracts";
 
 type Ctx = { params: Promise<{ id: string }> };

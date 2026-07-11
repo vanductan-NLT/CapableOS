@@ -35,6 +35,12 @@ export const feedbackSchema = z.object({
   note: z.string().trim().max(2000).optional(),
 });
 
+export const routeRequestSchema = z.object({
+  task_id: z.string({ required_error: "Thiếu task_id" }).uuid("task_id phải là UUID"),
+});
+
+export const decisionIdSchema = z.string().uuid("decision id phải là UUID");
+
 // Feature 0: Pool caps PHẢI dùng đúng taxonomy chung (CapabilitySchema), không tự bịa cap mới.
 const capsSchema = z.record(CapabilitySchema, z.number().min(0).max(1));
 
