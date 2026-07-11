@@ -131,6 +131,40 @@ describe("plan", () => {
       },
     ]);
   });
+
+  it("returns unresolved high-risk output when LLM fails and fallback finds no capability", async () => {
+    const result = await plan(
+      { title: "Chuẩn bị onboarding" },
+      { model: hangingModel(), timeoutMs: 10 },
+    );
+
+    expect(result).toEqual({
+      required: [],
+      risk: "high",
+    });
+  });
+
+  it("merges duplicate capabilities from the LLM output and preserves first-seen order", async () => {
+    const result = await plan(
+      { title: "Phân tích và tóm tắt" },
+      {
+        model: modelWithObject({
+          required: [
+            { cap: "analysis", weight: 0.6 },
+            { cap: "summarization", weight: 0.5 },
+            { cap: "analysis", weight: 0.2 },
+          ],
+          missing: [],
+          rationale: "Cần phân tích và tóm tắt.",
+        }),
+      },
+    );
+
+    expect(result.required.map((item) => item.cap)).toEqual(["analysis", "summarization"]);
+    expect(result.required[0].weight).toBeCloseTo(0.8 / 1.3);
+    expect(result.required[1].weight).toBeCloseTo(0.5 / 1.3);
+    expect(result.required.reduce((sum, item) => sum + item.weight, 0)).toBeCloseTo(1);
+  });
 });
 
 interface PlannerModelOutput {
