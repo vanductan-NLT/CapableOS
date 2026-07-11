@@ -1,0 +1,69 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`plan > returns enum capabilities and 'high' risk for 'Dịch hợp đồng sang tiếng Anh rồi gửi …' 1`] = `
+{
+  "required": [
+    {
+      "cap": "translation",
+      "weight": 1
+    }
+  ],
+  "risk": "high"
+}
+`;
+
+exports[`plan > returns enum capabilities and 'high' risk for 'Xoá toàn bộ dữ liệu khách hàng cũ' 1`] = `
+{
+  "required": [
+    {
+      "cap": "analysis",
+      "weight": 1
+    }
+  ],
+  "risk": "high"
+}
+`;
+
+exports[`plan > returns enum capabilities and 'low' risk for 'Nghiên cứu và viết blog về AI' 1`] = `
+{
+  "required": [
+    {
+      "cap": "research",
+      "weight": 0.5
+    },
+    {
+      "cap": "writing",
+      "weight": 0.5
+    }
+  ],
+  "risk": "low"
+}
+`;
+
+exports[`plan > returns enum capabilities and 'low' risk for 'Tóm tắt 30 trang báo cáo thị trường q…' 1`] = `
+{
+  "required": [
+    {
+      "cap": "summarization",
+      "weight": 0.7
+    },
+    {
+      "cap": "analysis",
+      "weight": 0.3
+    }
+  ],
+  "risk": "low"
+}
+`;
+
+exports[`plan > returns enum capabilities and 'low' risk for 'Viết biên bản cuộc họp nội bộ tuần này' 1`] = `
+{
+  "required": [
+    {
+      "cap": "meeting_notes",
+      "weight": 1
+    }
+  ],
+  "risk": "low"
+}
+`;
