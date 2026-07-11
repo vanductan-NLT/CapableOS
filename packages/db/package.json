@@ -1,0 +1,15 @@
+{
+  "name": "@orchestra/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "[B] Founder B owns the schema. Migrations + RLS + seed for Orchestra (Supabase/Postgres).",
+  "type": "module",
+  "scripts": {
+    "migrate": "node scripts/run.mjs migrate",
+    "seed": "node scripts/run.mjs seed",
+    "reset": "node scripts/run.mjs reset"
+  },
+  "devDependencies": {
+    "pg": "^8.13.1"
+  }
+}
