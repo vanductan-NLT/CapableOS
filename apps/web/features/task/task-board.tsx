@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Agent, Task } from "@orchestra/contracts";
+import type { Agent, DecisionResponse, ExecuteResponse, Task } from "@orchestra/contracts";
 import {
   AgentAvatar,
   Badge,
@@ -14,6 +14,7 @@ import {
   ErrorState,
   Lift,
   Skeleton,
+  SparkIcon,
   Stagger,
   StaggerItem,
   cn,
@@ -23,6 +24,9 @@ import { HttpError } from "@/lib/http";
 import { useSubmitFeedback } from "@/features/dashboard/hooks";
 import { useAgents, useRealtimeTasks, useTasks } from "./hooks";
 import { BOARD_COLUMNS, STATUS_META } from "./status";
+import { useRouteDecision } from "@/lib/queries/use-route-decision";
+import { useExecute } from "@/lib/queries/use-execute";
+import { useReview } from "@/lib/queries/use-review";
 
 // Column accent rail — ties each Kanban column to its status tone.
 const RAIL: Record<Tone, string> = {
@@ -33,6 +37,10 @@ const RAIL: Record<Tone, string> = {
   good: "bg-good",
   bad: "bg-bad",
 };
+
+// Purple-tinted button for AI/decision actions (secondary hierarchy, AA-safe both themes).
+const AI_BTN = "w-full border border-a-line bg-a-soft text-a hover:bg-a/10";
+const VERDICT_TONE = { ai: "a", human: "b", hybrid: "gold", escalate: "bad" } as const;
 
 export function TaskBoard() {
   const { data: tasks, isLoading, isError, error, refetch } = useTasks();
@@ -59,7 +67,6 @@ export function TaskBoard() {
 
   const byStatus = new Map(BOARD_COLUMNS.map((s) => [s, [] as Task[]]));
   for (const t of tasks) byStatus.get(t.status)?.push(t);
-  // only show columns that have tasks, plus the first (created) always
   const visible = BOARD_COLUMNS.filter((s, i) => i === 0 || (byStatus.get(s)?.length ?? 0) > 0);
 
   return (
@@ -96,30 +103,199 @@ function TaskCard({ task, agent }: { task: Task; agent?: Agent }) {
   return (
     <Lift>
       <Card className="flex flex-col gap-2.5 p-3.5">
-      <p className="text-sm font-medium leading-snug text-ink">{task.title}</p>
-      {task.description ? <p className="line-clamp-2 text-xs leading-relaxed text-muted">{task.description}</p> : null}
-      <div className="flex items-center gap-2">
-        {agent ? (
-          <span className="flex items-center gap-1.5">
-            <AgentAvatar type={agent.type} size="sm" />
-            <span className="text-xs font-medium text-ink2">{agent.name}</span>
-          </span>
-        ) : (
-          <span className="text-xs text-faint">Chưa gán</span>
-        )}
-      </div>
-      {task.result ? (
-        <details className="group rounded-lg border border-line bg-paper/60 px-2.5 py-1.5">
-          <summary className="flex cursor-pointer list-none items-center gap-1 text-xs font-medium text-b">
-            <ChevronRightIcon size={13} className="transition-transform group-open:rotate-90" />
-            Xem kết quả
-          </summary>
-          <p className="mt-1.5 whitespace-pre-wrap text-xs leading-relaxed text-ink2">{task.result}</p>
-        </details>
-      ) : null}
+        <p className="text-sm font-medium leading-snug text-ink">{task.title}</p>
+        {task.description ? (
+          <p className="line-clamp-2 text-xs leading-relaxed text-muted">{task.description}</p>
+        ) : null}
+        <div className="flex items-center gap-2">
+          {agent ? (
+            <span className="flex items-center gap-1.5">
+              <AgentAvatar type={agent.type} size="sm" />
+              <span className="text-xs font-medium text-ink2">{agent.name}</span>
+            </span>
+          ) : (
+            <span className="text-xs text-faint">Chưa gán</span>
+          )}
+        </div>
+
+        {task.status === "created" ? <RouteAction taskId={task.id} /> : null}
+        {task.status === "routed" && task.decision_id ? <ExecuteAction decisionId={task.decision_id} /> : null}
+        {task.status === "awaiting_approval" && task.decision_id ? (
+          <ReviewAction decisionId={task.decision_id} />
+        ) : null}
+
+        {task.result ? (
+          <details className="group rounded-lg border border-line bg-paper/60 px-2.5 py-1.5">
+            <summary className="flex cursor-pointer list-none items-center gap-1 text-xs font-medium text-b">
+              <ChevronRightIcon size={13} className="transition-transform group-open:rotate-90" />
+              Xem kết quả
+            </summary>
+            <p className="mt-1.5 whitespace-pre-wrap text-xs leading-relaxed text-ink2">{task.result}</p>
+          </details>
+        ) : null}
+
         {task.status === "done" ? <FeedbackControl taskId={task.id} /> : null}
       </Card>
     </Lift>
+  );
+}
+
+function RouteAction({ taskId }: { taskId: string }) {
+  const route = useRouteDecision();
+  const execute = useExecute();
+  const [decision, setDecision] = useState<DecisionResponse | null>(null);
+  const [execResult, setExecResult] = useState<ExecuteResponse | null>(null);
+
+  function handleRouteAndExecute() {
+    route.mutate(taskId, {
+      onSuccess: (dec) => {
+        setDecision(dec);
+        if (dec.verdict === "ai" || dec.verdict === "hybrid") {
+          execute.mutate({ decisionId: dec.id }, { onSuccess: (r) => setExecResult(r) });
+        }
+      },
+    });
+  }
+
+  const isPending = route.isPending || execute.isPending;
+
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-line pt-2.5">
+      {!decision && !route.isError ? (
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={isPending}
+          leftIcon={<SparkIcon size={14} />}
+          className={AI_BTN}
+          onClick={handleRouteAndExecute}
+        >
+          {isPending ? "Đang xử lý…" : "Định tuyến & Thực thi"}
+        </Button>
+      ) : null}
+      {route.isError ? (
+        <p className="text-xs text-bad">{route.error instanceof HttpError ? route.error.message : "Lỗi routing"}</p>
+      ) : null}
+      {decision ? (
+        <div className="flex items-center gap-1.5 rounded-lg border border-line bg-paper/60 px-2 py-1.5">
+          <Badge tone={VERDICT_TONE[decision.verdict]} dot>
+            {decision.verdict}
+          </Badge>
+          <span className="font-mono text-[10px] text-muted">{((decision.confidence ?? 0) * 100).toFixed(0)}% conf.</span>
+        </div>
+      ) : null}
+      {execResult?.kind === "ai_success" ? (
+        <p className="flex items-center gap-1 text-xs text-good">
+          <CheckIcon size={13} /> AI đã xong · {execResult.ms}ms
+        </p>
+      ) : null}
+      {execute.isError ? <p className="text-xs text-bad">Lỗi thực thi</p> : null}
+    </div>
+  );
+}
+
+function ExecuteAction({ decisionId }: { decisionId: string }) {
+  const execute = useExecute();
+  const [result, setResult] = useState<ExecuteResponse | null>(null);
+
+  if (result) {
+    return (
+      <div className="border-t border-line pt-2.5 text-xs">
+        {result.kind === "ai_success" ? (
+          <p className="flex items-center gap-1 text-good">
+            <CheckIcon size={13} /> AI xong · {result.ms}ms
+          </p>
+        ) : null}
+        {result.kind === "human_pending" ? <p className="text-muted">Đã giao cho người</p> : null}
+        {result.kind === "denied" ? <p className="text-bad">Bị chặn: {result.reason}</p> : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-t border-line pt-2.5">
+      <Button
+        size="sm"
+        variant="secondary"
+        disabled={execute.isPending}
+        leftIcon={<SparkIcon size={14} />}
+        className={AI_BTN}
+        onClick={() => execute.mutate({ decisionId }, { onSuccess: (r) => setResult(r) })}
+      >
+        {execute.isPending ? "Đang thực thi…" : "Thực thi"}
+      </Button>
+      {execute.isError ? <p className="mt-1 text-xs text-bad">Lỗi thực thi</p> : null}
+    </div>
+  );
+}
+
+function ReviewAction({ decisionId }: { decisionId: string }) {
+  const review = useReview();
+  const [done, setDone] = useState(false);
+  const [executionId, setExecutionId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  if (done) {
+    return (
+      <p className="flex items-center gap-1.5 border-t border-line pt-2.5 text-xs text-good">
+        <CheckIcon size={14} /> Đã duyệt
+      </p>
+    );
+  }
+
+  async function loadAndReview(outcome: "approve" | "reject") {
+    if (!executionId) {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/execute`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ decision_id: decisionId }),
+        });
+        const data = await res.json();
+        if (data.ok && data.data.execution_id) {
+          setExecutionId(data.data.execution_id);
+          review.mutate({ executionId: data.data.execution_id, outcome }, { onSuccess: () => setDone(true) });
+        }
+      } catch {
+        // fallback — surfaced via review.isError below
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      review.mutate({ executionId, outcome }, { onSuccess: () => setDone(true) });
+    }
+  }
+
+  const busy = review.isPending || loading;
+
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-line pt-2.5">
+      <p className="font-mono text-[10px] font-medium uppercase tracking-wide text-muted">AI đã xong — cần duyệt</p>
+      <div className="flex gap-1.5">
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={busy}
+          leftIcon={<CheckIcon size={14} />}
+          className="flex-1 border-good/30 bg-good-soft text-good hover:bg-good/15"
+          onClick={() => loadAndReview("approve")}
+        >
+          Duyệt
+        </Button>
+        <Button
+          size="sm"
+          variant="danger"
+          disabled={busy}
+          leftIcon={<CloseIcon size={14} />}
+          className="flex-1"
+          onClick={() => loadAndReview("reject")}
+        >
+          Từ chối
+        </Button>
+      </div>
+      {review.isError ? <p className="text-xs text-bad">Lỗi duyệt</p> : null}
+    </div>
   );
 }
 

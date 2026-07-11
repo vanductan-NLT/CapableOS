@@ -2,10 +2,18 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import type { Agent, Task, TaskStatus } from "@orchestra/contracts";
+import type { Agent, DecisionResponse, ExecuteResponse, Task, TaskStatus } from "@orchestra/contracts";
 import { api } from "@/lib/http";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { hasSupabase } from "@/lib/env";
+
+export interface PipelineResponse {
+  task: Task;
+  decision: DecisionResponse | null;
+  execution: ExecuteResponse | null;
+  error_stage?: "route" | "execute";
+  error_message?: string;
+}
 
 export function useTasks(status?: TaskStatus) {
   return useQuery({
@@ -20,6 +28,21 @@ export function useCreateTask() {
     mutationFn: (body: { title: string; description?: string }) =>
       api<Task>("/api/tasks", { method: "POST", body: JSON.stringify(body) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+}
+
+/** Full pipeline: create → route → execute in one call. */
+export function usePipeline() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { title: string; description?: string }) =>
+      api<PipelineResponse>("/api/tasks/pipeline", { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["metrics"] });
+      qc.invalidateQueries({ queryKey: ["breakdown"] });
+      qc.invalidateQueries({ queryKey: ["flow"] });
+    },
   });
 }
 

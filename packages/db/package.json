@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "pg": "^8.13.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }

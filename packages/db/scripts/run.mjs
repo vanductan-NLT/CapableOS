@@ -10,8 +10,11 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import pg from "pg";
 
+// Load .env.local from monorepo root
+import { config } from "dotenv";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_DIR = join(__dirname, "..");
+config({ path: join(DB_DIR, "..", "..", ".env.local") });
 const MIGRATIONS_DIR = join(DB_DIR, "migrations");
 
 const cmd = process.argv[2];

@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   runExecution: vi.fn(),
   createQwenPlannerOptions: vi.fn(),
   mapDecisionToExecution: vi.fn(),
+  checkGovernance: vi.fn(),
+  resolveGovernanceAction: vi.fn(),
 }));
 
 vi.mock("../../../lib/auth", () => ({
@@ -43,8 +45,22 @@ vi.mock("../../../lib/execution/mapper", () => ({
   },
 }));
 
+vi.mock("@orchestra/contracts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@orchestra/contracts")>();
+  return {
+    ...actual,
+    checkGovernance: mocks.checkGovernance,
+    resolveGovernanceAction: mocks.resolveGovernanceAction,
+  };
+});
+
 describe("POST /api/execute", () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => {
+    vi.resetAllMocks();
+    // Default governance to allow — existing tests don't care about governance
+    mocks.resolveGovernanceAction.mockReturnValue("allow");
+    mocks.checkGovernance.mockReturnValue({ gate: "allow", reason: "Action is permitted by default governance policy" });
+  });
 
   const decisionId = "d1000000-0000-0000-0000-000000000001";
 
@@ -463,5 +479,123 @@ describe("POST /api/execute", () => {
     const res = await POST(jsonRequest({ decision_id: decisionId }), {});
 
     expect(res.status).toBe(409);
+  });
+
+  // ── Governance gate (Phase 5) ──────────────────────────────
+
+  it("returns denied (HTTP 200) when governance denies the action", async () => {
+    mocks.requireAuthenticatedUserId.mockResolvedValue("user-1");
+    mocks.getDecisionById.mockResolvedValue(makeDecision("ai"));
+    mocks.mapDecisionToExecution.mockReturnValue({
+      task_id: "t1000000-0000-0000-0000-000000000001",
+      decision_id: decisionId,
+      verdict: "ai",
+      executor: "summarize",
+      assignee_id: "ai-summarize",
+      reviewer_id: null,
+      input: null,
+      max_retries: 2,
+      timeout_ms: 30000,
+    });
+    mocks.resolveGovernanceAction.mockReturnValue("delete_data");
+    mocks.checkGovernance.mockReturnValue({ gate: "deny", reason: 'Action "delete_data" is prohibited by governance policy' });
+
+    const { POST } = await import("./route");
+    const res = await POST(jsonRequest({ decision_id: decisionId }), {});
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.ok).toBe(true);
+    expect(json.data.kind).toBe("denied");
+    expect(json.data.execution_id).toBeNull();
+    expect(json.data.verdict).toBe("ai");
+    expect(json.data.reason).toContain("delete_data");
+    // Execution must NOT be created
+    expect(mocks.createExecution).not.toHaveBeenCalled();
+    expect(mocks.runExecution).not.toHaveBeenCalled();
+  });
+
+  it("promotes ai verdict to hybrid when governance requires approval (email executor)", async () => {
+    mocks.requireAuthenticatedUserId.mockResolvedValue("user-1");
+    mocks.getDecisionById.mockResolvedValue(makeDecision("ai"));
+    mocks.mapDecisionToExecution.mockReturnValue({
+      task_id: "t1000000-0000-0000-0000-000000000001",
+      decision_id: decisionId,
+      verdict: "ai",
+      executor: "email",
+      assignee_id: "ai-email",
+      reviewer_id: null,
+      input: null,
+      max_retries: 2,
+      timeout_ms: 30000,
+    });
+    mocks.resolveGovernanceAction.mockReturnValue("send:email");
+    mocks.checkGovernance.mockReturnValue({ gate: "approval", reason: 'Action "send:email" requires human approval before execution' });
+    mocks.createExecution.mockResolvedValue({
+      status: "created",
+      execution: makeExecution({ verdict: "hybrid", executor: "email", assignee_id: "ai-email", reviewer_id: "ai-email" }),
+    });
+    mocks.createQwenPlannerOptions.mockReturnValue({ model: {} });
+    mocks.runExecution.mockResolvedValue({
+      outcome: "succeeded",
+      execution_id: "e1000000-0000-0000-0000-000000000001",
+      output: "Email draft",
+      tokens: 180,
+      ms: 500,
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(jsonRequest({ decision_id: decisionId }), {});
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.kind).toBe("ai_success");
+    expect(json.data.verdict).toBe("hybrid"); // promoted from ai to hybrid
+    expect(json.data.output).toBe("Email draft");
+    expect(mocks.runExecution).toHaveBeenCalledOnce();
+    // Verify execution was created with hybrid verdict
+    expect(mocks.createExecution).toHaveBeenCalledWith(
+      "t1000000-0000-0000-0000-000000000001",
+      decisionId,
+      expect.objectContaining({ verdict: "hybrid", reviewer_id: "ai-email" }),
+      expect.any(String),
+    );
+  });
+
+  it("allows summarize executor through governance gate (regression)", async () => {
+    mocks.requireAuthenticatedUserId.mockResolvedValue("user-1");
+    mocks.getDecisionById.mockResolvedValue(makeDecision("ai"));
+    mocks.mapDecisionToExecution.mockReturnValue({
+      task_id: "t1000000-0000-0000-0000-000000000001",
+      decision_id: decisionId,
+      verdict: "ai",
+      executor: "summarize",
+      assignee_id: "ai-summarize",
+      reviewer_id: null,
+      input: null,
+      max_retries: 2,
+      timeout_ms: 30000,
+    });
+    mocks.resolveGovernanceAction.mockReturnValue("summarize");
+    mocks.checkGovernance.mockReturnValue({ gate: "allow", reason: "Action is permitted by default governance policy" });
+    mocks.createExecution.mockResolvedValue({ status: "created", execution: makeExecution() });
+    mocks.createQwenPlannerOptions.mockReturnValue({ model: {} });
+    mocks.runExecution.mockResolvedValue({
+      outcome: "succeeded",
+      execution_id: "e1000000-0000-0000-0000-000000000001",
+      output: "Summary result",
+      tokens: 150,
+      ms: 420,
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(jsonRequest({ decision_id: decisionId }), {});
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.kind).toBe("ai_success");
+    expect(json.data.verdict).toBe("ai"); // unchanged, allow gate
+    expect(json.data.output).toBe("Summary result");
+    expect(mocks.runExecution).toHaveBeenCalledOnce();
   });
 });
