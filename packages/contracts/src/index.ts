@@ -18,6 +18,15 @@ export type { Verdict, Risk, RequiredCapability, Candidate, Governance, Decision
 export type { TaskStatus, Task, Feedback } from "./task";
 export type { AgentType, CapabilityMap, Agent, NewAgentInput, AgentPatch } from "./agent";
 export type {
+  Verdict,
+  Risk,
+  RequiredCapability,
+  Candidate,
+  Governance,
+  Decision,
+} from "./decision";
+
+export type { PoolCandidate } from "./agent";
   ApiErrorCode,
   ApiError,
   ApiResponse,
