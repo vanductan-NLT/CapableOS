@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build outputs
+dist/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# env & secrets — NEVER commit
+.env
+.env.local
+.env.*.local
+
+# supabase local
+supabase/.branches/
+supabase/.temp/
+
+# logs & os
+*.log
+.DS_Store
+Thumbs.db
+packages/db/supabase-setup.sql
