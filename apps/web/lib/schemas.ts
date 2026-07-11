@@ -66,3 +66,26 @@ export const patchAgentSchema = z
     caps: capsSchema.optional(),
   })
   .refine((o) => Object.keys(o).length > 0, "Cần ít nhất một trường để cập nhật");
+
+// ── Execution schemas (Feature 4.4) ────────────────────────
+
+export const executeSchema = z.object({
+  decision_id: z.string({ required_error: "Thiếu decision_id" }).uuid("decision_id phải là UUID"),
+  input: z.unknown().optional(),
+});
+
+export const submitResultSchema = z.object({
+  output: z
+    .string({ required_error: "Thiếu output" })
+    .trim()
+    .min(1, "Output không được để trống")
+    .max(50_000),
+});
+
+export const reviewSchema = z.object({
+  outcome: z.enum(["approve", "reject"], { required_error: "Thiếu outcome (approve|reject)" }),
+  note: z.string().trim().max(2000).optional(),
+});
+
+export const executionIdSchema = z.string().uuid("execution id phải là UUID");
+

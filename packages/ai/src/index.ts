@@ -23,3 +23,32 @@ export type {
 } from "./router";
 export { decideTask } from "./decision-pipeline";
 export type { DecideTaskInput, DecideTaskResult } from "./decision-pipeline";
+
+// ── Executor runtime (Feature 4.2) ─────────────────────────
+export {
+  executeTask,
+  classifyError,
+  validationFailure,
+  validateExecutorInput,
+  safeValidateExecutorInput,
+  baseExecutorInputSchema,
+  summarizeInputSchema,
+  researchInputSchema,
+  emailInputSchema,
+  translateInputSchema,
+  meetingInputSchema,
+} from "./executor";
+export type {
+  BaseExecutorInput,
+  SummarizeInput,
+  ResearchInput,
+  EmailInput,
+  TranslateInput,
+  MeetingInput,
+  ExecutorOutput,
+  ExecutorOptions,
+  ExecutorFailure,
+  ExecuteResult,
+  ExecutorRunInput,
+  ExecutorLogEvent,
+} from "./executor";
