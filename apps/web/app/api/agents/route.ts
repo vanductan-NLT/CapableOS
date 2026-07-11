@@ -2,7 +2,8 @@ import { ApiFail, jsonBody, ok, route } from "@/lib/api";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { newAgentSchema } from "@/lib/schemas";
 import { agentId } from "@/lib/slug";
-import { toAgent, type AgentRow } from "@/lib/db-types";
+import type { AgentRow } from "@/lib/db-types";
+import { toAgent } from "@/lib/row-mappers";
 import type { Agent } from "@orchestra/contracts";
 
 // GET /agents → Agent[]   (Owner: B, FR-13 — Capability Pool)

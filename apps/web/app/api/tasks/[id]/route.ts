@@ -1,7 +1,8 @@
 import { ApiFail, jsonBody, ok, route } from "@/lib/api";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { patchTaskSchema } from "@/lib/schemas";
-import { toTask, type TaskRow } from "@/lib/db-types";
+import type { TaskRow } from "@/lib/db-types";
+import { toTask } from "@/lib/row-mappers";
 import type { Task } from "@orchestra/contracts";
 
 type Ctx = { params: Promise<{ id: string }> };

@@ -1,7 +1,7 @@
 import { ApiFail, ok, route } from "@/lib/api";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { computeMetrics } from "@/lib/metrics";
-import type { AgentRow, DecisionRow, ExecutionRow, FeedbackRow } from "@/lib/db-types";
+import type { AgentRow, DecisionSummaryRow, ExecutionRow, FeedbackRow } from "@/lib/db-types";
 import type { Metrics } from "@orchestra/contracts";
 
 // GET /metrics → {automation, cost_saving, avg_ms, split, quality}   (Owner: B, FR-12)
@@ -19,7 +19,7 @@ export const GET = route(async () => {
   const humanBaselineCost = humanCosts.length ? humanCosts.reduce((a, b) => a + b, 0) / humanCosts.length : 0;
 
   const metrics = computeMetrics({
-    decisions: dec.data as DecisionRow[],
+    decisions: dec.data as DecisionSummaryRow[],
     executions: exe.data as ExecutionRow[],
     feedback: fb.data as Pick<FeedbackRow, "rating">[],
     humanBaselineCost,

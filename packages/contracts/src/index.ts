@@ -12,7 +12,19 @@ export {
 export type { Capability } from "./capabilities";
 
 // ── Decision domain (domain A owns) ─────────────────────────
-export type { Verdict, Risk, RequiredCapability, Candidate, Governance, Decision } from "./decision";
+export type {
+  Verdict,
+  Risk,
+  RequiredCapability,
+  Candidate,
+  ScoredCandidate,
+  RouterReasonCode,
+  Governance,
+  Decision,
+  StructuredDecisionReason,
+  DecisionPersistenceInput,
+  DecisionResponse,
+} from "./decision";
 
 // ── Workspace domain (domain B owns) ────────────────────────
 export type { TaskStatus, Task, Feedback } from "./task";

@@ -22,6 +22,23 @@ export interface Candidate {
   minutes: number;
 }
 
+export interface ScoredCandidate extends Candidate {
+  trust: number; // 0..100
+  normalizedTrust: number; // 0..1
+}
+
+export type RouterReasonCode =
+  | "NO_REQUIRED_CAPABILITIES"
+  | "NO_CANDIDATES"
+  | "TOP_FIT_BELOW_THRESHOLD"
+  | "AMBIGUOUS_HUMAN_AI_HYBRID"
+  | "AMBIGUOUS_HUMAN_CANDIDATES"
+  | "AMBIGUOUS_AI_CANDIDATES"
+  | "TOP_CANDIDATE_HUMAN"
+  | "TOP_CANDIDATE_AI_LOW_RISK"
+  | "HIGH_RISK_AI_REQUIRES_HUMAN"
+  | "NO_HUMAN_REVIEWER_AVAILABLE";
+
 export interface Governance {
   allow: string[];
   deny: string[];
@@ -40,4 +57,34 @@ export interface Decision {
   reasoning: string;
   governance: Governance;
   estimated: boolean; // cost/time chưa validate?
+}
+
+export interface StructuredDecisionReason {
+  code: RouterReasonCode;
+  selected_candidate_ids: string[];
+  top_candidate_id?: string;
+  top_fit?: number;
+  ambiguity: number | null;
+}
+
+export interface DecisionPersistenceInput {
+  task_id: string;
+  required: RequiredCapability[];
+  risk: Risk;
+  candidates: ScoredCandidate[];
+  verdict: Verdict;
+  chosen: string[];
+  confidence: number | null;
+  ambiguity: number | null;
+  reason: StructuredDecisionReason;
+  reasoning: string;
+  governance: null;
+  cost_est: number | null;
+  minutes_est: number | null;
+  estimated: true;
+}
+
+export interface DecisionResponse extends DecisionPersistenceInput {
+  id: string;
+  created_at: string;
 }
