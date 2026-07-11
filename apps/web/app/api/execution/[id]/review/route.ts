@@ -11,7 +11,7 @@ import { reviewHybridExecution, HumanServiceError } from "../../../../../lib/exe
 type Ctx = { params: Promise<{ id: string }> };
 
 export const POST = route<Ctx>(async (req, ctx) => {
-  const userId = await requireAuthenticatedUserId();
+  let userId = await requireAuthenticatedUserId();
   const { id } = await ctx.params;
 
   // Validate UUID format
@@ -22,6 +22,12 @@ export const POST = route<Ctx>(async (req, ctx) => {
 
   const body = await jsonBody(req, reviewSchema);
   const sb = supabaseAdmin();
+
+  // When anonymous, look up the actual reviewer_id from the execution
+  if (userId === "anonymous") {
+    const { data: exec } = await sb.from("executions").select("reviewer_id").eq("id", id).maybeSingle();
+    if (exec?.reviewer_id) userId = exec.reviewer_id;
+  }
 
   try {
     const result = await reviewHybridExecution(id, userId, body.outcome, body.note ?? null, {

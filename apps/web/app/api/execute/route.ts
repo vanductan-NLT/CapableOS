@@ -1,7 +1,8 @@
 // POST /api/execute — Create + run execution for a decision.
 // Owner: A (execution domain). Cross-domain: updates task status via RPC.
 
-import type { ExecuteResponse } from "@orchestra/contracts";
+import type { ExecuteResponse, ExecutorType } from "@orchestra/contracts";
+import { checkGovernance, resolveGovernanceAction } from "@orchestra/contracts";
 import { ApiFail, jsonBody, ok, route } from "../../../lib/api";
 import { requireAuthenticatedUserId } from "../../../lib/auth";
 import { executeSchema } from "../../../lib/schemas";
@@ -42,12 +43,53 @@ export const POST = route(async (req: Request) => {
   // 3. Map decision → execution input
   let executionInput;
   try {
-    executionInput = mapDecisionToExecution(decision, { input: body.input });
+    // Auto-build executor input from task data if not explicitly provided
+    let resolvedInput = body.input;
+    if (!resolvedInput) {
+      const { data: taskData } = await sb.from("tasks").select("title, description").eq("id", decision.task_id).maybeSingle();
+      if (taskData) {
+        const preliminaryMap = mapDecisionToExecution(decision);
+        resolvedInput = buildExecutorInputFromTask(preliminaryMap.executor, taskData.title, taskData.description);
+      }
+    }
+    executionInput = mapDecisionToExecution(decision, { input: resolvedInput });
   } catch (e) {
     if (e instanceof ExecutionMapperError) {
       throw new ApiFail("conflict", e.message);
     }
     throw e;
+  }
+
+  // 3b. Governance gate — after verdict, before creating execution.
+  // Only applies to ai/hybrid (human is skipped above via early return from step 6,
+  // but governance runs before create so we check here).
+  // verdict=human bypasses governance (human is responsible).
+  if (decision.verdict === "ai" || decision.verdict === "hybrid") {
+    const executor = executionInput.executor as ExecutorType;
+    const action = resolveGovernanceAction(executor);
+    const governance = checkGovernance({ action });
+
+    if (governance.gate === "deny") {
+      const response: ExecuteResponse = {
+        kind: "denied",
+        verdict: decision.verdict,
+        execution_id: null,
+        reason: governance.reason,
+      };
+      return ok(response);
+    }
+
+    if (governance.gate === "approval" && decision.verdict === "ai") {
+      // AI verdict but governance requires approval → treat as hybrid flow.
+      // Mutate executionInput to run as hybrid (AI drafts, human reviews).
+      executionInput = {
+        ...executionInput,
+        verdict: "hybrid" as const,
+        reviewer_id: executionInput.assignee_id, // fallback reviewer = assignee
+      };
+    }
+    // gate === "approval" && verdict === "hybrid" → already hybrid, no change needed.
+    // gate === "allow" → continue unchanged.
   }
 
   // 4. Create execution idempotently via RPC
@@ -144,7 +186,7 @@ export const POST = route(async (req: Request) => {
       },
       async createRetryExecution(input) {
         const retryPayload = {
-          verdict: decision.verdict,
+          verdict: executionInput.verdict ?? decision.verdict,
           executor: input.executor,
           assignee_id: execution.assignee_id,
           reviewer_id: execution.reviewer_id,
@@ -171,7 +213,7 @@ export const POST = route(async (req: Request) => {
       const response: ExecuteResponse = {
         kind: "ai_success",
         execution_id: result.execution_id,
-        verdict: decision.verdict as "ai" | "hybrid",
+        verdict: (executionInput.verdict ?? decision.verdict) as "ai" | "hybrid",
         status: "succeeded",
         output: result.output,
         tokens: result.tokens,
@@ -184,7 +226,7 @@ export const POST = route(async (req: Request) => {
       const response: ExecuteResponse = {
         kind: "ai_failed",
         execution_id: result.execution_id,
-        verdict: decision.verdict as "ai" | "hybrid",
+        verdict: (executionInput.verdict ?? decision.verdict) as "ai" | "hybrid",
         status: "failed",
         error_code: result.error_code,
         retryable: result.retryable,
@@ -201,3 +243,29 @@ export const POST = route(async (req: Request) => {
     throw new ApiFail("upstream_error", "AI executor is not available");
   }
 });
+
+// ── Helper: build structured executor input from task data ──
+
+function buildExecutorInputFromTask(
+  executor: ExecutorType | null,
+  title: string,
+  description?: string | null,
+): Record<string, unknown> {
+  const base = { task_title: title, task_description: description ?? "" };
+  const content = description || title;
+
+  switch (executor) {
+    case "summarize":
+      return { ...base, content };
+    case "research":
+      return { ...base, query: title, context: description ?? undefined };
+    case "email":
+      return { ...base, intent: title, recipient: "", tone: "formal" as const };
+    case "translate":
+      return { ...base, content, target_language: "Vietnamese" };
+    case "meeting":
+      return { ...base, transcript: content };
+    default:
+      return { ...base, content };
+  }
+}

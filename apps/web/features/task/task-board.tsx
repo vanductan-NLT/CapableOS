@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import type { Agent, Task } from "@orchestra/contracts";
+import type { Agent, DecisionResponse, ExecuteResponse, Task } from "@orchestra/contracts";
 import { Badge, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { HttpError } from "@/lib/http";
 import { useSubmitFeedback } from "@/features/dashboard/hooks";
 import { useAgents, useRealtimeTasks, useTasks } from "./hooks";
 import { BOARD_COLUMNS, STATUS_META } from "./status";
+import { useRouteDecision } from "@/lib/queries/use-route-decision";
+import { useExecute } from "@/lib/queries/use-execute";
+import { useReview } from "@/lib/queries/use-review";
 
 export function TaskBoard() {
   const { data: tasks, isLoading, isError, error, refetch } = useTasks();
@@ -33,7 +36,6 @@ export function TaskBoard() {
 
   const byStatus = new Map(BOARD_COLUMNS.map((s) => [s, [] as Task[]]));
   for (const t of tasks) byStatus.get(t.status)?.push(t);
-  // only show columns that have tasks, plus the first (created) always
   const visible = BOARD_COLUMNS.filter((s, i) => i === 0 || (byStatus.get(s)?.length ?? 0) > 0);
 
   return (
@@ -72,14 +74,178 @@ function TaskCard({ task, agent }: { task: Task; agent?: Agent }) {
           <span className="text-xs text-muted">Chưa gán</span>
         )}
       </div>
+
+      {/* Action: Route created tasks */}
+      {task.status === "created" && <RouteAction taskId={task.id} />}
+
+      {/* Action: Execute routed tasks */}
+      {task.status === "routed" && task.decision_id && <ExecuteAction decisionId={task.decision_id} />}
+
+      {/* Action: Review awaiting_approval tasks */}
+      {task.status === "awaiting_approval" && task.decision_id && <ReviewAction decisionId={task.decision_id} />}
+
+      {/* Show result */}
       {task.result ? (
         <details className="mt-2">
-          <summary className="cursor-pointer text-xs text-b">Xem kết quả</summary>
+          <summary className="cursor-pointer text-xs text-b">► Xem kết quả</summary>
           <p className="mt-1 whitespace-pre-wrap text-xs text-ink2">{task.result}</p>
         </details>
       ) : null}
+
+      {/* Feedback for done tasks */}
       {task.status === "done" ? <FeedbackControl taskId={task.id} /> : null}
     </Card>
+  );
+}
+
+function RouteAction({ taskId }: { taskId: string }) {
+  const route = useRouteDecision();
+  const execute = useExecute();
+  const [decision, setDecision] = useState<DecisionResponse | null>(null);
+  const [execResult, setExecResult] = useState<ExecuteResponse | null>(null);
+
+  function handleRouteAndExecute() {
+    route.mutate(taskId, {
+      onSuccess: (dec) => {
+        setDecision(dec);
+        if (dec.verdict === "ai" || dec.verdict === "hybrid") {
+          execute.mutate(
+            { decisionId: dec.id },
+            { onSuccess: (r) => setExecResult(r) },
+          );
+        }
+      },
+    });
+  }
+
+  const isPending = route.isPending || execute.isPending;
+
+  return (
+    <div className="mt-2 space-y-1.5">
+      {!decision && !route.isError && (
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={handleRouteAndExecute}
+          className="w-full rounded-md bg-a px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
+        >
+          {isPending ? "Đang xử lý…" : "Định tuyến & Thực thi"}
+        </button>
+      )}
+      {route.isError && (
+        <p className="text-xs text-bad">{route.error instanceof HttpError ? route.error.message : "Lỗi routing"}</p>
+      )}
+      {decision && (
+        <div className="rounded border border-line bg-paper/50 p-1.5">
+          <div className="flex items-center gap-1.5">
+            <Badge tone={decision.verdict === "ai" ? "a" : decision.verdict === "human" ? "b" : "gold"}>
+              {decision.verdict.toUpperCase()}
+            </Badge>
+            <span className="text-[10px] text-muted">
+              {((decision.confidence ?? 0) * 100).toFixed(0)}% confidence
+            </span>
+          </div>
+        </div>
+      )}
+      {execResult?.kind === "ai_success" && (
+        <p className="text-xs text-good">✓ AI đã xong · {execResult.ms}ms</p>
+      )}
+      {execute.isError && (
+        <p className="text-xs text-bad">Lỗi thực thi</p>
+      )}
+    </div>
+  );
+}
+
+function ExecuteAction({ decisionId }: { decisionId: string }) {
+  const execute = useExecute();
+  const [result, setResult] = useState<ExecuteResponse | null>(null);
+
+  if (result) {
+    return (
+      <div className="mt-2">
+        {result.kind === "ai_success" && <p className="text-xs text-good">✓ AI xong · {result.ms}ms</p>}
+        {result.kind === "human_pending" && <p className="text-xs text-muted">Đã giao cho người</p>}
+        {result.kind === "denied" && <p className="text-xs text-bad">Bị chặn: {result.reason}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        disabled={execute.isPending}
+        onClick={() => execute.mutate({ decisionId }, { onSuccess: (r) => setResult(r) })}
+        className="w-full rounded-md bg-a px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
+      >
+        {execute.isPending ? "Đang thực thi…" : "Thực thi"}
+      </button>
+      {execute.isError && <p className="mt-1 text-xs text-bad">Lỗi thực thi</p>}
+    </div>
+  );
+}
+
+function ReviewAction({ decisionId }: { decisionId: string }) {
+  const review = useReview();
+  const [done, setDone] = useState(false);
+  const [executionId, setExecutionId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  if (done) {
+    return <p className="mt-2 text-xs text-good">✓ Đã duyệt</p>;
+  }
+
+  async function loadAndReview(outcome: "approve" | "reject") {
+    if (!executionId) {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/execute`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ decision_id: decisionId }),
+        });
+        const data = await res.json();
+        if (data.ok && data.data.execution_id) {
+          setExecutionId(data.data.execution_id);
+          review.mutate(
+            { executionId: data.data.execution_id, outcome },
+            { onSuccess: () => setDone(true) },
+          );
+        }
+      } catch {
+        // fallback
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      review.mutate({ executionId, outcome }, { onSuccess: () => setDone(true) });
+    }
+  }
+
+  return (
+    <div className="mt-2 space-y-1">
+      <p className="text-[10px] font-medium uppercase text-muted">AI đã xong — cần duyệt:</p>
+      <div className="flex gap-1.5">
+        <button
+          type="button"
+          disabled={review.isPending || loading}
+          onClick={() => loadAndReview("approve")}
+          className="flex-1 rounded-md border border-good/40 px-2 py-0.5 text-xs text-good disabled:opacity-50"
+        >
+          Duyệt
+        </button>
+        <button
+          type="button"
+          disabled={review.isPending || loading}
+          onClick={() => loadAndReview("reject")}
+          className="flex-1 rounded-md border border-bad/40 px-2 py-0.5 text-xs text-bad disabled:opacity-50"
+        >
+          Từ chối
+        </button>
+      </div>
+      {review.isError && <p className="text-xs text-bad">Lỗi duyệt</p>}
+    </div>
   );
 }
 
