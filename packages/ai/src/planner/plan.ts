@@ -1,6 +1,7 @@
 import { CAPABILITIES, type RequiredCapability, type Risk } from "@orchestra/contracts";
 import { PLANNER_PROMPT } from "@orchestra/prompts";
 import { generateObject, type LanguageModel } from "ai";
+import { normalizeCapabilities } from "../capability";
 import { PlannerOutputSchema } from "./schema";
 import { fallbackExtract } from "./fallback";
 import { classifyRisk } from "./risk";
@@ -55,8 +56,28 @@ export async function plan(input: PlanInput, options: PlanOptions): Promise<Plan
     });
 
     return {
-      required: normalizeWeights(result.object.required),
+      required: normalizeCapabilities(result.object.required),
       risk,
+    };
+  } catch (error) {
+    options.log?.({
+      source: "fallback",
+      error: stringifyError(error),
+    });
+  }
+
+  const fallbackRequired = fallbackExtract(input);
+  if (fallbackRequired.length === 0) {
+    return {
+      required: [],
+      risk: "high",
+    };
+  }
+
+  try {
+    return {
+      required: normalizeCapabilities(fallbackRequired),
+      risk: "high",
     };
   } catch (error) {
     options.log?.({
@@ -65,7 +86,7 @@ export async function plan(input: PlanInput, options: PlanOptions): Promise<Plan
     });
 
     return {
-      required: fallbackExtract(input),
+      required: [],
       risk: "high",
     };
   }
@@ -76,25 +97,6 @@ function buildUserPrompt(input: PlanInput): string {
     title: input.title,
     description: input.description,
     known_capabilities: CAPABILITIES,
-  });
-}
-
-function normalizeWeights(required: RequiredCapability[]): RequiredCapability[] {
-  const total = required.reduce((sum, item) => sum + item.weight, 0);
-  if (total <= 0) {
-    const weight = Number((1 / required.length).toFixed(3));
-    return required.map((item) => ({ ...item, weight }));
-  }
-
-  return required.map((item, index) => {
-    if (index === required.length - 1) {
-      const previous = required
-        .slice(0, -1)
-        .reduce((sum, previousItem) => sum + Number((previousItem.weight / total).toFixed(3)), 0);
-      return { ...item, weight: Number((1 - previous).toFixed(3)) };
-    }
-
-    return { ...item, weight: Number((item.weight / total).toFixed(3)) };
   });
 }
 
