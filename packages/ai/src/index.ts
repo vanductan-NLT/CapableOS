@@ -14,3 +14,12 @@ export type {
   ScoringResult,
   ScoringWeights,
 } from "./scoring";
+export { DEFAULT_ROUTER_CONFIG, ROUTER_EPSILON, RouterError, routeDecision } from "./router";
+export type {
+  RouteDecisionInput,
+  RouteDecisionResult,
+  RouterConfig,
+  RouterReasonCode,
+} from "./router";
+export { decideTask } from "./decision-pipeline";
+export type { DecideTaskInput, DecideTaskResult } from "./decision-pipeline";
