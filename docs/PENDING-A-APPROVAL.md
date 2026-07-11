@@ -16,6 +16,9 @@
 - **Chính sách duyệt feedback (FR-11):** ai được gửi, ngưỡng nào cần approval, chống gian lận?
   Mặc định MVP đề xuất: mọi user đăng nhập gửi được, trust ±1 tự động, bounded 0..100, full audit log. Cần chốt.
 
+## 4. UI kit dùng chung (tương lai, chưa làm — cần A)
+- Domain B tạm để UI kit **local** trong `apps/web/components/ui.tsx` để không chặn MVP. Việc gộp thành `packages/ui` [S] (design system dùng chung A+B) là hạng mục shared tương lai → cần A đồng thiết kế.
+
 ## Những gì B ĐƯỢC tự merge (thuần B, 1 review)
 - `packages/db` (migrations, RLS, seed, scripts) — B là chủ schema (mục 10). Đã verify 19/19 trên Postgres thật.
 - Scaffold monorepo, AGENTS.md, docs/ — hạ tầng chung không đổi interface.

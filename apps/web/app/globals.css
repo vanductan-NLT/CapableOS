@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #f7f8fc;
+  --card: #ffffff;
+  --ink: #141a2e;
+  --ink2: #39415f;
+  --muted: #6a7291;
+  --line: #e6e9f3;
+}
+.dark {
+  --paper: #0b0e18;
+  --card: #141a2e;
+  --ink: #eef1fb;
+  --ink2: #c3c9e0;
+  --muted: #8b93b4;
+  --line: #232a44;
+}
+
+html {
+  color-scheme: light dark;
+}
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* visible keyboard focus (a11y) */
+:focus-visible {
+  outline: 2px solid #0e9c8b;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
