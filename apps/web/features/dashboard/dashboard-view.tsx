@@ -4,7 +4,16 @@ import type { AllocationSplit } from "@orchestra/contracts";
 import { Badge, Card, EmptyState, ErrorState, EstimatedTag, Skeleton } from "@/components/ui";
 import type { SideStat } from "@/lib/metrics";
 import { HttpError } from "@/lib/http";
-import { useBreakdown, useMetrics } from "./hooks";
+import { useBreakdown, useFlow, useMetrics } from "./hooks";
+
+const dur = (ms: number) => {
+  if (!ms || ms < 0) return "—";
+  const m = ms / 60000;
+  if (m < 60) return `${Math.round(m)} phút`;
+  const h = m / 60;
+  if (h < 24) return `${h.toFixed(1)} giờ`;
+  return `${(h / 24).toFixed(1)} ngày`;
+};
 
 // Validated categorical palette (dataviz skill: CVD ΔE≥20; dark purple relieved by labels+table).
 const VERDICTS = [
@@ -20,6 +29,7 @@ const num = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 export function DashboardView() {
   const m = useMetrics();
   const b = useBreakdown();
+  const flow = useFlow();
 
   if (m.isLoading || b.isLoading) {
     return (
@@ -64,6 +74,18 @@ export function DashboardView() {
           hint={feedbackCount ? `${feedbackCount} đánh giá` : "chưa có đánh giá"}
         />
       </section>
+
+      {flow.data && flow.data.completed > 0 ? (
+        <section aria-label="Flow (DORA)" className="grid gap-3 sm:grid-cols-3">
+          <StatTile label="Việc hoàn thành" value={num(flow.data.completed)} hint="tổng luỹ kế" />
+          <StatTile label="Lead time (P50)" value={dur(flow.data.leadTimeMsP50)} hint="tạo → xong, trung vị" />
+          <StatTile
+            label={`Throughput ${flow.data.windowDays} ngày`}
+            value={num(flow.data.throughput)}
+            hint="việc xong gần đây"
+          />
+        </section>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Allocation split={metrics.split} total={total} />

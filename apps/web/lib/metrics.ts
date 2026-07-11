@@ -77,3 +77,38 @@ export function computeBreakdown(records: TaskRecord[]): { human: SideStat; ai: 
     ai: sideStat(records.filter((r) => r.side === "ai")),
   };
 }
+
+// ── Flow metrics (DORA-style: lead time + throughput) ───────────────────────
+// Research: objective delivery signals from data alone. Lead time = created→done;
+// throughput = completed per window. P50 (median) resists outliers better than mean.
+const median = (xs: number[]) => {
+  if (xs.length === 0) return 0;
+  const s = [...xs].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid]! : Math.round((s[mid - 1]! + s[mid]!) / 2);
+};
+
+export interface DoneEvent {
+  leadMs: number; // done_at − created_at
+  doneAt: number; // epoch ms
+}
+
+export interface Flow {
+  completed: number;
+  leadTimeMsP50: number;
+  leadTimeMsAvg: number;
+  throughput: number; // completed within the window
+  windowDays: number;
+}
+
+export function computeFlow(events: DoneEvent[], nowMs: number, windowDays = 7): Flow {
+  const leads = events.map((e) => e.leadMs).filter((x) => Number.isFinite(x) && x >= 0);
+  const since = nowMs - windowDays * 86_400_000;
+  return {
+    completed: events.length,
+    leadTimeMsP50: median(leads),
+    leadTimeMsAvg: Math.round(mean(leads)),
+    throughput: events.filter((e) => e.doneAt >= since).length,
+    windowDays,
+  };
+}
