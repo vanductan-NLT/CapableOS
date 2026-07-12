@@ -87,10 +87,20 @@ function routeAmbiguous(scoring: Extract<ScoringResult, { scorable: true }>): Ro
     });
   }
 
+  // When top candidates are same type and close, pick the top one instead of escalating.
+  // This prevents unnecessary escalation when two good AI agents are available.
+  if (first.type === "ai") {
+    return withTop(scoring, {
+      verdict: "ai",
+      selectedCandidateIds: [first.id],
+      reasonCode: "TOP_CANDIDATE_AI_LOW_RISK",
+    });
+  }
+
   return withTop(scoring, {
-    verdict: "escalate",
-    selectedCandidateIds: [],
-    reasonCode: first.type === "human" ? "AMBIGUOUS_HUMAN_CANDIDATES" : "AMBIGUOUS_AI_CANDIDATES",
+    verdict: "human",
+    selectedCandidateIds: [first.id],
+    reasonCode: "TOP_CANDIDATE_HUMAN",
   });
 }
 
