@@ -9,11 +9,10 @@ config({ path: resolve(__dirname, "../../.env.local") });
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Workspace packages are shipped as raw TS source → let Next transpile them.
-  transpilePackages: ["@orchestra/contracts", "@orchestra/ai"],
+  transpilePackages: ["@orchestra/contracts", "@orchestra/ai", "@orchestra/prompts"],
   reactStrictMode: true,
-  // @orchestra/prompts uses fs.readFileSync + import.meta.url to load .md files.
-  // Webpack mangles import.meta.url → must run natively in Node, not bundled.
-  serverExternalPackages: ["@orchestra/prompts"],
+  // @orchestra/prompts previously used fs.readFileSync — now inlined as string literals.
+  // No longer needs serverExternalPackages.
 
   // ── Windows stability: reduce .next cache corruption ──────
   // Use filesystem cache with longer intervals to reduce write contention.
