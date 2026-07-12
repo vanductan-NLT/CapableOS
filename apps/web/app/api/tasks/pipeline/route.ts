@@ -52,6 +52,11 @@ export const POST = route(async (req: Request) => {
     }, { status: 201 });
   }
 
+  // 2b. Update task.assignee_id with the chosen candidate (so Board shows who's assigned)
+  if (decision.chosen.length > 0) {
+    await sb.from("tasks").update({ assignee_id: decision.chosen[0] }).eq("id", task.id);
+  }
+
   // 3. Auto-execute for AI/hybrid verdicts
   if (decision.verdict === "ai" || decision.verdict === "hybrid") {
     try {
