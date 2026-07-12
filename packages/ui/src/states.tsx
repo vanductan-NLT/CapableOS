@@ -22,19 +22,19 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border border-dashed border-line bg-grad-mesh px-6 py-12 text-center",
+        "relative flex flex-col items-center gap-4 overflow-hidden rounded-2xl border border-dashed border-line bg-grad-aurora px-6 py-16 text-center",
         className,
       )}
     >
       {illustration ? (
-        <div className="w-full max-w-[300px]">{illustration}</div>
+        <div className="w-full max-w-[340px]">{illustration}</div>
       ) : (
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-grad-brand text-white shadow-glow-b">
-          {icon ?? <InboxIcon size={22} />}
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-b-deep">
+          {icon ?? <InboxIcon size={24} />}
         </span>
       )}
-      <p className="font-medium text-ink">{title}</p>
-      {hint ? <p className="max-w-sm text-sm text-muted">{hint}</p> : null}
+      <p className="text-lg font-medium text-ink">{title}</p>
+      {hint ? <p className="max-w-sm text-body-lg text-muted">{hint}</p> : null}
       {action}
     </div>
   );
@@ -45,7 +45,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
   return (
     <div
       role="alert"
-      className="flex items-start gap-3 rounded-2xl border border-bad/25 bg-bad-soft px-4 py-4 text-sm text-bad"
+      className="flex items-start gap-3 rounded-2xl border border-bad/25 bg-bad-soft px-5 py-4 text-sm text-bad"
     >
       <AlertIcon size={20} className="mt-0.5 flex-none" />
       <div className="min-w-0">

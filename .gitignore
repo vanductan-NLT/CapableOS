@@ -23,3 +23,6 @@ supabase/.temp/
 .DS_Store
 Thumbs.db
 packages/db/supabase-setup.sql
+
+# stray local runtime junk
+.tmp/

@@ -1,46 +1,54 @@
 import type { ReactNode } from "react";
 import { Reveal } from "@orchestra/ui";
 
+type Accent = "brand" | "b" | "a" | "gold";
+
+const EYEBROW: Record<Accent, string> = {
+  brand: "text-brand-deep",
+  b: "text-b-deep",
+  a: "text-a",
+  gold: "text-gold",
+};
+const DOT: Record<Accent, string> = {
+  brand: "bg-brand",
+  b: "bg-b",
+  a: "bg-a",
+  gold: "bg-gold",
+};
+
 /**
- * Editorial page header shared across the workspace screens: a mono eyebrow, a
- * serif title (the report's voice), a lead line, and a gradient icon chip +
- * trailing actions. Reveals on mount. Keeps the four screens of one family.
+ * Editorial masthead — the repeated top note across all four workspace screens
+ * (research: eyebrow → serif display H1 → one-line lead → actions). Keeps the
+ * screens one family. Neutrals + type do the work; the accent lives only in the
+ * mono eyebrow + its dot, so each screen has exactly one quiet colour signature.
  */
 export function PageHeader({
   eyebrow,
   title,
   lead,
-  icon,
+  accent = "brand",
   actions,
 }: {
   eyebrow?: string;
   title: string;
   lead?: string;
-  icon?: ReactNode;
+  accent?: Accent;
   actions?: ReactNode;
 }) {
   return (
     <Reveal>
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          {icon ? (
-            <span className="mt-0.5 flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-grad-b text-white shadow-glow-b">
-              {icon}
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+        <div className="min-w-0">
+          {eyebrow ? (
+            <span className={`flex items-center gap-2 font-mono text-eyebrow font-medium uppercase ${EYEBROW[accent]}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${DOT[accent]}`} aria-hidden />
+              {eyebrow}
             </span>
           ) : null}
-          <div className="min-w-0">
-            {eyebrow ? (
-              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-b-deep">
-                {eyebrow}
-              </span>
-            ) : null}
-            <h1 className="mt-1 font-serif text-3xl font-medium leading-tight tracking-[-0.01em] text-ink md:text-[34px]">
-              {title}
-            </h1>
-            {lead ? <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted md:text-[15px]">{lead}</p> : null}
-          </div>
+          <h1 className="mt-3 text-balance font-serif text-h1 font-medium text-ink md:text-display">{title}</h1>
+          {lead ? <p className="mt-4 max-w-[46ch] text-body-lg text-muted">{lead}</p> : null}
         </div>
-        {actions ? <div className="flex flex-none items-center gap-2">{actions}</div> : null}
+        {actions ? <div className="flex flex-none items-center gap-2 pb-1">{actions}</div> : null}
       </header>
     </Reveal>
   );

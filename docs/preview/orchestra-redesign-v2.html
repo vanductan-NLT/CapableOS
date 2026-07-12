@@ -1,0 +1,1635 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orchestra · Redesign preview (trắng + xanh dương)</title>
+</head>
+<body>
+<title>Orchestra · Redesign (trắng + xanh dương)</title>
+<style>
+/* ============================================================
+   ORCHESTRA — Shared Design Foundation
+   Blue hero · White ground · teal/purple/gold = human/AI/hybrid
+   Synthesis of: Friendly-Fintech · Soft-Bento-3D · Vibrant-Editorial · SG-gov-Warm
+   Self-contained. System fonts only. No external URLs / @import.
+   ============================================================ */
+
+:root{
+  /* ---- GROUND: airy white + blue-tinted wells (never grey) ---- */
+  --bg:          #FFFFFF;
+  --surface-1:   #F4F8FF;   /* inset / well */
+  --surface-2:   #EEF4FF;   /* deeper inset, chips, zebra */
+  --surface-3:   #E7EFFE;   /* pressed / nested */
+  --border:      #E3ECFB;   /* 1px hairline — the default divider */
+  --border-strong:#D2E0F7;  /* card outline when no shadow */
+
+  /* ---- INK: near-black, weight-driven hierarchy (never #000) ---- */
+  --ink-900:     #16181D;   /* headings */
+  --ink-700:     #3A4657;   /* body */
+  --ink-400:     #55647A;   /* captions, tile labels, eyebrow */
+  --ink-300:     #94A3B4;   /* disabled */
+  --on-accent:   #FFFFFF;   /* text on blue-600/700, teal, purple */
+
+  /* ---- BLUE: THE HERO (≈90% of interaction signal) ---- */
+  --blue-50:  #EFF5FF;  --blue-100: #DBE8FF;  --blue-200: #BFD6FF;
+  --blue-300: #8FB6FF;  --blue-400: #6098FA;  --blue-500: #3B7BF6; /* accent/border only — NO white text */
+  --blue-600: #2563EB;  /* primary CTA fill — white text OK (5.17) */
+  --blue-700: #1D4ED8;  /* projector-safe · active nav (6.9) */
+  --blue-900: #1A3A8F;  /* deep text-on-tint, gradient anchor */
+  --blue-bg:  #EAF1FE;  /* ~10% tint — soft fills, active pills */
+
+  /* ---- SEMANTIC SPOTS: meaning only, always paired with an icon ---- */
+  --human:      #12B5A5;  --human-ink: #0C766D;  --human-tint: #CFFAF2;  /* teal   — con người */
+  --ai:         #7C3AED;  --ai-ink:    #6B27D4;  --ai-tint:    #EBE3FD;  /* purple — AI */
+  --hybrid:     #F7B01F;  --hybrid-ink:#6E4010;  --hybrid-tint:#FEF0C7;  /* gold   — kết hợp (ink text!) */
+
+  /* ---- STATE ---- */
+  --success:#15803D;  --success-tint:#DCFCE7;
+  --warning:#B45309;  --warning-tint:#FEF0C7;
+  --danger: #C62A2F;  --danger-tint: #FEE4E2;
+  --verify: #15803D;  /* "đã xác minh" trust green */
+
+  /* ---- GRADIENTS: 2 stops chrome · 3 hero only · 120–160° ---- */
+  --grad-hero: linear-gradient(135deg,#2563EB 0%,#3B7BF6 45%,#12B5A5 100%); /* blue→teal balance/spotlight card */
+  --grad-sky:  linear-gradient(160deg,#3B7BF6 0%,#8FB6FF 100%);             /* soft blue header band */
+  --grad-cta:  linear-gradient(120deg,#1D4ED8 0%,#2563EB 100%);            /* primary pill — white text safe */
+  --grad-duet: linear-gradient(120deg,#2563EB 0%,#7C3AED 100%);            /* human×AI, decorative only */
+  --wash:      linear-gradient(160deg,#F4F8FF 0%,#EEF4FF 100%);            /* section bg — ink text only */
+  --grad-clay-blue: linear-gradient(145deg,#8FB6FF 0%,#2563EB 100%);       /* soft-3D illustration fills */
+  --grad-clay-teal: linear-gradient(145deg,#7EE8DA 0%,#12B5A5 100%);
+  --grad-clay-gold: linear-gradient(145deg,#FFD874 0%,#F7B01F 100%);
+
+  /* grain overlay to kill projector banding (inline SVG data-URI) */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* gloss: 1px inner highlight to sell premium glass on gradient cards */
+  --gloss: inset 0 1px 0 rgba(255,255,255,.35);
+
+  /* ---- DEPTH: soft tinted (top rim-light + blue drop), never grey ---- */
+  --elev-1:
+    0 1px 2px rgba(16,24,40,.04),
+    0 8px 24px rgba(37,99,235,.06),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  --elev-2:
+    0 2px 4px rgba(16,24,40,.05),
+    0 16px 40px rgba(37,99,235,.10),
+    inset 0 1px 0 rgba(255,255,255,.95);
+  --elev-hero:
+    0 8px 30px rgba(37,99,235,.18),
+    var(--gloss);
+  --elev-press: 0 1px 2px rgba(16,24,40,.06);
+  --ring: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--blue-600); /* focus */
+
+  /* ---- FRIENDLY RADII ---- */
+  --r-xs: 8px;
+  --r-sm: 12px;    /* chips */
+  --r-md: 16px;    /* cards */
+  --r-lg: 20px;    /* tiles */
+  --r-xl: 24px;    /* feature tiles */
+  --r-pill: 999px; /* buttons, badges */
+
+  /* ---- SPACING (8px scale) ---- */
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px;
+  --s-6:32px; --s-7:48px; --s-8:64px;
+  --gutter:16px;
+
+  /* ---- TYPE: system stacks only ---- */
+  --font-display: ui-serif, "New York", Georgia, "Times New Roman", serif; /* one warm headline per screen */
+  --font-ui:      -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+
+  /* ---- MOTION: enter fast, exit relaxed ---- */
+  --ease-out:    cubic-bezier(0,0,.2,1);        /* entrances (default) */
+  --ease-in-out: cubic-bezier(.4,0,.2,1);       /* moving visible elements */
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);  /* reward moments ONLY */
+  --t-press: 130ms;  --t-hover: 180ms;  --t-drop: 240ms;  --t-modal: 360ms;
+}
+
+/* ---- DARK: deep navy-blue, not grey ---- */
+:root[data-theme="dark"]{
+  --bg:          #0B1220;
+  --surface-1:   #121C2E;
+  --surface-2:   #16233A;
+  --surface-3:   #1C2C46;
+  --border:      #24344F;
+  --border-strong:#2E4166;
+
+  --ink-900:     #F2F6FD;
+  --ink-700:     #C3D0E4;
+  --ink-400:     #8A9BB6;
+  --ink-300:     #5C6E8C;
+  --on-accent:   #FFFFFF;
+
+  --blue-bg:     #17274A;
+
+  --human-tint:  #0C3A36;
+  --ai-tint:     #2A1B4D;
+  --hybrid-tint: #3A2A0A;
+  --success-tint:#0E3320; --warning-tint:#3A2A0A; --danger-tint:#3B1418;
+
+  --wash: linear-gradient(160deg,#121C2E 0%,#16233A 100%);
+
+  --elev-1:
+    0 1px 2px rgba(0,0,0,.4),
+    0 10px 28px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  --elev-2:
+    0 2px 6px rgba(0,0,0,.45),
+    0 18px 44px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.07);
+  --elev-hero:
+    0 10px 34px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  --ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--blue-400);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{ -webkit-text-size-adjust:100%; }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink-700);
+  font-family:var(--font-ui);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+
+/* tabular numerals for every number that means something */
+.tnum,.stat__num,.hero__num,.count,.badge--count{
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;
+}
+
+h1,h2,h3,h4{ color:var(--ink-900); font-weight:700; line-height:1.2; margin:0 0 var(--s-3); }
+h1{ font-size:40px; letter-spacing:-.01em; }
+h2{ font-size:28px; letter-spacing:-.005em; }
+h3{ font-size:20px; }
+h4{ font-size:16px; }
+
+/* editorial display — ONE warm serif headline per screen */
+.display{
+  font-family:var(--font-display);
+  font-weight:500;              /* serif reads premium at medium weight */
+  color:var(--ink-900);
+  font-size:clamp(30px,4.4vw,56px);
+  line-height:1.06;
+  letter-spacing:-.01em;
+  margin:0;
+}
+/* eyebrow / kicker above headlines (gov-form label pattern) */
+.eyebrow{
+  font-family:var(--font-ui);
+  font-size:12px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-400); margin:0 0 var(--s-2);
+}
+
+p{ margin:0 0 var(--s-4); }
+small,.caption{ font-size:12px; color:var(--ink-400); }
+code,kbd,samp{ font-family:var(--font-mono); font-size:.92em; }
+
+a{ color:var(--blue-700); text-decoration:none; font-weight:500;
+   transition:color var(--t-hover) var(--ease-out); }
+a:hover{ color:var(--blue-600); text-decoration:underline; text-underline-offset:2px; }
+
+:focus-visible{ outline:none; box-shadow:var(--ring); border-radius:var(--r-xs); }
+::selection{ background:var(--blue-100); color:var(--ink-900); }
+
+hr{ border:0; border-top:1px solid var(--border); margin:var(--s-5) 0; }
+
+/* ============================================================
+   LAYOUT — bento
+   ============================================================ */
+.bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:var(--gutter);
+  align-items:start;
+}
+.col-3{grid-column:span 3;} .col-4{grid-column:span 4;}
+.col-5{grid-column:span 5;} .col-6{grid-column:span 6;}
+.col-7{grid-column:span 7;} .col-8{grid-column:span 8;}
+.col-12{grid-column:1 / -1;}
+.row-2{grid-row:span 2;}
+@media (max-width:1199px){
+  .col-3,.col-4,.col-5{grid-column:span 6;}
+  .col-7,.col-8{grid-column:1 / -1;}
+}
+@media (max-width:767px){
+  .bento{grid-template-columns:1fr;}
+  [class*="col-"]{grid-column:1 / -1;}
+}
+
+/* horizontal-scroll card row (recent / templates) */
+.scroller{
+  display:flex; gap:var(--s-3);
+  overflow-x:auto; scroll-snap-type:x mandatory;
+  padding-bottom:var(--s-2); margin:0 calc(-1*var(--s-1));
+  -webkit-overflow-scrolling:touch;
+}
+.scroller > *{ scroll-snap-align:start; flex:0 0 auto; }
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{
+  display:flex; align-items:center; gap:var(--s-2);
+  padding:var(--s-3) var(--s-5);
+  background:color-mix(in srgb,var(--bg) 82%, transparent);
+  backdrop-filter:saturate(1.6) blur(12px);
+  border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:50;
+}
+.nav__brand{ font-weight:700; font-size:18px; color:var(--ink-900); margin-right:var(--s-5); letter-spacing:-.01em; }
+.navlink{
+  display:inline-flex; align-items:center; gap:var(--s-2);
+  padding:var(--s-2) var(--s-4); border-radius:var(--r-pill);
+  color:var(--ink-400); font-weight:600; font-size:14px;
+  transition:background var(--t-hover) var(--ease-out), color var(--t-hover) var(--ease-out);
+}
+.navlink:hover{ background:var(--surface-1); color:var(--ink-700); text-decoration:none; }
+.navlink[aria-current="page"],.navlink.is-active{
+  background:var(--blue-bg); color:var(--blue-700);
+}
+/* icon-only left-rail variant */
+.rail{ display:flex; flex-direction:column; gap:var(--s-2); width:72px; padding:var(--s-4) 0; align-items:center; }
+.rail .navlink{ padding:var(--s-3); border-radius:var(--r-md); }
+.rail .navlink[aria-current="page"]{ background:var(--blue-600); color:var(--on-accent); box-shadow:0 6px 16px rgba(37,99,235,.28); }
+
+/* ============================================================
+   CARD / TILE / BENTO
+   ============================================================ */
+.card,.tile{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  padding:var(--s-5);
+  box-shadow:var(--elev-1);
+  transition:transform var(--t-hover) var(--ease-out),
+             box-shadow var(--t-hover) var(--ease-out);
+}
+.card--well,.tile--well{ background:var(--surface-1); border-color:var(--border); box-shadow:none; }
+.card--wash{ background:var(--wash); border-color:transparent; }
+.tile--interactive{ cursor:pointer; }
+.tile--interactive:hover{ transform:translateY(-2px) scale(1.02); box-shadow:var(--elev-2); }
+.tile--interactive:active{ transform:translateY(0) scale(.995); box-shadow:var(--elev-press); }
+
+/* semantic left rail on a card — who owns it (icon still required) */
+.card--human{ border-left:4px solid var(--human); }
+.card--ai{    border-left:4px solid var(--ai); }
+.card--hybrid{border-left:4px solid var(--hybrid); }
+
+/* ============================================================
+   HERO — the gradient "balance / spotlight" card (ONE per screen)
+   ============================================================ */
+.hero{
+  position:relative; isolation:isolate;
+  border-radius:var(--r-xl);
+  padding:var(--s-7);
+  color:var(--on-accent);
+  background:var(--grad-hero);
+  box-shadow:var(--elev-hero);
+  overflow:hidden;
+}
+.hero::after{ /* grain to kill projector banding */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image:var(--grain); opacity:.05; mix-blend-mode:overlay;
+  border-radius:inherit;
+}
+.hero > *{ position:relative; z-index:1; }
+.hero .eyebrow{ color:rgba(255,255,255,.82); }
+.hero__num{ font-size:clamp(40px,7vw,72px); font-weight:800; line-height:1; letter-spacing:-.02em; }
+.hero__label{ font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:rgba(255,255,255,.85); }
+/* keep small copy off the teal tail: put it on a white chip */
+.hero__chip{
+  display:inline-flex; align-items:center; gap:var(--s-2);
+  background:var(--bg); color:var(--ink-900);
+  padding:var(--s-2) var(--s-3); border-radius:var(--r-pill);
+  font-size:13px; font-weight:600; box-shadow:var(--elev-1);
+}
+
+/* ============================================================
+   STAT — big-number storytelling
+   ============================================================ */
+.stat{ display:flex; flex-direction:column; gap:var(--s-1); }
+.stat__label{ font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-400); }
+.stat__num{ font-size:clamp(28px,3.4vw,40px); font-weight:700; color:var(--ink-900); line-height:1.05; }
+.stat__delta{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; }
+.stat__delta--up{ color:var(--success); }
+.stat__delta--down{ color:var(--danger); }
+
+/* ============================================================
+   PILL / BADGE  (+ icon-chip, the SG-gov colorful system)
+   ============================================================ */
+.pill,.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:var(--r-pill);
+  font-size:13px; font-weight:600; line-height:1;
+  background:var(--surface-2); color:var(--ink-700);
+}
+.badge--count{ background:var(--blue-bg); color:var(--blue-700); }
+.pill--human{ background:var(--human-tint); color:var(--human-ink); }
+.pill--ai{    background:var(--ai-tint);    color:var(--ai-ink); }
+.pill--hybrid{background:var(--hybrid-tint);color:var(--hybrid-ink); }
+.pill--success{background:var(--success-tint);color:var(--success);}
+.pill--warning{background:var(--warning-tint);color:var(--warning);}
+.pill--danger{ background:var(--danger-tint); color:var(--danger);}
+.pill--verify{ background:var(--success-tint); color:var(--verify); }
+
+/* duotone icon-chip — colorful energy inside the ≤15% chrome budget */
+.chip-icon{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:44px; height:44px; border-radius:var(--r-sm);
+  background:var(--blue-bg); color:var(--blue-600);
+  flex:0 0 auto;
+}
+.chip-icon svg{ width:24px; height:24px; stroke:currentColor; stroke-width:1.75; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.chip-icon--human{ background:var(--human-tint); color:var(--human-ink); }
+.chip-icon--ai{    background:var(--ai-tint);    color:var(--ai-ink); }
+.chip-icon--hybrid{background:var(--hybrid-tint);color:var(--hybrid-ink); }
+
+/* ============================================================
+   BUTTONS  (full-pill)
+   ============================================================ */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--s-2);
+  padding:12px 22px; border-radius:var(--r-pill);
+  font-family:var(--font-ui); font-size:15px; font-weight:600; line-height:1;
+  border:1px solid var(--border-strong); background:var(--bg); color:var(--ink-900);
+  cursor:pointer; user-select:none;
+  transition:transform var(--t-press) var(--ease-out),
+             box-shadow var(--t-hover) var(--ease-out),
+             background var(--t-hover) var(--ease-out),
+             filter var(--t-hover) var(--ease-out);
+}
+.btn:hover{ background:var(--surface-1); }
+.btn:active{ transform:scale(.98); box-shadow:var(--elev-press); }
+.btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+.btn-primary{
+  color:var(--on-accent); border-color:transparent;
+  background:var(--grad-cta);
+  box-shadow:0 6px 18px rgba(37,99,235,.28), var(--gloss);
+}
+.btn-primary:hover{ filter:brightness(1.05); background:var(--grad-cta); }
+.btn-primary:active{ transform:scale(.98); box-shadow:0 3px 10px rgba(37,99,235,.3); }
+
+.btn-ghost{ background:transparent; border-color:transparent; color:var(--blue-700); }
+.btn-ghost:hover{ background:var(--blue-bg); }
+.btn--lg{ padding:16px 30px; font-size:16px; }
+.btn--icon{ padding:12px; width:44px; height:44px; }
+
+/* ============================================================
+   FIELD / INPUT — one big friendly target
+   ============================================================ */
+.field{
+  width:100%; padding:16px 20px;
+  border:1.5px solid var(--border-strong); border-radius:var(--r-pill);
+  background:var(--bg); color:var(--ink-900);
+  font-family:var(--font-ui); font-size:16px; line-height:1.4;
+  transition:border-color var(--t-hover) var(--ease-out), box-shadow var(--t-hover) var(--ease-out);
+}
+.field::placeholder{ color:var(--ink-400); }
+.field:focus{ outline:none; border-color:var(--blue-600); box-shadow:0 0 0 4px rgba(37,99,235,.15); }
+.field--area{ border-radius:var(--r-lg); resize:vertical; min-height:96px; }
+
+/* ============================================================
+   AVATAR (teal/purple/gold semantic variants)
+   ============================================================ */
+.avatar{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:44px; height:44px; border-radius:var(--r-pill);
+  background:var(--blue-100); color:var(--blue-900);
+  font-weight:700; font-size:15px; flex:0 0 auto;
+  box-shadow:inset 0 0 0 2px var(--bg), 0 0 0 2px var(--border);
+}
+.avatar--human{ background:var(--human-tint); color:var(--human-ink); box-shadow:inset 0 0 0 2px var(--bg), 0 0 0 2px var(--human); }
+.avatar--ai{    background:var(--ai-tint);    color:var(--ai-ink);    box-shadow:inset 0 0 0 2px var(--bg), 0 0 0 2px var(--ai); }
+.avatar--hybrid{background:var(--hybrid-tint);color:var(--hybrid-ink);box-shadow:inset 0 0 0 2px var(--bg), 0 0 0 2px var(--hybrid); }
+.avatar--lg{ width:64px; height:64px; font-size:20px; }
+
+/* ============================================================
+   RING / GAUGE — capability, capacity, progress (shape > text)
+   ============================================================ */
+.ring{ --pct:60; --ring-color:var(--blue-600); position:relative; width:64px; height:64px; }
+.ring svg{ width:100%; height:100%; transform:rotate(-90deg); }
+.ring__track{ fill:none; stroke:var(--surface-2); stroke-width:8; }
+.ring__fill{
+  fill:none; stroke:var(--ring-color); stroke-width:8; stroke-linecap:round;
+  stroke-dasharray:176; /* 2πr, r=28 */
+  stroke-dashoffset:calc(176 - (176 * var(--pct) / 100));
+  transition:stroke-dashoffset 700ms var(--ease-out);
+}
+.ring--human{ --ring-color:var(--human); }
+.ring--ai{    --ring-color:var(--ai); }
+.ring--hybrid{--ring-color:var(--hybrid); }
+.ring__val{ position:absolute; inset:0; display:grid; place-items:center; font-weight:700; font-size:15px; color:var(--ink-900); font-variant-numeric:tabular-nums; }
+.ring.is-full{ animation:breathe 2.4s var(--ease-in-out) infinite; }
+
+/* linear meter + human×AI duet bar */
+.gauge{ height:10px; border-radius:var(--r-pill); background:var(--surface-2); overflow:hidden; }
+.gauge__fill{ height:100%; border-radius:inherit; background:var(--grad-cta); width:60%; transition:width 700ms var(--ease-out); }
+.duet{ display:flex; height:14px; border-radius:var(--r-pill); overflow:hidden; box-shadow:var(--elev-1); }
+.duet__human{ background:var(--human); }
+.duet__hybrid{ background:var(--hybrid); }
+.duet__ai{ background:var(--ai); }
+
+/* self-drawing sparkline / connector */
+.draw{ stroke-dasharray:1000; stroke-dashoffset:1000; animation:draw 1000ms var(--ease-out) forwards; }
+
+/* ============================================================
+   ILLUSTRATION HELPERS (soft-3D clay)
+   ============================================================ */
+.clay{
+  border-radius:40%;
+  box-shadow:
+    0 10px 24px rgba(37,99,235,.18),
+    inset 0 2px 4px rgba(255,255,255,.6),
+    inset 0 -8px 16px rgba(29,78,216,.15);
+  background:var(--grad-clay-blue);
+}
+.clay--teal{ background:var(--grad-clay-teal); }
+.clay--gold{ background:var(--grad-clay-gold); }
+
+/* ============================================================
+   ENTRANCE / ANIMATION UTILITIES
+   ============================================================ */
+.enter{ animation:rise 420ms var(--ease-out) both; }
+.enter-2{ animation:rise 420ms var(--ease-out) 80ms both; }
+.enter-3{ animation:rise 420ms var(--ease-out) 160ms both; }
+.fade-in{ animation:fade 360ms var(--ease-out) both; }
+/* editorial word-by-word masked wipe — apply per word span */
+.word-wipe{ display:inline-block; overflow:hidden; }
+.word-wipe > span{ display:inline-block; animation:wipe-up 460ms var(--ease-out) both; }
+.reward{ animation:pop 520ms var(--ease-spring) both; } /* success/complete ONLY */
+.stamp{ animation:stamp 460ms var(--ease-spring) both; }
+
+@keyframes rise{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
+@keyframes fade{ from{opacity:0;} to{opacity:1;} }
+@keyframes wipe-up{ from{opacity:0; transform:translateY(100%);} to{opacity:1; transform:none;} }
+@keyframes draw{ to{ stroke-dashoffset:0; } }
+@keyframes pop{ 0%{opacity:0; transform:scale(.9);} 60%{transform:scale(1.04);} 100%{opacity:1; transform:scale(1);} }
+@keyframes stamp{ 0%{opacity:0; transform:scale(1.4) rotate(-8deg);} 70%{transform:scale(.94) rotate(-8deg);} 100%{opacity:1; transform:scale(1) rotate(-8deg);} }
+@keyframes breathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.02); } }
+@keyframes float-soft{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+@keyframes shimmer{ 0%{ background-position:-200% 0; } 100%{ background-position:200% 0; } }
+
+.float{ animation:float-soft 4s var(--ease-in-out) infinite; }
+.skeleton{
+  background:linear-gradient(100deg,var(--surface-1) 30%,var(--surface-2) 50%,var(--surface-1) 70%);
+  background-size:200% 100%; animation:shimmer 1.4s linear infinite; border-radius:var(--r-md);
+}
+
+/* ============================================================
+   REDUCED MOTION — designed static end-state, not a blanket kill
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  /* freeze meaningful states at their designed finish */
+  .draw{ stroke-dashoffset:0 !important; }
+  .ring__fill{ transition:none !important; }
+  .word-wipe > span,.enter,.enter-2,.enter-3,.fade-in{ opacity:1 !important; transform:none !important; }
+  .reward,.stamp{ opacity:1 !important; transform:scale(1) !important; }
+  .float,.ring.is-full,.skeleton{ animation:none !important; }
+  .hero__num,.stat__num{ /* count-ups render final value via markup */ }
+}
+
+/* ---- preview shell (frame only; uses design tokens) ---- */
+.shell-top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:12px clamp(16px,4vw,32px);
+  background:color-mix(in srgb, var(--bg) 82%, transparent);backdrop-filter:saturate(1.4) blur(12px);
+  border-bottom:1px solid var(--border);}
+.shell-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink-900);white-space:nowrap;}
+.shell-brand .dot{width:28px;height:28px;border-radius:9px;background:var(--grad-cta);box-shadow:var(--elev-1);flex:none;
+  display:grid;place-items:center;}
+.shell-brand .dot svg{width:16px;height:16px;}
+.shell-tabs{display:flex;gap:4px;flex-wrap:wrap;overflow-x:auto;}
+.shell-tab{font-family:var(--font-ui);font-size:14px;font-weight:600;cursor:pointer;border:0;padding:9px 15px;border-radius:var(--r-pill);
+  background:transparent;color:var(--ink-400);transition:color var(--t-hover) var(--ease-out),background var(--t-hover) var(--ease-out);white-space:nowrap;}
+.shell-tab:hover{color:var(--ink-900);background:var(--surface-1);}
+.shell-tab.active{color:#fff;background:var(--grad-cta);box-shadow:var(--elev-1);}
+.shell-tab:focus-visible{outline:none;box-shadow:var(--ring);}
+.shell-spacer{margin-left:auto;}
+.shell-toggle{cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--ink-700);width:40px;height:40px;
+  border-radius:var(--r-pill);display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:none;transition:background var(--t-hover);}
+.shell-toggle:hover{background:var(--surface-1);}
+.shell-toggle:focus-visible{outline:none;box-shadow:var(--ring);}
+.shell-main{padding:clamp(20px,4vw,40px) clamp(16px,4vw,40px) 96px;max-width:1180px;margin:0 auto;}
+.screen{display:none;}
+.screen.active{display:block;animation:shell-fade .32s var(--ease-out);}
+@keyframes shell-fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen.active{animation:none}}
+
+</style>
+
+<header class="shell-top">
+  <div class="shell-brand"><span class="dot"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="2.4" fill="#fff"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span> Orchestra</div>
+  <nav class="shell-tabs" role="tablist" aria-label="Màn hình">
+      <button class="shell-tab active" role="tab" aria-selected="true" aria-controls="screen-command" data-target="screen-command">Giao việc</button>
+      <button class="shell-tab" role="tab" aria-selected="false" aria-controls="screen-board" data-target="screen-board">Bảng việc</button>
+      <button class="shell-tab" role="tab" aria-selected="false" aria-controls="screen-dashboard" data-target="screen-dashboard">Năng suất</button>
+      <button class="shell-tab" role="tab" aria-selected="false" aria-controls="screen-pool" data-target="screen-pool">Năng lực</button>
+  </nav>
+  <span class="shell-spacer"></span>
+  <button class="shell-toggle" aria-label="Đổi sáng/tối" title="Sáng / Tối">☾</button>
+</header>
+
+<main class="shell-main">
+<section class="screen active" id="screen-command" role="tabpanel" aria-label="Giao việc">
+<style>
+/* ===== Command / Giao việc — screen-scoped only (.command-*) ===== */
+.command-wrap{ max-width:940px; margin:0 auto; padding:var(--s-6) var(--gutter) var(--s-8); display:flex; flex-direction:column; gap:var(--s-6); }
+.command-head{ text-align:center; max-width:660px; margin:0 auto; }
+.command-title{ margin:var(--s-2) 0 0; }
+.command-sub{ color:var(--ink-400); font-size:17px; margin:var(--s-3) 0 0; }
+
+.command-stage{ padding:0; overflow:hidden; box-shadow:var(--elev-2); }
+.command-viz{ position:relative; padding:var(--s-6) var(--s-4) var(--s-4);
+  background:radial-gradient(130% 120% at 50% -20%, var(--blue-50) 0%, transparent 62%), var(--bg); }
+.command-svg{ display:block; width:100%; height:auto; max-width:600px; margin:0 auto; }
+
+.command-form{ border-top:1px solid var(--border); padding:var(--s-5); display:flex; flex-direction:column; gap:var(--s-4); }
+.command-inputrow{ display:flex; gap:var(--s-3); align-items:stretch; }
+.command-inputwrap{ position:relative; flex:1 1 auto; }
+.command-inputwrap>svg{ position:absolute; left:18px; top:50%; transform:translateY(-50%); width:22px; height:22px; stroke:var(--blue-500); stroke-width:1.8; fill:none; stroke-linecap:round; stroke-linejoin:round; pointer-events:none; }
+.command-input{ padding-left:50px; }
+.command-cta{ flex:0 0 auto; white-space:nowrap; }
+
+.command-hints{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--s-2); }
+.command-chip{ cursor:pointer; padding:6px 12px; border-radius:var(--r-pill); font-size:13px; font-weight:600; line-height:1; background:var(--blue-bg); color:var(--blue-700); border:1px solid transparent; transition:background var(--t-hover) var(--ease-out), transform var(--t-press) var(--ease-out); }
+.command-chip:hover{ background:var(--blue-100); transform:translateY(-1px); }
+.command-kbd{ margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--ink-400); background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-xs); padding:5px 9px; }
+
+/* result */
+.command-result{ display:flex; flex-direction:column; gap:var(--s-4); }
+.command-result-top{ display:flex; align-items:center; gap:var(--s-3); flex-wrap:wrap; }
+.command-verdict{ display:inline-flex; align-items:center; gap:8px; padding:10px 17px; border-radius:var(--r-pill); background:var(--ai); color:#fff; font-size:15px; font-weight:700; line-height:1; box-shadow:0 6px 16px rgba(124,58,237,.30), var(--gloss); }
+.command-verdict>svg{ width:16px; height:16px; }
+.command-risk{ display:inline-flex; align-items:center; gap:6px; padding:8px 13px; border-radius:var(--r-pill); font-size:13px; font-weight:600; line-height:1; background:var(--success-tint); color:var(--success); }
+.command-risk>svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.command-timeago{ margin-left:auto; font-family:var(--font-mono); font-size:12px; color:var(--ink-400); }
+
+.command-out{ background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--s-4) var(--s-5); }
+.command-done{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--success); margin-bottom:var(--s-2); }
+.command-done>svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.command-out-text{ color:var(--ink-900); font-size:16px; line-height:1.55; margin:0; }
+.command-meta{ margin-top:var(--s-3); font-family:var(--font-mono); font-size:12px; color:var(--ink-400); }
+.command-actions{ display:flex; gap:var(--s-3); flex-wrap:wrap; }
+.command-actions svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* svg flow */
+.command-wire{ fill:none; stroke-linecap:round; stroke-width:3; opacity:.30; }
+.command-flow{ fill:none; stroke-linecap:round; stroke-width:3; stroke-dasharray:3 21; animation:command-flow 1.5s linear infinite; }
+@keyframes command-flow{ to{ stroke-dashoffset:-48; } }
+.command-router-g{ transform-box:fill-box; transform-origin:center; animation:command-breathe 2.6s var(--ease-in-out) infinite; }
+@keyframes command-breathe{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.05);} }
+.command-ping{ transform-box:fill-box; transform-origin:center; animation:command-ping 2.6s var(--ease-out) infinite; }
+.command-ping--2{ animation-delay:1.3s; }
+@keyframes command-ping{ 0%{ transform:scale(.85); opacity:.5;} 70%{ opacity:0;} 100%{ transform:scale(1.4); opacity:0;} }
+
+/* svg text + icon colors (theme-aware) */
+.command-lbl{ font-family:var(--font-ui); font-weight:700; font-size:15px; }
+.command-lbl--h{ fill:var(--human-ink); } .command-lbl--a{ fill:var(--ai-ink); } .command-lbl--g{ fill:var(--hybrid-ink); }
+.command-ic-h{ stroke:var(--human-ink); fill:none; } .command-ic-g{ stroke:var(--hybrid-ink); fill:none; } .command-ic-a{ fill:var(--ai); }
+:root[data-theme="dark"] .command-lbl--h{ fill:#3FD6C6; } :root[data-theme="dark"] .command-lbl--a{ fill:#B49BF6; } :root[data-theme="dark"] .command-lbl--g{ fill:var(--hybrid); }
+:root[data-theme="dark"] .command-ic-h{ stroke:#3FD6C6; } :root[data-theme="dark"] .command-ic-g{ stroke:var(--hybrid); } :root[data-theme="dark"] .command-ic-a{ fill:#B49BF6; }
+:root[data-theme="dark"] .command-done{ color:#5FD98A; }
+:root[data-theme="dark"] .command-risk{ color:#5FD98A; }
+
+@media (max-width:640px){
+  .command-inputrow{ flex-direction:column; }
+  .command-cta{ width:100%; }
+  .command-kbd{ display:none; }
+}
+</style>
+
+<div class="command-wrap">
+  <header class="command-head enter">
+    <p class="eyebrow">Giao việc</p>
+    <h1 class="display command-title">Giao một việc —<br>viết như đang nói.</h1>
+    <p class="command-sub">Bạn viết. Orchestra chọn người hay AI — và làm luôn.</p>
+  </header>
+
+  <div class="card command-stage enter-2">
+    <div class="command-viz">
+      <svg class="command-svg" viewBox="0 0 680 220" role="img" aria-label="Sơ đồ định tuyến: lời của bạn đi qua bộ điều phối rồi chia tới Người, AI hoặc Kết hợp">
+        <defs>
+          <linearGradient id="cmdRouter" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#1D4ED8"/>
+            <stop offset="1" stop-color="#3B7BF6"/>
+          </linearGradient>
+          <filter id="cmdBloom" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="14"/></filter>
+          <filter id="cmdSoft" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(37,99,235,.22)"/></filter>
+        </defs>
+
+        <!-- color blooms behind nodes -->
+        <circle cx="540" cy="54"  r="26" fill="var(--human)"  filter="url(#cmdBloom)" opacity=".26"/>
+        <circle cx="540" cy="110" r="30" fill="var(--ai)"     filter="url(#cmdBloom)" opacity=".32"/>
+        <circle cx="540" cy="166" r="26" fill="var(--hybrid)" filter="url(#cmdBloom)" opacity=".26"/>
+
+        <!-- base wires -->
+        <path class="command-wire" stroke="var(--blue-500)" d="M100 110 H294"/>
+        <path class="command-wire" stroke="var(--human)"  d="M366 110 C 445 110, 470 54, 516 54"/>
+        <path class="command-wire" stroke="var(--ai)"     d="M366 110 H516"/>
+        <path class="command-wire" stroke="var(--hybrid)" d="M366 110 C 445 110, 470 166, 516 166"/>
+
+        <!-- animated flow pulses -->
+        <path class="command-flow" stroke="var(--blue-500)" d="M100 110 H294"/>
+        <path class="command-flow" stroke="var(--human)"  style="animation-delay:.15s" d="M366 110 C 445 110, 470 54, 516 54"/>
+        <path class="command-flow" stroke="var(--ai)"     d="M366 110 H516"/>
+        <path class="command-flow" stroke="var(--hybrid)" style="animation-delay:.3s"  d="M366 110 C 445 110, 470 166, 516 166"/>
+
+        <!-- prompt bubble (your words) -->
+        <g filter="url(#cmdSoft)">
+          <rect x="22" y="84" width="76" height="52" rx="15" fill="var(--blue-bg)" stroke="var(--blue-200)" stroke-width="1.5"/>
+          <path d="M40 136 L40 149 L55 136 Z" fill="var(--blue-bg)" stroke="var(--blue-200)" stroke-width="1.5" stroke-linejoin="round"/>
+          <rect x="34" y="98"  width="52" height="5" rx="2.5" fill="var(--blue-400)"/>
+          <rect x="34" y="110" width="40" height="5" rx="2.5" fill="var(--blue-300)"/>
+          <rect x="34" y="122" width="30" height="5" rx="2.5" fill="var(--blue-300)"/>
+        </g>
+
+        <!-- router hub -->
+        <g class="command-router-g" filter="url(#cmdSoft)">
+          <rect x="294" y="74" width="72" height="72" rx="20" fill="url(#cmdRouter)"/>
+          <rect x="294" y="74" width="72" height="72" rx="20" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+          <circle cx="320" cy="110" r="4.5" fill="#fff"/>
+          <path d="M324 110 H340" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <path d="M324 110 C 334 110, 336 96, 344 96" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <path d="M324 110 C 334 110, 336 124, 344 124" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <circle cx="344" cy="96" r="3" fill="#fff"/><circle cx="344" cy="110" r="3" fill="#fff"/><circle cx="344" cy="124" r="3" fill="#fff"/>
+        </g>
+
+        <!-- chosen ping on AI -->
+        <circle class="command-ping" cx="540" cy="110" r="24" fill="none" stroke="var(--ai)" stroke-width="2"/>
+        <circle class="command-ping command-ping--2" cx="540" cy="110" r="24" fill="none" stroke="var(--ai)" stroke-width="2"/>
+
+        <!-- node: Người (teal) -->
+        <g filter="url(#cmdSoft)">
+          <circle cx="540" cy="54" r="24" fill="var(--human-tint)" stroke="var(--human)" stroke-width="2"/>
+          <circle class="command-ic-h" cx="540" cy="49" r="5" stroke-width="2"/>
+          <path class="command-ic-h" d="M530 64 C 532 55, 548 55, 550 64" stroke-width="2" stroke-linecap="round"/>
+        </g>
+        <!-- node: AI (purple) — chosen, larger -->
+        <g filter="url(#cmdSoft)">
+          <circle cx="540" cy="110" r="26" fill="var(--ai-tint)" stroke="var(--ai)" stroke-width="2.5"/>
+          <path class="command-ic-a" d="M540 96 L544 106 L554 110 L544 114 L540 124 L536 114 L526 110 L536 106 Z"/>
+        </g>
+        <!-- node: Kết hợp (gold) -->
+        <g filter="url(#cmdSoft)">
+          <circle cx="540" cy="166" r="24" fill="var(--hybrid-tint)" stroke="var(--hybrid)" stroke-width="2"/>
+          <circle class="command-ic-g" cx="535" cy="166" r="6.5" stroke-width="2"/>
+          <circle class="command-ic-g" cx="545" cy="166" r="6.5" stroke-width="2"/>
+        </g>
+
+        <!-- labels -->
+        <text class="command-lbl command-lbl--h" x="574" y="54"  dominant-baseline="middle">Người</text>
+        <text class="command-lbl command-lbl--a" x="574" y="110" dominant-baseline="middle">AI</text>
+        <text class="command-lbl command-lbl--g" x="574" y="166" dominant-baseline="middle">Kết hợp</text>
+      </svg>
+    </div>
+
+    <div class="command-form">
+      <div class="command-inputrow">
+        <div class="command-inputwrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.12 2.12 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
+          <input class="field command-input" type="text" maxlength="200" aria-label="Việc cần làm" placeholder="VD: Tóm tắt báo cáo thị trường quý 4 (30 trang)"/>
+        </div>
+        <button type="button" class="btn btn-primary btn--lg command-cta">Giao việc
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="command-hints">
+        <span class="caption">Gợi ý</span>
+        <button type="button" class="command-chip">Tóm tắt báo cáo</button>
+        <button type="button" class="command-chip">Soạn email khách hàng</button>
+        <button type="button" class="command-chip">Lên kế hoạch tuần</button>
+        <span class="command-kbd">⌘ + Enter</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--ai command-result enter-3">
+    <div class="command-result-top">
+      <span class="command-verdict">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg>
+        Giao cho AI · gần như chắc chắn
+      </span>
+      <span class="command-risk">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
+        Rủi ro thấp
+      </span>
+      <span class="command-timeago">vừa xong</span>
+    </div>
+
+    <div class="command-out">
+      <span class="command-done">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        AI đã làm xong
+      </span>
+      <p class="command-out-text">Doanh thu Q4 đạt <strong>48,2 tỷ đồng</strong>, tăng 18% so với quý trước nhờ mảng khách hàng doanh nghiệp. Biên lợi nhuận gộp lên 41%; đề xuất tăng 12% ngân sách bán hàng cho quý 1.</p>
+      <p class="command-meta tnum">1.240 token · 3,2 giây · Qwen-Tóm tắt + dữ liệu nội bộ</p>
+    </div>
+
+    <div class="command-actions">
+      <button type="button" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        Chấp nhận
+      </button>
+      <button type="button" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 20v-4h4"/></svg>
+        Giao lại người
+      </button>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="screen" id="screen-board" role="tabpanel" aria-label="Bảng việc">
+<style>
+  .board-wrap{
+    display:flex; flex-direction:column; gap:var(--s-6);
+    max-width:1280px; margin:0 auto;
+    padding:var(--s-6) clamp(16px,4vw,40px) var(--s-8);
+  }
+
+  /* ---------- header ---------- */
+  .board-head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:var(--s-6); flex-wrap:wrap;
+  }
+  .board-head__text{ min-width:min(100%,320px); flex:1 1 320px; }
+  .board-head__row{ display:flex; align-items:center; gap:var(--s-4); flex-wrap:wrap; }
+  .board-title{ margin:0; }
+  .board-add{ padding:11px 18px; font-size:14px; }
+  .board-add svg{ width:18px; height:18px; stroke:currentColor; stroke-width:2.2; fill:none; stroke-linecap:round; }
+
+  .board-legend{ display:flex; gap:var(--s-2); margin-top:var(--s-5); flex-wrap:wrap; }
+  .board-legend__item{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; font-weight:600; color:var(--ink-700);
+    background:var(--surface-1); border:1px solid var(--border);
+    padding:6px 13px 6px 10px; border-radius:var(--r-pill);
+  }
+  .board-legend__dot{ width:11px; height:11px; border-radius:50%; box-shadow:0 0 0 3px color-mix(in srgb,currentColor 16%,transparent); }
+  .board-legend__dot--human{ background:var(--human); color:var(--human); }
+  .board-legend__dot--ai{ background:var(--ai); color:var(--ai); }
+  .board-legend__dot--hybrid{ background:var(--hybrid); color:var(--hybrid); }
+
+  .board-illus{ width:clamp(210px,25vw,278px); height:auto; flex:0 0 auto; }
+
+  /* ---------- columns ---------- */
+  .board-cols{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--s-4); }
+  .board-col{
+    background:var(--surface-1); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:var(--s-3) var(--s-3) var(--s-4);
+    display:flex; flex-direction:column; gap:var(--s-3); min-width:0;
+    animation:rise 480ms var(--ease-out) both;
+  }
+  .board-col:nth-child(1){ animation-delay:40ms; }
+  .board-col:nth-child(2){ animation-delay:120ms; }
+  .board-col:nth-child(3){ animation-delay:200ms; }
+  .board-col:nth-child(4){ animation-delay:280ms; }
+
+  .board-col__head{ display:flex; align-items:center; gap:10px; padding:6px 6px 10px; border-bottom:1px solid var(--border); }
+  .board-col__dot{ width:12px; height:12px; border-radius:4px; background:var(--col); flex:0 0 auto;
+    box-shadow:0 3px 8px color-mix(in srgb,var(--col) 45%,transparent); }
+  .board-col__title{ font-size:15px; font-weight:700; color:var(--ink-900); margin:0; flex:1 1 auto; letter-spacing:-.01em; }
+  .board-count{
+    font-variant-numeric:tabular-nums; font-size:13px; font-weight:700;
+    min-width:26px; height:24px; padding:0 8px; display:inline-flex;
+    align-items:center; justify-content:center; border-radius:var(--r-pill);
+    background:var(--col-tint); color:var(--col-ink);
+  }
+  .board-col--new{    --col:var(--blue-400); --col-tint:var(--blue-bg);      --col-ink:var(--blue-700); }
+  .board-col--doing{  --col:var(--blue-600); --col-tint:var(--blue-bg);      --col-ink:var(--blue-700); }
+  .board-col--review{ --col:var(--warning);  --col-tint:var(--warning-tint); --col-ink:var(--warning); }
+  .board-col--done{   --col:var(--success);  --col-tint:var(--success-tint); --col-ink:var(--success); }
+
+  .board-cards{ display:flex; flex-direction:column; gap:var(--s-3); min-height:56px; }
+
+  /* ---------- card ---------- */
+  .board-card{
+    background:var(--bg); border:1px solid var(--border);
+    border-radius:var(--r-md); padding:var(--s-4);
+    box-shadow:var(--elev-1); display:flex; flex-direction:column; gap:var(--s-3);
+    cursor:grab;
+    transition:transform var(--t-hover) var(--ease-out), box-shadow var(--t-hover) var(--ease-out);
+  }
+  .board-card:hover{ transform:translateY(-3px); box-shadow:var(--elev-2); }
+  .board-card:active{ cursor:grabbing; transform:translateY(0) scale(.995); box-shadow:var(--elev-press); }
+  .board-card__head{ display:flex; align-items:center; justify-content:space-between; gap:var(--s-2); }
+  .board-av{ width:36px; height:36px; font-size:13px; }
+  .board-av svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .board-card__title{ font-family:var(--font-ui); font-size:15px; font-weight:600; color:var(--ink-900); line-height:1.3; margin:0; }
+  .board-card__foot{ display:flex; align-items:center; gap:10px; }
+
+  .board-flag{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+  .board-flag--hi{ background:var(--danger); box-shadow:0 0 0 3px var(--danger-tint); }
+  .board-flag--md{ background:var(--blue-500); box-shadow:0 0 0 3px var(--blue-bg); }
+
+  /* progress */
+  .board-gauge{ flex:1 1 auto; height:8px; border-radius:var(--r-pill); background:var(--surface-2); overflow:hidden; }
+  .board-gauge__fill{ height:100%; border-radius:inherit; background:var(--grad-cta);
+    transform-origin:left; animation:board-grow 900ms var(--ease-out) both; }
+  .board-gauge--hybrid .board-gauge__fill{ background:var(--grad-clay-gold); }
+  .board-pct{ font-size:12px; font-weight:700; color:var(--ink-400); font-variant-numeric:tabular-nums; flex:0 0 auto; }
+
+  /* status chip + due chip */
+  .board-status{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700;
+    padding:5px 11px 5px 9px; border-radius:var(--r-pill); }
+  .board-status svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .board-status--wait{ background:var(--warning-tint); color:var(--warning); }
+  .board-status--done{ background:var(--success-tint); color:var(--success); }
+  .board-due{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--ink-400);
+    background:var(--surface-1); border:1px solid var(--border); padding:4px 11px 4px 9px; border-radius:var(--r-pill); }
+  .board-due svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* illustration motion */
+  .board-illus__a{ animation:board-bob 5.5s var(--ease-in-out) infinite; }
+  .board-illus__b{ animation:board-bob 6.6s var(--ease-in-out) .3s infinite; }
+  .board-illus__c{ animation:board-bob 7.2s var(--ease-in-out) .6s infinite; }
+  .board-illus__dot{ animation:board-bob 4.6s var(--ease-in-out) infinite; }
+  .board-illus__dot--2{ animation-duration:5.4s; animation-delay:.4s; }
+  .board-illus__dot--3{ animation-duration:6.1s; animation-delay:.8s; }
+  .board-illus__check{ transform-box:fill-box; transform-origin:center; animation:pop 640ms var(--ease-spring) 480ms both; }
+  .board-illus__pulse{ transform-box:fill-box; transform-origin:center; animation:board-pulse 2.8s var(--ease-in-out) infinite; }
+  .board-illus__wire{ stroke-dasharray:1 9; animation:board-drift 6s linear infinite; }
+
+  @keyframes board-grow{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+  @keyframes board-bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+  @keyframes board-pulse{ 0%{ transform:scale(.75); opacity:.55; } 70%{ transform:scale(1.7); opacity:0; } 100%{ opacity:0; } }
+  @keyframes board-drift{ to{ stroke-dashoffset:-100; } }
+
+  /* dark-mode contrast lifts (tinted chips stay readable on deep navy) */
+  :root[data-theme="dark"] .board-col--new,
+  :root[data-theme="dark"] .board-col--doing{ --col-ink:var(--blue-200); }
+  :root[data-theme="dark"] .board-col--review{ --col-ink:#FBBF24; }
+  :root[data-theme="dark"] .board-col--done{ --col-ink:#4ADE80; }
+  :root[data-theme="dark"] .board-status--wait{ color:#FBBF24; }
+  :root[data-theme="dark"] .board-status--done{ color:#4ADE80; }
+
+  @media (max-width:1000px){
+    .board-cols{
+      grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:minmax(262px,82%);
+      overflow-x:auto; scroll-snap-type:x mandatory;
+      margin:0 calc(-1*clamp(16px,4vw,40px)); padding:0 clamp(16px,4vw,40px) var(--s-3);
+    }
+    .board-col{ scroll-snap-align:start; }
+  }
+  @media (max-width:767px){ .board-illus{ display:none; } }
+</style>
+
+<div class="board-wrap">
+
+  <header class="board-head">
+    <div class="board-head__text">
+      <p class="eyebrow">Tuần 28 · 08–12/07</p>
+      <div class="board-head__row">
+        <h1 class="display board-title">Bảng việc</h1>
+        <button type="button" class="btn btn-primary board-add">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Thêm việc
+        </button>
+      </div>
+      <div class="board-legend" aria-label="Chú thích màu người phụ trách">
+        <span class="board-legend__item"><span class="board-legend__dot board-legend__dot--human"></span>Người</span>
+        <span class="board-legend__item"><span class="board-legend__dot board-legend__dot--ai"></span>AI</span>
+        <span class="board-legend__item"><span class="board-legend__dot board-legend__dot--hybrid"></span>Kết hợp</span>
+      </div>
+    </div>
+
+    <svg class="board-illus" viewBox="0 0 280 210" role="img" aria-label="Minh hoạ bảng việc: các thẻ công việc đang được hoàn thành">
+      <defs>
+        <linearGradient id="bIll-blue" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2563EB"/><stop offset=".5" stop-color="#3B7BF6"/><stop offset="1" stop-color="#12B5A5"/>
+        </linearGradient>
+        <linearGradient id="bIll-teal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#7EE8DA"/><stop offset="1" stop-color="#12B5A5"/>
+        </linearGradient>
+        <linearGradient id="bIll-purple" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#A06BF0"/><stop offset="1" stop-color="#7C3AED"/>
+        </linearGradient>
+        <filter id="bIll-sh" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#2563EB" flood-opacity="0.20"/>
+        </filter>
+      </defs>
+
+      <!-- marching-dot wire -->
+      <path class="board-illus__wire" d="M52 74 Q 150 6 236 70" fill="none" stroke="#8FB6FF" stroke-width="2.4" stroke-linecap="round"/>
+
+      <!-- back card (purple) -->
+      <g class="board-illus__c">
+        <g transform="rotate(-10 138 118)">
+          <rect x="74" y="60" width="108" height="116" rx="17" fill="url(#bIll-purple)" opacity=".92" filter="url(#bIll-sh)"/>
+        </g>
+      </g>
+      <!-- mid card (teal) -->
+      <g class="board-illus__b">
+        <g transform="rotate(7 150 112)">
+          <rect x="94" y="52" width="110" height="120" rx="17" fill="url(#bIll-teal)" opacity=".95" filter="url(#bIll-sh)"/>
+        </g>
+      </g>
+      <!-- front card (blue hero) -->
+      <g class="board-illus__a">
+        <rect x="104" y="64" width="120" height="114" rx="17" fill="url(#bIll-blue)" filter="url(#bIll-sh)"/>
+        <circle cx="126" cy="90" r="11" fill="#FFFFFF" opacity=".95"/>
+        <rect x="145" y="83" width="54" height="9" rx="4.5" fill="#FFFFFF" opacity=".9"/>
+        <rect x="145" y="97" width="34" height="7" rx="3.5" fill="#FFFFFF" opacity=".55"/>
+        <rect x="118" y="120" width="92" height="8" rx="4" fill="#FFFFFF" opacity=".82"/>
+        <rect x="118" y="134" width="66" height="8" rx="4" fill="#FFFFFF" opacity=".48"/>
+        <!-- segmented duet meter -->
+        <rect x="118" y="152" width="40" height="10" rx="5" fill="#CFFAF2"/>
+        <rect x="161" y="152" width="22" height="10" rx="5" fill="#FEF0C7"/>
+        <rect x="186" y="152" width="20" height="10" rx="5" fill="#EBE3FD"/>
+      </g>
+
+      <!-- done badge -->
+      <circle class="board-illus__pulse" cx="214" cy="160" r="16" fill="#15803D" opacity=".5"/>
+      <g class="board-illus__check">
+        <circle cx="214" cy="160" r="15" fill="#15803D" stroke="#FFFFFF" stroke-width="2.5"/>
+        <path d="M207 160.5l4.5 4.5 9-9" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+
+      <!-- floating semantic dots -->
+      <g class="board-illus__dot"><circle cx="52" cy="74" r="10" fill="#12B5A5"/><circle cx="48" cy="70" r="3" fill="#FFFFFF" opacity=".55"/></g>
+      <g class="board-illus__dot board-illus__dot--2"><circle cx="236" cy="70" r="9" fill="#7C3AED"/><circle cx="233" cy="67" r="2.6" fill="#FFFFFF" opacity=".5"/></g>
+      <g class="board-illus__dot board-illus__dot--3"><circle cx="150" cy="196" r="9" fill="#F7B01F"/><circle cx="147" cy="193" r="2.6" fill="#FFFFFF" opacity=".55"/></g>
+    </svg>
+  </header>
+
+  <!-- ================= KANBAN ================= -->
+  <div class="board-cols">
+
+    <!-- Mới -->
+    <section class="board-col board-col--new" aria-label="Mới">
+      <header class="board-col__head">
+        <span class="board-col__dot" aria-hidden="true"></span>
+        <h2 class="board-col__title">Mới</h2>
+        <span class="board-count tnum">2</span>
+      </header>
+      <div class="board-cards">
+        <article class="board-card" tabindex="0">
+          <div class="board-card__head">
+            <span class="avatar avatar--human board-av" title="Phụ trách: Nhi (Người)">Nh</span>
+          </div>
+          <p class="board-card__title">Lên lịch nội dung tháng 8</p>
+          <div class="board-card__foot">
+            <span class="board-flag board-flag--md" title="Ưu tiên vừa" aria-hidden="true"></span>
+            <span class="board-due"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>15/07</span>
+          </div>
+        </article>
+        <article class="board-card" tabindex="0">
+          <div class="board-card__head">
+            <span class="avatar avatar--ai board-av" title="Phụ trách: AI">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z"/><path d="M18.5 4l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>
+            </span>
+          </div>
+          <p class="board-card__title">Phân tích số liệu tuyển sinh</p>
+          <div class="board-card__foot">
+            <span class="board-flag board-flag--hi" title="Ưu tiên cao" aria-hidden="true"></span>
+            <span class="board-due"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>16/07</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Đang làm -->
+    <section class="board-col board-col--doing" aria-label="Đang làm">
+      <header class="board-col__head">
+        <span class="board-col__dot" aria-hidden="true"></span>
+        <h2 class="board-col__title">Đang làm</h2>
+        <span class="board-count tnum">2</span>
+      </header>
+      <div class="board-cards">
+        <article class="board-card" tabindex="0">
+          <div class="board-card__head">
+            <span class="avatar avatar--human board-av" title="Phụ trách: Sơn (Người)">Sn</span>
+          </div>
+          <p class="board-card__title">Thiết kế banner khai giảng</p>
+          <div class="board-card__foot">
+            <span class="board-gauge"><span class="board-gauge__fill" style="width:65%"></span></span>
+            <span class="board-pct">65%</span>
+          </div>
+        </article>
+        <article class="board-card" tabindex="0">
+          <div class="board-card__head">
+            <span class="avatar avatar--hybrid board-av" title="Phụ trách: Người × AI (Kết hợp)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="12" r="5"/><circle cx="14.5" cy="12" r="5"/></svg>
+            </span>
+          </div>
+          <p class="board-card__title">Dựng video giới thiệu khóa học</p>
+          <div class="board-card__foot board-gauge--hybrid">
+            <span class="board-gauge"><span class="board-gauge__fill" style="width:40%"></span></span>
+            <span class="board-pct">40%</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Chờ duyệt -->
+    <section class="board-col board-col--review" aria-label="Chờ duyệt">
+      <header class="board-col__head">
+        <span class="board-col__dot" aria-hidden="true"></span>
+        <h2 class="board-col__title">Chờ duyệt</h2>
+        <span class="board-count tnum">1</span>
+      </header>
+      <div class="board-cards">
+        <article class="board-card" tabindex="0">
+          <div class="board-card__head">
+            <span class="avatar avatar--human board-av" title="Phụ trách: An (Người)">An</span>
+          </div>
+          <p class="board-card__title">Kịch bản livestream Q&amp;A</p>
+          <div class="board-card__foot">
+            <span class="board-status board-status--wait">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Chờ duyệt
+            </span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Xong -->
+    <section class="board-col board-col--done" aria-label="Xong">
+      <header class="board-col__head">
+        <span class="board-col__dot" aria-hidden="true"></span>
+        <h2 class="board-col__title">Xong</h2>
+        <span class="board-count tnum">2</span>
+      </header>
+      <div class="board-cards">
+        <article class="board-card" tabindex="0">
+          <div class="board-card__head">
+            <span class="avatar avatar--ai board-av" title="Phụ trách: AI">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z"/><path d="M18.5 4l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>
+            </span>
+          </div>
+          <p class="board-card__title">Email chào mừng học viên</p>
+          <div class="board-card__foot">
+            <span class="board-status board-status--done">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7L10 17l-5-5"/></svg>Xong
+            </span>
+          </div>
+        </article>
+        <article class="board-card" tabindex="0">
+          <div class="board-card__head">
+            <span class="avatar avatar--human board-av" title="Phụ trách: Vy (Người)">Vy</span>
+          </div>
+          <p class="board-card__title">Báo cáo tuần đội IT</p>
+          <div class="board-card__foot">
+            <span class="board-status board-status--done">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7L10 17l-5-5"/></svg>Xong
+            </span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </div>
+</div>
+</section>
+
+<section class="screen" id="screen-dashboard" role="tabpanel" aria-label="Năng suất">
+<style>
+  .dashboard-wrap{max-width:1200px;margin:0 auto;padding:clamp(20px,4vw,40px);display:flex;flex-direction:column;gap:var(--s-5);}
+  .dashboard-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s-4);flex-wrap:wrap;}
+  .dashboard-head .display{font-size:clamp(30px,4.4vw,48px);}
+  .dashboard-headmeta{display:flex;align-items:center;gap:var(--s-3);flex-wrap:wrap;}
+  .dashboard-seg{display:inline-flex;gap:4px;padding:4px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-pill);}
+  .dashboard-seg button{border:0;background:transparent;padding:8px 16px;border-radius:var(--r-pill);font-family:var(--font-ui);font-size:14px;font-weight:600;color:var(--ink-400);cursor:pointer;transition:background var(--t-hover) var(--ease-out),color var(--t-hover) var(--ease-out);}
+  .dashboard-seg button[aria-selected="true"]{background:var(--bg);color:var(--blue-700);box-shadow:var(--elev-1);}
+  .dashboard-seg button:hover[aria-selected="false"]{color:var(--ink-700);}
+
+  /* ---- stat tiles ---- */
+  .dashboard-tile{display:flex;flex-direction:column;gap:var(--s-3);min-height:214px;}
+  .dashboard-toprow{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2);}
+  .dashboard-num{font-family:var(--font-ui);font-weight:800;font-size:clamp(32px,3.8vw,46px);line-height:.95;letter-spacing:-.025em;color:var(--ink-900);margin-top:auto;}
+  .dashboard-unit{font-size:.52em;font-weight:700;color:var(--ink-400);margin-left:2px;letter-spacing:0;}
+  .dashboard-lbl{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-400);}
+  .dashboard-delta{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;padding:3px 9px;border-radius:var(--r-pill);}
+  .dashboard-delta-up{color:var(--success);background:var(--success-tint);}
+  .dashboard-delta-onhero{color:#fff;background:rgba(255,255,255,.2);}
+
+  /* mini viz sizing */
+  .dashboard-viz{height:52px;display:block;}
+  .dashboard-viz svg{width:100%;height:100%;overflow:visible;}
+  .dashboard-bar{transform-box:fill-box;transform-origin:50% 100%;animation:dashboard-grow 800ms var(--ease-out) both;}
+
+  /* ---- hero gradient tile (the one gradient card) ---- */
+  .dashboard-hero-tile{position:relative;isolation:isolate;overflow:hidden;border-radius:var(--r-xl);padding:var(--s-5);color:var(--on-accent);background:var(--grad-hero);box-shadow:var(--elev-hero);display:flex;flex-direction:column;gap:var(--s-3);min-height:214px;}
+  .dashboard-hero-tile::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:var(--grain);opacity:.06;mix-blend-mode:overlay;border-radius:inherit;}
+  .dashboard-glow{position:absolute;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 70%);top:-70px;right:-50px;z-index:0;pointer-events:none;}
+  .dashboard-hero-tile>*{position:relative;z-index:1;}
+  .dashboard-hpill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);color:#fff;padding:5px 12px;border-radius:var(--r-pill);font-size:12px;font-weight:700;letter-spacing:.03em;}
+  .dashboard-ringwrap{position:relative;width:120px;height:120px;margin:auto;}
+  .dashboard-ringwrap svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .dashboard-ring-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:34px;letter-spacing:-.02em;color:#fff;}
+  .dashboard-ring-num span{font-size:18px;font-weight:700;opacity:.85;}
+  .dashboard-hero-ring{stroke-dashoffset:64;animation:dashboard-ring 1200ms var(--ease-out) both;}
+  .dashboard-hlbl{font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:rgba(255,255,255,.9);text-align:center;}
+
+  /* gauge fill */
+  .dashboard-gauge-fill{stroke-dashoffset:7.5;animation:dashboard-gauge 1200ms var(--ease-out) .15s both;}
+
+  /* ---- Người vs AI card ---- */
+  .dashboard-vs{display:flex;gap:var(--s-6);align-items:stretch;}
+  .dashboard-vs-intro{flex:0 0 240px;display:flex;flex-direction:column;gap:var(--s-3);justify-content:center;}
+  .dashboard-vs-big{font-family:var(--font-ui);font-weight:800;font-size:clamp(40px,5vw,60px);line-height:.92;letter-spacing:-.03em;color:var(--ink-900);}
+  .dashboard-legend{display:flex;flex-direction:column;gap:8px;}
+  .dashboard-legrow{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-700);}
+  .dashboard-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
+  .dashboard-legrow b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink-900);}
+  .dashboard-vs-bars{flex:1 1 auto;display:flex;align-items:flex-end;justify-content:space-around;gap:var(--s-4);min-height:220px;padding-top:var(--s-4);}
+  .dashboard-vscol{display:flex;flex-direction:column;align-items:center;gap:var(--s-2);flex:1 1 0;max-width:120px;height:100%;justify-content:flex-end;}
+  .dashboard-vscol-num{font-weight:800;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em;color:var(--ink-900);font-variant-numeric:tabular-nums;}
+  .dashboard-vstrack{width:100%;height:150px;display:flex;align-items:flex-end;}
+  .dashboard-vsbar{width:100%;border-radius:12px 12px 4px 4px;transform-origin:bottom;animation:dashboard-grow 900ms var(--ease-out) both;box-shadow:var(--gloss);}
+  .dashboard-vscap{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-700);}
+
+  @keyframes dashboard-grow{from{transform:scaleY(0);}}
+  @keyframes dashboard-ring{from{stroke-dashoffset:201;}}
+  @keyframes dashboard-gauge{from{stroke-dashoffset:126;}}
+
+  @media (max-width:767px){
+    .dashboard-vs{flex-direction:column;gap:var(--s-4);}
+    .dashboard-vs-intro{flex-basis:auto;}
+  }
+</style>
+
+<div class="dashboard-wrap">
+
+  <!-- Header -->
+  <header class="dashboard-head">
+    <div>
+      <p class="eyebrow">Tổng quan · Tuần 28 · 07–13/07</p>
+      <h1 class="display">Năng suất</h1>
+    </div>
+    <div class="dashboard-headmeta">
+      <span class="pill pill--verify" aria-label="Đồng bộ tức thời">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Đồng bộ tức thời
+      </span>
+      <div class="dashboard-seg" role="tablist" aria-label="Khoảng thời gian">
+        <button role="tab" aria-selected="true">Tuần</button>
+        <button role="tab" aria-selected="false">Tháng</button>
+        <button role="tab" aria-selected="false">Quý</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stat tiles -->
+  <div class="bento">
+
+    <!-- A · Tự động hoá (gradient hero tile) -->
+    <article class="col-3 dashboard-hero-tile enter">
+      <span class="dashboard-glow"></span>
+      <div class="dashboard-toprow">
+        <span class="dashboard-hpill">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>
+          Tự động hoá
+        </span>
+        <span class="dashboard-delta dashboard-delta-onhero">▲ 6%</span>
+      </div>
+      <div class="dashboard-ringwrap">
+        <svg viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="9"/>
+          <circle class="dashboard-hero-ring" cx="40" cy="40" r="32" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="201"/>
+        </svg>
+        <div class="dashboard-ring-num tnum">68<span>%</span></div>
+      </div>
+      <div class="dashboard-hlbl">việc chạy tự động</div>
+    </article>
+
+    <!-- B · Tiết kiệm (teal sparkline) -->
+    <article class="col-3 tile tile--interactive enter-2 dashboard-tile">
+      <div class="dashboard-toprow">
+        <span class="chip-icon chip-icon--human">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6.5" rx="8" ry="3"/><path d="M4 6.5v11c0 1.66 3.58 3 8 3s8-1.34 8-3v-11"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
+        </span>
+        <span class="dashboard-delta dashboard-delta-up">▲ 12%</span>
+      </div>
+      <div class="dashboard-num tnum">12,4<span class="dashboard-unit">tr₫</span></div>
+      <div class="dashboard-lbl">Tiết kiệm chi phí</div>
+      <div class="dashboard-viz" aria-hidden="true">
+        <svg viewBox="0 0 128 52">
+          <defs><linearGradient id="dbSparkFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--human)" stop-opacity=".32"/><stop offset="1" stop-color="var(--human)" stop-opacity="0"/></linearGradient></defs>
+          <path class="fade-in" d="M0 42 L21 38 L43 32 L64 34 L85 22 L107 15 L128 6 L128 52 L0 52 Z" fill="url(#dbSparkFill)"/>
+          <path class="draw" d="M0 42 L21 38 L43 32 L64 34 L85 22 L107 15 L128 6" fill="none" stroke="var(--human)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="128" cy="6" r="3.5" fill="var(--human)"/>
+        </svg>
+      </div>
+    </article>
+
+    <!-- C · Thời gian TB (blue bars, descending = faster) -->
+    <article class="col-3 tile tile--interactive enter-2 dashboard-tile">
+      <div class="dashboard-toprow">
+        <span class="chip-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>
+        </span>
+        <span class="dashboard-delta dashboard-delta-up">▼ 0,4s</span>
+      </div>
+      <div class="dashboard-num tnum">2,3<span class="dashboard-unit">giây</span></div>
+      <div class="dashboard-lbl">Thời gian phản hồi TB</div>
+      <div class="dashboard-viz" aria-hidden="true">
+        <svg viewBox="0 0 128 52">
+          <g fill="var(--blue-400)">
+            <rect class="dashboard-bar" x="2"   y="8"  width="16" height="44" rx="5" style="animation-delay:0ms"/>
+            <rect class="dashboard-bar" x="23"  y="14" width="16" height="38" rx="5" style="animation-delay:70ms"/>
+            <rect class="dashboard-bar" x="44"  y="22" width="16" height="30" rx="5" style="animation-delay:140ms"/>
+            <rect class="dashboard-bar" x="65"  y="27" width="16" height="25" rx="5" style="animation-delay:210ms"/>
+            <rect class="dashboard-bar" x="86"  y="33" width="16" height="19" rx="5" style="animation-delay:280ms"/>
+          </g>
+          <rect class="dashboard-bar" x="107" y="38" width="16" height="14" rx="5" fill="var(--blue-600)" style="animation-delay:350ms"/>
+        </svg>
+      </div>
+    </article>
+
+    <!-- D · Chất lượng (gold semicircle gauge) -->
+    <article class="col-3 tile tile--interactive enter-3 dashboard-tile">
+      <div class="dashboard-toprow">
+        <span class="chip-icon chip-icon--hybrid">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+        </span>
+        <span class="dashboard-delta dashboard-delta-up">▲ 2%</span>
+      </div>
+      <div class="dashboard-num tnum">94<span class="dashboard-unit">%</span></div>
+      <div class="dashboard-lbl">Chất lượng đầu ra</div>
+      <div class="dashboard-viz" aria-hidden="true">
+        <svg viewBox="0 0 96 54">
+          <path d="M8 48 A40 40 0 0 1 88 48" fill="none" stroke="var(--surface-2)" stroke-width="10" stroke-linecap="round"/>
+          <path class="dashboard-gauge-fill" d="M8 48 A40 40 0 0 1 88 48" fill="none" stroke="var(--hybrid)" stroke-width="10" stroke-linecap="round" stroke-dasharray="126"/>
+        </svg>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- Người vs AI comparison -->
+  <div class="bento">
+    <section class="col-12 card enter-3 dashboard-vs" aria-label="Phân công Người và AI">
+
+      <div class="dashboard-vs-intro">
+        <p class="eyebrow" style="margin:0">Phân công · Người × AI</p>
+        <div class="dashboard-vs-big tnum">1.426</div>
+        <div class="dashboard-lbl">việc hoàn thành tuần này</div>
+        <div class="duet" style="margin-top:8px" aria-hidden="true">
+          <span class="duet__human" style="flex:312"></span>
+          <span class="duet__hybrid" style="flex:428"></span>
+          <span class="duet__ai" style="flex:686"></span>
+        </div>
+        <div class="dashboard-legend" style="margin-top:6px">
+          <div class="dashboard-legrow"><span class="dashboard-dot" style="background:var(--human)"></span>Con người <b class="tnum">312</b></div>
+          <div class="dashboard-legrow"><span class="dashboard-dot" style="background:var(--hybrid)"></span>Kết hợp <b class="tnum">428</b></div>
+          <div class="dashboard-legrow"><span class="dashboard-dot" style="background:var(--ai)"></span>AI <b class="tnum">686</b></div>
+        </div>
+      </div>
+
+      <div class="dashboard-vs-bars" role="img" aria-label="So sánh: Con người 312, Kết hợp 428, AI 686 việc">
+        <div class="dashboard-vscol">
+          <div class="dashboard-vscol-num">312</div>
+          <div class="dashboard-vstrack"><div class="dashboard-vsbar" style="height:46%;background:var(--grad-clay-teal);animation-delay:80ms"></div></div>
+          <div class="dashboard-vscap"><span class="dashboard-dot" style="background:var(--human)"></span>Con người</div>
+        </div>
+        <div class="dashboard-vscol">
+          <div class="dashboard-vscol-num">428</div>
+          <div class="dashboard-vstrack"><div class="dashboard-vsbar" style="height:62%;background:var(--grad-clay-gold);animation-delay:200ms"></div></div>
+          <div class="dashboard-vscap"><span class="dashboard-dot" style="background:var(--hybrid)"></span>Kết hợp</div>
+        </div>
+        <div class="dashboard-vscol">
+          <div class="dashboard-vscol-num">686</div>
+          <div class="dashboard-vstrack"><div class="dashboard-vsbar" style="height:100%;background:linear-gradient(145deg,#A98BF3 0%,#7C3AED 100%);animation-delay:320ms"></div></div>
+          <div class="dashboard-vscap"><span class="dashboard-dot" style="background:var(--ai)"></span>AI</div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+</div>
+</section>
+
+<section class="screen" id="screen-pool" role="tabpanel" aria-label="Năng lực">
+<style>
+.pool-wrap{ display:flex; flex-direction:column; gap:var(--s-6); max-width:1180px; margin:0 auto; padding:var(--s-6) var(--s-5); }
+
+/* ---------- HERO ---------- */
+.pool-hero{ display:flex; align-items:center; gap:var(--s-6); flex-wrap:wrap; }
+.pool-hero__body{ flex:1 1 320px; min-width:280px; }
+.pool-hero .display{ color:var(--on-accent); margin:6px 0 0; }
+.pool-hero__stats{ display:flex; gap:var(--s-7); margin:var(--s-5) 0; flex-wrap:wrap; }
+.pool-hstat__num{ font-weight:800; font-size:clamp(34px,4.4vw,48px); line-height:1; color:var(--on-accent); letter-spacing:-.02em; }
+.pool-duet{ margin:0; max-width:340px; }
+.pool-legend{ display:flex; gap:var(--s-2); flex-wrap:wrap; margin-top:var(--s-3); }
+.pool-dot{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+.pool-dot--h{ background:var(--human); }
+.pool-dot--a{ background:var(--ai); }
+.pool-hero__art{ flex:1 1 240px; min-width:220px; max-width:380px; }
+.pool-hero__art svg{ width:100%; height:auto; display:block; overflow:visible; }
+
+/* illustration motion */
+.pool-eqbar{ transform-box:fill-box; transform-origin:center bottom; animation:pool-eq 1.6s var(--ease-in-out) infinite; }
+@keyframes pool-eq{ 0%,100%{ transform:scaleY(.45); } 50%{ transform:scaleY(1); } }
+.pool-halo{ transform-box:fill-box; transform-origin:center; animation:pool-halo 3.4s var(--ease-in-out) infinite; }
+@keyframes pool-halo{ 0%,100%{ transform:scale(1); opacity:.22; } 50%{ transform:scale(1.18); opacity:.10; } }
+.pool-link{ fill:none; stroke:rgba(255,255,255,.42); stroke-width:2; stroke-linecap:round; }
+
+/* ---------- ROSTER ---------- */
+.pool-grid{ display:grid; gap:var(--gutter); grid-template-columns:repeat(auto-fit,minmax(252px,1fr)); }
+.pool-card{ position:relative; overflow:hidden; display:flex; flex-direction:column; gap:var(--s-4); border-left:4px solid var(--c,var(--blue-500)); }
+.pool-card:hover{ transform:translateY(-3px); box-shadow:var(--elev-2); }
+.pool-card--human{ --c:var(--human); --c-ink:var(--human-ink); --c-tint:var(--human-tint); }
+.pool-card--ai{ --c:var(--ai); --c-ink:var(--ai-ink); --c-tint:var(--ai-tint); }
+
+.pool-status{ position:absolute; top:15px; right:15px; width:10px; height:10px; border-radius:50%; background:var(--success); animation:pool-pulse 2.2s var(--ease-out) infinite; }
+@keyframes pool-pulse{ 0%{ box-shadow:0 0 0 0 rgba(21,128,61,.5); } 70%{ box-shadow:0 0 0 9px rgba(21,128,61,0); } 100%{ box-shadow:0 0 0 0 rgba(21,128,61,0); } }
+
+.pool-head{ display:flex; align-items:center; gap:var(--s-3); padding-right:18px; }
+.pool-av{ width:58px; height:58px; flex:0 0 auto; display:grid; place-items:center; color:#fff; font-weight:800; font-size:20px; letter-spacing:.02em; text-shadow:0 1px 3px rgba(6,40,54,.45); }
+.pool-av--human{ border-radius:var(--r-pill); background:linear-gradient(145deg,#15C7B4 0%,#0C7B70 100%); box-shadow:0 8px 18px rgba(18,181,165,.32), inset 0 2px 4px rgba(255,255,255,.55), inset 0 -7px 14px rgba(12,118,109,.30); }
+.pool-av--ai{ border-radius:16px; background:linear-gradient(145deg,#9E74F6 0%,#6D28D9 100%); box-shadow:0 8px 18px rgba(124,58,237,.32), inset 0 2px 4px rgba(255,255,255,.5), inset 0 -7px 14px rgba(76,29,149,.35); }
+.pool-av svg{ width:27px; height:27px; fill:#fff; }
+.pool-id{ min-width:0; }
+.pool-name{ font-weight:800; font-size:18px; color:var(--ink-900); line-height:1.15; letter-spacing:-.01em; margin-bottom:6px; }
+.pool-role{ font-size:12px; }
+.pool-role svg{ width:14px; height:14px; }
+
+.pool-caps{ display:flex; flex-wrap:wrap; gap:8px; }
+.pool-cap{ display:inline-flex; align-items:center; gap:7px; padding:5px 12px 5px 6px; border-radius:var(--r-pill); background:var(--c-tint); color:var(--c-ink); font-size:12.5px; font-weight:700; line-height:1; }
+.pool-cap__ring{ width:22px; height:22px; flex:0 0 auto; }
+.pool-ringtrack{ fill:none; stroke:color-mix(in srgb, var(--c) 24%, transparent); stroke-width:3.5; }
+.pool-ringfill{ fill:none; stroke:var(--c); stroke-width:3.5; stroke-linecap:round; stroke-dasharray:44; stroke-dashoffset:calc(44 - 44 * var(--lvl,0) / 100); transform:rotate(-90deg); transform-box:fill-box; transform-origin:center; transition:stroke-dashoffset 800ms var(--ease-out); }
+
+.pool-foot{ margin-top:auto; display:flex; align-items:center; gap:var(--s-4); flex-wrap:wrap; padding-top:var(--s-4); border-top:1px solid var(--border); }
+.pool-arcwrap{ position:relative; width:96px; height:56px; flex:0 0 auto; }
+.pool-arc{ width:96px; height:56px; display:block; }
+.pool-arc__track{ fill:none; stroke:var(--surface-2); stroke-width:9; stroke-linecap:round; }
+.pool-arc__fill{ fill:none; stroke-width:9; stroke-linecap:round; stroke-dasharray:126; stroke-dashoffset:calc(126 - 126 * var(--pct,0) / 100); transition:stroke-dashoffset 950ms var(--ease-out); }
+.pool-arc__val{ position:absolute; left:0; right:0; bottom:0; text-align:center; font-weight:800; font-size:21px; color:var(--ink-900); font-variant-numeric:tabular-nums; }
+.pool-arc__val span{ font-size:11px; font-weight:700; color:var(--ink-400); margin-left:1px; }
+.pool-foot__meta{ display:flex; flex-direction:column; gap:6px; }
+.pool-foot__meta .caption{ font-weight:600; }
+.pool-verify{ font-size:11.5px; padding:5px 10px; }
+.pool-verify svg{ width:13px; height:13px; stroke:currentColor; stroke-width:2.4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+</style>
+
+<div class="pool-wrap">
+
+  <!-- ============ HERO ============ -->
+  <header class="hero pool-hero enter">
+    <div class="pool-hero__body">
+      <p class="eyebrow">Dàn năng lực · Orchestra</p>
+      <h1 class="display">Dàn năng lực</h1>
+      <div class="pool-hero__stats">
+        <div class="stat">
+          <span class="pool-hstat__num tnum">4</span>
+          <span class="hero__label">Tác nhân</span>
+        </div>
+        <div class="stat">
+          <span class="pool-hstat__num tnum">90%</span>
+          <span class="hero__label">Độ tin cậy TB</span>
+        </div>
+      </div>
+      <div class="duet pool-duet">
+        <div class="duet__human" style="flex:1"></div>
+        <div class="duet__ai" style="flex:1"></div>
+      </div>
+      <div class="pool-legend">
+        <span class="hero__chip"><span class="pool-dot pool-dot--h"></span>2 Người</span>
+        <span class="hero__chip"><span class="pool-dot pool-dot--a"></span>2 AI</span>
+      </div>
+    </div>
+
+    <div class="pool-hero__art">
+      <svg viewBox="0 0 260 210" role="img" aria-label="Sơ đồ dàn năng lực: hai người và hai AI quanh trung tâm điều phối">
+        <ellipse cx="130" cy="105" rx="106" ry="84" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.5" stroke-dasharray="3 7"/>
+        <ellipse cx="130" cy="105" rx="66" ry="52" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/>
+
+        <path class="pool-link draw" d="M130 105 L48 58" style="animation-delay:.15s"/>
+        <path class="pool-link draw" d="M130 105 L52 156" style="animation-delay:.30s"/>
+        <path class="pool-link draw" d="M130 105 L212 54" style="animation-delay:.45s"/>
+        <path class="pool-link draw" d="M130 105 L208 154" style="animation-delay:.60s"/>
+
+        <circle class="pool-halo" cx="130" cy="105" r="40" fill="#fff"/>
+        <circle cx="130" cy="105" r="29" fill="#fff"/>
+        <g fill="#2563EB">
+          <rect class="pool-eqbar" x="116" y="101" width="5" height="16" rx="2.5" style="animation-delay:0s"/>
+          <rect class="pool-eqbar" x="124" y="93"  width="5" height="24" rx="2.5" style="animation-delay:.2s"/>
+          <rect class="pool-eqbar" x="132" y="97"  width="5" height="20" rx="2.5" style="animation-delay:.4s"/>
+          <rect class="pool-eqbar" x="140" y="91"  width="5" height="26" rx="2.5" style="animation-delay:.6s"/>
+        </g>
+
+        <g class="float" style="animation-delay:.1s">
+          <circle cx="48" cy="58" r="19" fill="url(#pool-teal)"/>
+          <circle cx="48" cy="58" r="19" fill="none" stroke="#fff" stroke-width="3"/>
+          <circle cx="48" cy="53" r="4" fill="#fff"/>
+          <path d="M40 68a8 8 0 0 1 16 0z" fill="#fff"/>
+        </g>
+        <g class="float" style="animation-delay:.9s">
+          <circle cx="52" cy="156" r="17" fill="url(#pool-teal)"/>
+          <circle cx="52" cy="156" r="17" fill="none" stroke="#fff" stroke-width="3"/>
+          <circle cx="52" cy="151" r="3.6" fill="#fff"/>
+          <path d="M45 165a7 7 0 0 1 14 0z" fill="#fff"/>
+        </g>
+        <g class="float" style="animation-delay:.5s">
+          <rect x="193" y="35" width="38" height="38" rx="12" fill="url(#pool-purp)"/>
+          <rect x="193" y="35" width="38" height="38" rx="12" fill="none" stroke="#fff" stroke-width="3"/>
+          <path d="M212 44l2.6 6.4 6.4 2.6-6.4 2.6-2.6 6.4-2.6-6.4-6.4-2.6 6.4-2.6z" fill="#fff"/>
+        </g>
+        <g class="float" style="animation-delay:1.3s">
+          <rect x="191" y="137" width="34" height="34" rx="11" fill="url(#pool-purp)"/>
+          <rect x="191" y="137" width="34" height="34" rx="11" fill="none" stroke="#fff" stroke-width="3"/>
+          <path d="M208 145l2.4 5.8 5.8 2.4-5.8 2.4-2.4 5.8-2.4-5.8-5.8-2.4 5.8-2.4z" fill="#fff"/>
+        </g>
+
+        <defs>
+          <linearGradient id="pool-teal" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7EE8DA"/><stop offset="1" stop-color="#12B5A5"/>
+          </linearGradient>
+          <linearGradient id="pool-purp" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#B794F4"/><stop offset="1" stop-color="#7C3AED"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </header>
+
+  <!-- ============ ROSTER GRID ============ -->
+  <div class="pool-grid">
+
+    <!-- Minh Anh -->
+    <article class="card pool-card pool-card--human enter" style="animation-delay:.05s">
+      <span class="pool-status" role="img" aria-label="Đang hoạt động"></span>
+      <div class="pool-head">
+        <div class="pool-av pool-av--human" aria-hidden="true">MA</div>
+        <div class="pool-id">
+          <div class="pool-name">Minh Anh</div>
+          <span class="pill pill--human pool-role">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19a6.5 6.5 0 0 1 13 0"/></svg>
+            Người · Biên tập
+          </span>
+        </div>
+      </div>
+      <div class="pool-caps">
+        <span class="pool-cap" style="--lvl:92"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Viết</span>
+        <span class="pool-cap" style="--lvl:88"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Rà soát</span>
+        <span class="pool-cap" style="--lvl:79"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Phỏng vấn</span>
+      </div>
+      <div class="pool-foot">
+        <div class="pool-arcwrap" style="--pct:94">
+          <svg class="pool-arc" viewBox="0 0 96 56" role="img" aria-label="Độ tin cậy 94%">
+            <defs><linearGradient id="pool-grad-ma" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#12B5A5"/></linearGradient></defs>
+            <path class="pool-arc__track" d="M8 48 A40 40 0 0 1 88 48"/>
+            <path class="pool-arc__fill" style="stroke:url(#pool-grad-ma)" d="M8 48 A40 40 0 0 1 88 48"/>
+          </svg>
+          <div class="pool-arc__val">94<span>%</span></div>
+        </div>
+        <div class="pool-foot__meta">
+          <span class="caption">Độ tin cậy</span>
+          <span class="pill pill--verify pool-verify"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Đã xác minh</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- Đức Huy -->
+    <article class="card pool-card pool-card--human enter" style="animation-delay:.12s">
+      <span class="pool-status" role="img" aria-label="Đang hoạt động"></span>
+      <div class="pool-head">
+        <div class="pool-av pool-av--human" aria-hidden="true">ĐH</div>
+        <div class="pool-id">
+          <div class="pool-name">Đức Huy</div>
+          <span class="pill pill--human pool-role">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19a6.5 6.5 0 0 1 13 0"/></svg>
+            Người · Phân tích
+          </span>
+        </div>
+      </div>
+      <div class="pool-caps">
+        <span class="pool-cap" style="--lvl:90"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Dữ liệu</span>
+        <span class="pool-cap" style="--lvl:85"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Báo cáo</span>
+        <span class="pool-cap" style="--lvl:82"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Kiểm định</span>
+      </div>
+      <div class="pool-foot">
+        <div class="pool-arcwrap" style="--pct:88">
+          <svg class="pool-arc" viewBox="0 0 96 56" role="img" aria-label="Độ tin cậy 88%">
+            <defs><linearGradient id="pool-grad-dh" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#12B5A5"/></linearGradient></defs>
+            <path class="pool-arc__track" d="M8 48 A40 40 0 0 1 88 48"/>
+            <path class="pool-arc__fill" style="stroke:url(#pool-grad-dh)" d="M8 48 A40 40 0 0 1 88 48"/>
+          </svg>
+          <div class="pool-arc__val">88<span>%</span></div>
+        </div>
+        <div class="pool-foot__meta">
+          <span class="caption">Độ tin cậy</span>
+          <span class="pill pill--verify pool-verify"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Đã xác minh</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- Qwen-Tóm tắt -->
+    <article class="card pool-card pool-card--ai enter" style="animation-delay:.19s">
+      <span class="pool-status" role="img" aria-label="Trực tuyến"></span>
+      <div class="pool-head">
+        <div class="pool-av pool-av--ai" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2l2.2 6.3L20.5 10.5l-6.3 2.2L12 19l-2.2-6.3L3.5 10.5l6.3-2.2z"/></svg></div>
+        <div class="pool-id">
+          <div class="pool-name">Qwen-Tóm tắt</div>
+          <span class="pill pill--ai pool-role">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
+            AI · Tóm tắt
+          </span>
+        </div>
+      </div>
+      <div class="pool-caps">
+        <span class="pool-cap" style="--lvl:95"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Trích ý</span>
+        <span class="pool-cap" style="--lvl:90"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Rút gọn</span>
+        <span class="pool-cap" style="--lvl:84"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Chủ đề</span>
+      </div>
+      <div class="pool-foot">
+        <div class="pool-arcwrap" style="--pct:92">
+          <svg class="pool-arc" viewBox="0 0 96 56" role="img" aria-label="Độ tin cậy 92%">
+            <defs><linearGradient id="pool-grad-q1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+            <path class="pool-arc__track" d="M8 48 A40 40 0 0 1 88 48"/>
+            <path class="pool-arc__fill" style="stroke:url(#pool-grad-q1)" d="M8 48 A40 40 0 0 1 88 48"/>
+          </svg>
+          <div class="pool-arc__val">92<span>%</span></div>
+        </div>
+        <div class="pool-foot__meta">
+          <span class="caption">Độ tin cậy</span>
+          <span class="pill pill--verify pool-verify"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Đã xác minh</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- Qwen-Dịch -->
+    <article class="card pool-card pool-card--ai enter" style="animation-delay:.26s">
+      <span class="pool-status" role="img" aria-label="Trực tuyến"></span>
+      <div class="pool-head">
+        <div class="pool-av pool-av--ai" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2l2.2 6.3L20.5 10.5l-6.3 2.2L12 19l-2.2-6.3L3.5 10.5l6.3-2.2z"/></svg></div>
+        <div class="pool-id">
+          <div class="pool-name">Qwen-Dịch</div>
+          <span class="pill pill--ai pool-role">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
+            AI · Dịch
+          </span>
+        </div>
+      </div>
+      <div class="pool-caps">
+        <span class="pool-cap" style="--lvl:96"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Anh→Việt</span>
+        <span class="pool-cap" style="--lvl:91"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Việt→Anh</span>
+        <span class="pool-cap" style="--lvl:87"><svg class="pool-cap__ring" viewBox="0 0 22 22" aria-hidden="true"><circle class="pool-ringtrack" cx="11" cy="11" r="7"/><circle class="pool-ringfill" cx="11" cy="11" r="7"/></svg>Thuật ngữ</span>
+      </div>
+      <div class="pool-foot">
+        <div class="pool-arcwrap" style="--pct:86">
+          <svg class="pool-arc" viewBox="0 0 96 56" role="img" aria-label="Độ tin cậy 86%">
+            <defs><linearGradient id="pool-grad-q2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+            <path class="pool-arc__track" d="M8 48 A40 40 0 0 1 88 48"/>
+            <path class="pool-arc__fill" style="stroke:url(#pool-grad-q2)" d="M8 48 A40 40 0 0 1 88 48"/>
+          </svg>
+          <div class="pool-arc__val">86<span>%</span></div>
+        </div>
+        <div class="pool-foot__meta">
+          <span class="caption">Độ tin cậy</span>
+          <span class="pill pill--verify pool-verify"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Đã xác minh</span>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</div>
+</section>
+</main>
+
+<script>
+(function(){
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.shell-tab'));
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+      screens.forEach(function(s){ s.classList.remove('active'); });
+      t.classList.add('active'); t.setAttribute('aria-selected','true');
+      var el = document.getElementById(t.getAttribute('data-target'));
+      if (el) el.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+  var tog = document.querySelector('.shell-toggle');
+  if (tog) tog.addEventListener('click', function(){
+    var r = document.documentElement;
+    var dark = r.getAttribute('data-theme') === 'dark';
+    r.setAttribute('data-theme', dark ? 'light' : 'dark');
+    tog.textContent = dark ? '☾' : '☀';
+  });
+})();
+</script>
+</body>
+</html>

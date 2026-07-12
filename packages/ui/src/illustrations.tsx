@@ -51,65 +51,95 @@ function HybridNode({ x, y, r = 15 }: { x: number; y: number; r?: number }) {
   );
 }
 
-const labelStyle = {
-  fontFamily: "var(--font-mono, monospace)",
-  fontSize: 8.5,
-  letterSpacing: "0.12em",
-  textTransform: "uppercase" as const,
-};
-
-/* ── ① Command hero: the routing pipeline ──────────────── */
+/* ── ① Command hero: the blue routing pipeline (icon-only nodes) ──────── */
 export function RoutingPipeline({ className, ...props }: Props) {
   return (
     <svg
-      viewBox="0 0 640 200"
+      viewBox="0 0 680 220"
       role="img"
-      aria-label="Sơ đồ định tuyến người và AI"
+      aria-label="Định tuyến: lời của bạn đi qua bộ điều phối rồi chia tới Người, AI hoặc Kết hợp"
       className={["h-auto w-full", className].filter(Boolean).join(" ")}
       {...props}
     >
       <defs>
-        <linearGradient id="orch-prism" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="var(--b)" />
-          <stop offset="0.5" stopColor="var(--a)" />
-          <stop offset="1" stopColor="var(--gold)" />
+        <linearGradient id="orch-router" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="var(--brand-deep)" />
+          <stop offset="1" stopColor="var(--brand)" />
         </linearGradient>
-        <linearGradient id="orch-beam-h" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="var(--a)" />
-          <stop offset="1" stopColor="var(--b)" />
-        </linearGradient>
-        <linearGradient id="orch-beam-g" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="var(--a)" />
-          <stop offset="1" stopColor="var(--gold)" />
-        </linearGradient>
+        <filter id="orch-bloom" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="14" />
+        </filter>
+        <filter id="orch-soft" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="rgba(37,99,235,.22)" />
+        </filter>
       </defs>
 
-      {/* prompt capsule */}
-      <rect x="26" y="72" width="120" height="56" rx="14" fill="var(--card)" stroke="var(--b-line)" />
-      <line x1="46" y1="90" x2="126" y2="90" stroke="var(--b)" strokeOpacity="0.5" strokeWidth="2" strokeLinecap="round" />
-      <line x1="46" y1="100" x2="112" y2="100" stroke="var(--muted)" strokeOpacity="0.5" strokeWidth="2" strokeLinecap="round" />
-      <line x1="46" y1="110" x2="120" y2="110" stroke="var(--muted)" strokeOpacity="0.5" strokeWidth="2" strokeLinecap="round" />
-      <text x="26" y="146" fill="var(--muted)" style={labelStyle}>Prompt</text>
+      {/* soft color blooms behind the destination nodes */}
+      <circle cx="540" cy="54" r="26" fill="var(--b)" filter="url(#orch-bloom)" opacity="0.26" />
+      <circle cx="540" cy="110" r="30" fill="var(--a)" filter="url(#orch-bloom)" opacity="0.32" />
+      <circle cx="540" cy="166" r="26" fill="var(--gold)" filter="url(#orch-bloom)" opacity="0.26" />
 
-      {/* prompt → prism */}
-      <path d="M146 100 H 258" fill="none" stroke="var(--faint)" strokeWidth="2" strokeDasharray="2 6" strokeLinecap="round" />
+      {/* base wires */}
+      <g fill="none" strokeLinecap="round" strokeWidth="3" opacity="0.3">
+        <path stroke="var(--brand)" d="M100 110 H294" />
+        <path stroke="var(--b)" d="M366 110 C 445 110, 470 54, 516 54" />
+        <path stroke="var(--a)" d="M366 110 H516" />
+        <path stroke="var(--gold)" d="M366 110 C 445 110, 470 166, 516 166" />
+      </g>
 
-      {/* router prism */}
-      <path d="M300 70 L330 100 L300 130 L270 100 Z" fill="url(#orch-prism)" stroke="#fff" strokeOpacity="0.4" strokeWidth="1.4" />
-      <text x="300" y="150" textAnchor="middle" fill="var(--muted)" style={labelStyle}>Router</text>
+      {/* animated flow pulses */}
+      <g fill="none" strokeLinecap="round" strokeWidth="3">
+        <path className="orch-flow" stroke="var(--brand)" d="M100 110 H294" />
+        <path className="orch-flow" style={{ animationDelay: "0.15s" }} stroke="var(--b)" d="M366 110 C 445 110, 470 54, 516 54" />
+        <path className="orch-flow" stroke="var(--a)" d="M366 110 H516" />
+        <path className="orch-flow" style={{ animationDelay: "0.3s" }} stroke="var(--gold)" d="M366 110 C 445 110, 470 166, 516 166" />
+      </g>
 
-      {/* prism → nodes (animated flow) */}
-      <path className="orch-flow" d="M330 100 Q 440 56 516 50" fill="none" stroke="url(#orch-beam-h)" strokeWidth="2.5" strokeLinecap="round" />
-      <path className="orch-flow" d="M330 100 Q 440 100 516 100" fill="none" stroke="var(--a)" strokeWidth="2.5" strokeLinecap="round" />
-      <path className="orch-flow" d="M330 100 Q 440 146 516 152" fill="none" stroke="url(#orch-beam-g)" strokeWidth="2.5" strokeLinecap="round" />
+      {/* prompt bubble — "your words" */}
+      <g filter="url(#orch-soft)">
+        <rect x="22" y="84" width="76" height="52" rx="15" fill="var(--brand-soft)" stroke="var(--brand-line)" strokeWidth="1.5" />
+        <path d="M40 136 L40 149 L55 136 Z" fill="var(--brand-soft)" stroke="var(--brand-line)" strokeWidth="1.5" strokeLinejoin="round" />
+        <rect x="34" y="98" width="52" height="5" rx="2.5" fill="var(--brand)" opacity="0.7" />
+        <rect x="34" y="110" width="40" height="5" rx="2.5" fill="var(--brand)" opacity="0.45" />
+        <rect x="34" y="122" width="30" height="5" rx="2.5" fill="var(--brand)" opacity="0.45" />
+      </g>
 
-      {/* destinations */}
-      <HumanNode x={540} y={50} />
-      <text x="540" y="82" textAnchor="middle" fill="var(--b-deep)" style={labelStyle}>Human</text>
-      <AgentNode x={540} y={100} />
-      <text x="540" y="132" textAnchor="middle" fill="var(--a)" style={labelStyle}>AI</text>
-      <HybridNode x={540} y={152} />
-      <text x="540" y="180" textAnchor="middle" fill="var(--gold)" style={labelStyle}>Hybrid</text>
+      {/* router hub (breathes) */}
+      <g className="orch-breathe" filter="url(#orch-soft)">
+        <rect x="294" y="74" width="72" height="72" rx="20" fill="url(#orch-router)" />
+        <rect x="294" y="74" width="72" height="72" rx="20" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1" />
+        <circle cx="320" cy="110" r="4.5" fill="#fff" />
+        <g stroke="#fff" strokeWidth="2.4" strokeLinecap="round" fill="none">
+          <path d="M324 110 H340" />
+          <path d="M324 110 C 334 110, 336 96, 344 96" />
+          <path d="M324 110 C 334 110, 336 124, 344 124" />
+        </g>
+        <circle cx="344" cy="96" r="3" fill="#fff" />
+        <circle cx="344" cy="110" r="3" fill="#fff" />
+        <circle cx="344" cy="124" r="3" fill="#fff" />
+      </g>
+
+      {/* chosen "ping" on AI */}
+      <circle className="orch-ping" cx="540" cy="110" r="24" fill="none" stroke="var(--a)" strokeWidth="2" />
+      <circle className="orch-ping" style={{ animationDelay: "1.3s" }} cx="540" cy="110" r="24" fill="none" stroke="var(--a)" strokeWidth="2" />
+
+      {/* node: Người (teal) */}
+      <g filter="url(#orch-soft)">
+        <circle cx="540" cy="54" r="24" fill="var(--b-soft)" stroke="var(--b)" strokeWidth="2" />
+        <circle cx="540" cy="49" r="5" fill="none" stroke="var(--b-deep)" strokeWidth="2" />
+        <path d="M530 64 C 532 55, 548 55, 550 64" fill="none" stroke="var(--b-deep)" strokeWidth="2" strokeLinecap="round" />
+      </g>
+      {/* node: AI (purple) — chosen, larger */}
+      <g filter="url(#orch-soft)">
+        <circle cx="540" cy="110" r="26" fill="var(--a-soft)" stroke="var(--a)" strokeWidth="2.5" />
+        <path d="M540 96 L544 106 L554 110 L544 114 L540 124 L536 114 L526 110 L536 106 Z" fill="var(--a)" />
+      </g>
+      {/* node: Kết hợp (gold) */}
+      <g filter="url(#orch-soft)">
+        <circle cx="540" cy="166" r="24" fill="var(--gold-soft)" stroke="var(--gold)" strokeWidth="2" />
+        <circle cx="535" cy="166" r="6.5" fill="none" stroke="var(--gold)" strokeWidth="2" />
+        <circle cx="545" cy="166" r="6.5" fill="none" stroke="var(--gold)" strokeWidth="2" />
+      </g>
     </svg>
   );
 }

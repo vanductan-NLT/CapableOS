@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MotionConfig } from "framer-motion";
 import { useState, type ReactNode } from "react";
+import { LangProvider } from "@/lib/i18n";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(
@@ -17,7 +18,9 @@ export function Providers({ children }: { children: ReactNode }) {
   // component forgets the useReducedMotion hook.
   return (
     <QueryClientProvider client={client}>
-      <MotionConfig reducedMotion="user">{children}</MotionConfig>
+      <LangProvider>
+        <MotionConfig reducedMotion="user">{children}</MotionConfig>
+      </LangProvider>
     </QueryClientProvider>
   );
 }

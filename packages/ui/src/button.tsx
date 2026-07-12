@@ -5,19 +5,19 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium transition-[background,box-shadow,opacity,transform] duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
+  "inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-[background,box-shadow,opacity,transform,filter] duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
 const VARIANT: Record<Variant, string> = {
-  // AA-safe teal fill (raw --b fails white contrast) + colored elevation on the one primary action.
-  primary: "bg-b-strong text-white shadow-glow-b hover:bg-b-deep hover:shadow-glow-b-hover",
-  secondary: "border border-line bg-card text-ink hover:bg-line/50",
-  ghost: "text-ink2 hover:bg-line/60 hover:text-ink",
+  // BLUE brand — the ONE primary action per screen carries the blue gradient + glow.
+  primary: "bg-grad-cta text-white shadow-glow-brand hover:brightness-105 hover:shadow-glow-brand-hover",
+  secondary: "border border-brand-line bg-card text-brand-deep hover:bg-brand-soft",
+  ghost: "text-brand-deep hover:bg-brand-soft",
   danger: "border border-bad/30 bg-bad-soft text-bad hover:bg-bad/15",
 };
 
 const SIZE: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-xs",
-  md: "px-4 py-2 text-sm",
+  sm: "px-3 py-1.5 text-sm",
+  md: "px-5 py-2.5 text-base",
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -52,7 +52,7 @@ export const IconButton = forwardRef<
       className={cn(
         BASE,
         VARIANT[variant],
-        size === "sm" ? "h-7 w-7" : "h-9 w-9",
+        size === "sm" ? "h-11 w-11" : "h-11 w-11",
         "px-0 py-0",
         className,
       )}

@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen font-sans antialiased">
         <Providers>
           <Nav />
-          <main className="mx-auto w-full max-w-6xl px-4 py-7 md:px-6 md:py-10">{children}</main>
+          <main className="mx-auto w-full max-w-[1200px] px-6 py-12 md:px-12 md:py-16">{children}</main>
         </Providers>
       </body>
     </html>

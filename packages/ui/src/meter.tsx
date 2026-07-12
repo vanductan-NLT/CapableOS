@@ -8,7 +8,7 @@ import { cn } from "./cn";
 export function Meter({
   value,
   max = 100,
-  color = "var(--b)",
+  color = "var(--brand)",
   gradient,
   className,
   trackClassName,

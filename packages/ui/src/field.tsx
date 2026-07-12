@@ -2,7 +2,7 @@ import { forwardRef, type InputHTMLAttributes, type ReactNode, type TextareaHTML
 import { cn } from "./cn";
 
 const FIELD =
-  "w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-faint outline-none transition-[border,box-shadow] focus:border-b focus:ring-4 focus:ring-b/10";
+  "w-full min-h-11 rounded-xl border border-line bg-field px-4 py-3 text-base text-ink placeholder:text-faint outline-none transition-[border,box-shadow] focus:border-brand focus:ring-4 focus:ring-brand/15";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input(
   { className, ...rest },
@@ -28,18 +28,21 @@ export function Field({
 }: {
   label: ReactNode;
   hint?: ReactNode;
-  optional?: boolean;
+  /** `true` → default "(tuỳ chọn)"; pass a node/string to control the label (i18n). */
+  optional?: boolean | ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <label className={cn("flex flex-col gap-1.5", className)}>
-      <span className="flex items-center gap-2 text-sm font-medium text-ink">
+    <label className={cn("flex flex-col gap-2", className)}>
+      <span className="flex items-center gap-2 text-base font-medium text-ink">
         {label}
-        {optional ? <span className="font-normal text-muted">(tuỳ chọn)</span> : null}
+        {optional ? (
+          <span className="text-sm font-normal text-muted">{optional === true ? "(tuỳ chọn)" : optional}</span>
+        ) : null}
       </span>
       {children}
-      {hint ? <span className="text-xs text-muted">{hint}</span> : null}
+      {hint ? <span className="text-sm text-muted">{hint}</span> : null}
     </label>
   );
 }

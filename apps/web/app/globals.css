@@ -2,101 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Orchestra design tokens — values live here (light + dark), names are the
-   contract with @orchestra/ui (packages/ui/README.md). Palette inherited from
-   the Founder B report; vibrancy layer (gradients/glows) from enterprise research
-   (Stripe mesh · Linear restraint · Radix scales · Material 3 tone surfaces). */
+/* Orchestra design tokens — "Blue-on-white" (founder-approved v2).
+   BLUE is the brand/hero (chrome: buttons, nav, focus, key gradients).
+   Semantic accents speak MEANING only: teal=Người, purple=AI, gold=Kết hợp.
+   Names are the contract with @orchestra/ui + tailwind.config.ts. */
 :root {
-  --paper: #f7f8fc;
+  --paper: #ffffff; /* white ground */
   --card: #ffffff;
-  --ink: #141a2e;
-  --ink2: #39415f;
-  --muted: #6a7291;
-  --faint: #9aa0ba;
-  --line: #e6e9f3;
+  --surface: #f4f8ff; /* blue-tinted well (never grey) */
+  --ink: #16181d; /* near-black headings */
+  --ink2: #3a4657; /* body */
+  --muted: #55647a; /* captions/labels — AA-safe (≈6:1), survives a projector */
+  --faint: #94a3b4; /* decorative only */
+  --line: #e3ecfb; /* blue-tinted hairline */
+  --field: #f4f8ff; /* input fill */
 
-  --a: #5a4bd4;
-  --a-soft: #ede9ff;
-  --a-line: #d8d0fa;
+  /* BLUE — the brand/hero (≈90% of interaction signal) */
+  --brand: #2563eb; /* primary CTA fill — white text OK (5.17:1) */
+  --brand-deep: #1d4ed8; /* projector-safe active (6.9:1) */
+  --brand-soft: #eaf1fe; /* ~10% tint — soft fills, active pills */
+  --brand-line: #bfd6ff;
 
-  --b: #0e9c8b;
-  --b-soft: #dff4f0;
-  --b-line: #b9e6df;
-  --b-deep: #0a6b60;
-  --b-strong: #0b7a6d; /* AA-safe teal fill for white text (raw --b fails 4.5:1) */
+  /* SEMANTIC spots — meaning only, always with an icon */
+  --a: #7c3aed; /* AI purple */
+  --a-soft: #ebe3fd;
+  --a-line: #d8caf8;
 
-  --gold: #b27916;
-  --gold-soft: #f7eed8;
-  --gold-line: #ead9ae;
+  --b: #12b5a5; /* Người teal */
+  --b-soft: #cffaf2;
+  --b-line: #9fe9df;
+  --b-deep: #0c766d; /* AA-safe teal text/fill */
+  --b-strong: #0c766d;
 
-  --good: #1e9a69;
-  --good-soft: #e1f3ea;
-  --bad: #bb4c3b;
-  --bad-soft: #f7e7e3;
+  --gold: #b8790f; /* Kết hợp — text-safe amber (bright fills use grad-gold) */
+  --gold-soft: #fef0c7;
+  --gold-line: #f2d488;
 
-  --shadow: 0 1px 2px rgba(20, 26, 46, 0.04), 0 10px 26px rgba(20, 26, 46, 0.06);
-  --shadow-lg: 0 2px 6px rgba(20, 26, 46, 0.06), 0 18px 42px rgba(20, 26, 46, 0.1);
+  --good: #15803d;
+  --good-soft: #dcfce7;
+  --bad: #c62a2f;
+  --bad-soft: #fee4e2;
 
-  /* Gradients — signature brand (teal→purple via a bridging blue to kill the mud) */
-  --grad-brand: linear-gradient(135deg, #0e9c8b 0%, #3c6fc4 50%, #5a4bd4 100%);
-  --grad-b: linear-gradient(135deg, #14b7a4 0%, #0e9c8b 100%);
-  --grad-a: linear-gradient(135deg, #6e5de8 0%, #5a4bd4 100%);
-  --grad-gold: linear-gradient(135deg, #d89a2e 0%, #b27916 100%);
-  /* Ambient mesh — backdrop ONLY, ≤15% so text stays flat (Stripe technique) */
+  /* Soft, blue-tinted elevation (never grey) — edge XOR shadow still applies */
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(37, 99, 235, 0.07);
+  --shadow-lg: 0 2px 4px rgba(16, 24, 40, 0.05), 0 16px 40px rgba(37, 99, 235, 0.11);
+
+  /* Gradients — blue leads. Hero = blue→teal spotlight (ONE per screen). */
+  --grad-brand: linear-gradient(135deg, #2563eb 0%, #3b7bf6 45%, #12b5a5 100%);
+  --grad-cta: linear-gradient(120deg, #1d4ed8 0%, #2563eb 100%); /* primary button */
+  --grad-b: linear-gradient(135deg, #2bd3c0 0%, #12b5a5 100%);
+  --grad-a: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  --grad-gold: linear-gradient(135deg, #ffd874 0%, #f7b01f 100%);
   --grad-mesh:
-    radial-gradient(60% 55% at 12% 10%, rgba(14, 156, 139, 0.14), transparent 60%),
-    radial-gradient(55% 50% at 88% 15%, rgba(90, 75, 212, 0.14), transparent 60%),
-    radial-gradient(60% 60% at 72% 95%, rgba(178, 121, 22, 0.1), transparent 62%);
+    radial-gradient(60% 55% at 12% 8%, rgba(37, 99, 235, 0.10), transparent 60%),
+    radial-gradient(55% 50% at 90% 12%, rgba(18, 181, 165, 0.08), transparent 60%);
+  /* Aurora — the ONE soft hero backdrop per screen (blue-led, very low opacity) */
+  --grad-aurora:
+    radial-gradient(80% 90% at 6% 0%, rgba(37, 99, 235, 0.10), transparent 55%),
+    radial-gradient(70% 80% at 100% 6%, rgba(18, 181, 165, 0.07), transparent 55%);
 
-  /* Colored elevation — tinted shadow in light mode (primary action only) */
-  --glow-b: 0 2px 8px rgba(14, 156, 139, 0.24), 0 8px 24px rgba(14, 156, 139, 0.16);
-  --glow-a: 0 2px 8px rgba(90, 75, 212, 0.28), 0 8px 24px rgba(90, 75, 212, 0.18);
-  --glow-b-hover: 0 4px 12px rgba(14, 156, 139, 0.32), 0 12px 32px rgba(14, 156, 139, 0.2);
+  /* Colored elevation — reserved for the ONE primary action (blue). */
+  --glow-brand: 0 6px 18px rgba(37, 99, 235, 0.26);
+  --glow-brand-hover: 0 8px 24px rgba(37, 99, 235, 0.34);
+  --glow-b: 0 1px 5px rgba(18, 181, 165, 0.16), 0 6px 18px rgba(18, 181, 165, 0.12);
+  --glow-a: 0 1px 5px rgba(124, 58, 237, 0.18), 0 6px 18px rgba(124, 58, 237, 0.13);
+  --glow-b-hover: 0 2px 9px rgba(18, 181, 165, 0.22), 0 10px 26px rgba(18, 181, 165, 0.16);
 }
 .dark {
-  --paper: #0b0e18;
-  --card: #131a2c;
-  --ink: #eef1fb;
-  --ink2: #c3c9e0;
-  --muted: #8b93b4;
-  --faint: #5b627f;
-  --line: #232a44;
+  --paper: #0b1220; /* deep navy-blue, never grey */
+  --card: #121c2e;
+  --surface: #16233a;
+  --ink: #f2f6fd;
+  --ink2: #c3d0e4;
+  --muted: #949cbb;
+  --faint: #5c6e8c;
+  --line: #24344f;
+  --field: #0e1524;
 
-  --a: #8b7ff0;
-  --a-soft: #1f1b3d;
-  --a-line: #322a5c;
+  --brand: #6098fa;
+  --brand-deep: #8fb6ff;
+  --brand-soft: #17274a;
+  --brand-line: #2e4166;
 
-  --b: #2bc0ad;
-  --b-soft: #0f2e2b;
+  --a: #a78bfa;
+  --a-soft: #2a1b4d;
+  --a-line: #3b2d63;
+
+  --b: #2bd3c0;
+  --b-soft: #0c3a36;
   --b-line: #1c4a44;
   --b-deep: #7fe0d3;
-  --b-strong: #0e9c8b;
+  --b-strong: #12b5a5;
 
-  --gold: #d6a34a;
-  --gold-soft: #2c2412;
+  --gold: #e7ae45;
+  --gold-soft: #3a2a0a;
   --gold-line: #4a3d1e;
 
-  --good: #46c088;
-  --good-soft: #12281d;
-  --bad: #e0806f;
-  --bad-soft: #2c1714;
+  --good: #4ade80;
+  --good-soft: #0e3320;
+  --bad: #f87171;
+  --bad-soft: #3b1418;
 
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.4), 0 20px 46px rgba(0, 0, 0, 0.5);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.45), 0 20px 46px rgba(0, 0, 0, 0.5);
 
-  --grad-brand: linear-gradient(135deg, #16b5a2 0%, #4e7edd 50%, #6e5de8 100%);
-  --grad-b: linear-gradient(135deg, #1cc9b4 0%, #14b7a4 100%);
-  --grad-a: linear-gradient(135deg, #8172f0 0%, #6e5de8 100%);
+  --grad-brand: linear-gradient(135deg, #4e7edd 0%, #3b7bf6 45%, #2bd3c0 100%);
+  --grad-cta: linear-gradient(120deg, #2563eb 0%, #3b7bf6 100%);
+  --grad-b: linear-gradient(135deg, #2bd3c0 0%, #12b5a5 100%);
+  --grad-a: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
   --grad-gold: linear-gradient(135deg, #e7ae45 0%, #c88a22 100%);
   --grad-mesh:
-    radial-gradient(60% 55% at 12% 10%, rgba(20, 183, 164, 0.22), transparent 60%),
-    radial-gradient(55% 50% at 88% 15%, rgba(110, 93, 232, 0.22), transparent 60%),
-    radial-gradient(60% 60% at 72% 95%, rgba(216, 154, 46, 0.16), transparent 62%);
+    radial-gradient(60% 55% at 12% 8%, rgba(96, 152, 250, 0.16), transparent 60%),
+    radial-gradient(55% 50% at 90% 12%, rgba(43, 211, 192, 0.12), transparent 60%);
+  --grad-aurora:
+    radial-gradient(80% 90% at 6% 0%, rgba(96, 152, 250, 0.14), transparent 55%),
+    radial-gradient(70% 80% at 100% 6%, rgba(43, 211, 192, 0.10), transparent 55%);
 
-  /* Dark = emissive layered glow (glow reads as light on near-black) */
-  --glow-b: 0 0 0 1px rgba(20, 183, 164, 0.3), 0 4px 16px rgba(20, 183, 164, 0.34), 0 0 40px rgba(20, 183, 164, 0.16);
-  --glow-a: 0 0 0 1px rgba(110, 93, 232, 0.34), 0 4px 16px rgba(110, 93, 232, 0.38), 0 0 44px rgba(110, 93, 232, 0.18);
-  --glow-b-hover: 0 0 0 1px rgba(20, 183, 164, 0.4), 0 6px 22px rgba(20, 183, 164, 0.46), 0 0 56px rgba(20, 183, 164, 0.24);
+  --glow-brand: 0 0 0 1px rgba(96, 152, 250, 0.34), 0 6px 22px rgba(96, 152, 250, 0.4);
+  --glow-brand-hover: 0 0 0 1px rgba(96, 152, 250, 0.4), 0 8px 28px rgba(96, 152, 250, 0.5);
+  --glow-b: 0 0 0 1px rgba(43, 211, 192, 0.3), 0 4px 16px rgba(43, 211, 192, 0.34);
+  --glow-a: 0 0 0 1px rgba(167, 139, 250, 0.34), 0 4px 16px rgba(167, 139, 250, 0.38);
+  --glow-b-hover: 0 0 0 1px rgba(43, 211, 192, 0.4), 0 6px 22px rgba(43, 211, 192, 0.46);
 }
 
 html {
@@ -108,6 +134,11 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Engineered numerals — every KPI/count reads like instrumentation. */
+  font-feature-settings: "cv01", "ss03", "zero";
+}
+.font-serif {
+  font-feature-settings: "liga", "kern";
 }
 
 /* Illustration animations (packages/ui) — stilled under reduced-motion below. */
@@ -145,6 +176,38 @@ body {
 .orch-float {
   animation: orch-float 6s ease-in-out infinite;
 }
+@keyframes orch-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+.orch-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: orch-breathe 2.6s ease-in-out infinite;
+}
+@keyframes orch-ping {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+.orch-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: orch-ping 2.6s ease-out infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -159,9 +222,9 @@ body {
   }
 }
 
-/* visible keyboard focus (a11y) */
+/* visible keyboard focus (a11y) — blue brand ring */
 :focus-visible {
-  outline: 2px solid var(--b);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
   border-radius: 8px;
 }

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orchestra · Founder B — Báo cáo hoàn thành Workspace Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#F7F8FC; --card:#FFFFFF; --ink:#141A2E; --ink2:#39415F; --muted:#6A7291; --faint:#9AA0BA;
+  --line:#E6E9F3; --lineSoft:#EFF1F8;
+  --b:#0E9C8B; --bSoft:#DFF4F0; --bLine:#B9E6DF; --bDeep:#0a6b60;
+  --a:#5A4BD4; --aSoft:#EDE9FF; --gold:#B27916; --goldSoft:#F7EED8;
+  --green:#1E9A69; --greenSoft:#E1F3EA; --brick:#BB4C3B; --brickSoft:#F7E7E3;
+  --serif:'Newsreader',Georgia,serif; --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --shadow:0 1px 2px rgba(20,26,46,.04),0 12px 30px rgba(20,26,46,.07);
+}
+@media (prefers-color-scheme:dark){
+  :root{ --paper:#0B0E18; --card:#131A2C; --ink:#EEF1FB; --ink2:#C3C9E0; --muted:#8B93B4; --faint:#5B627F;
+    --line:#232A44; --lineSoft:#1B2138; --bSoft:#0f2e2b; --aSoft:#1f1b3d; --goldSoft:#2c2412;
+    --greenSoft:#12281d; --brickSoft:#2c1714; --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px rgba(0,0,0,.4);}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.68;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(30px,5vw,50px);line-height:1.05;letter-spacing:-.015em;margin:0}
+h2{font-family:var(--serif);font-weight:500;font-size:clamp(22px,3vw,30px);line-height:1.14;letter-spacing:-.01em;margin:0 0 4px}
+h3{font-weight:650;font-size:15px;margin:0 0 10px}
+p{margin:0 0 14px;color:var(--ink2)}
+.serif-i{font-family:var(--serif);font-style:italic}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--b)}
+code{font-family:var(--mono);font-size:.85em;background:var(--lineSoft);padding:1.5px 6px;border-radius:5px;color:var(--bDeep)}
+strong{color:var(--ink);font-weight:650}
+
+/* hero */
+header.hero{padding:64px 0 30px;border-bottom:1px solid var(--line)}
+.hero .mark{display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.hero .mark b{font-weight:600;letter-spacing:.02em}
+.hero .mark span{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted);display:block}
+.lead{font-size:18px;line-height:1.6;color:var(--ink2);max-width:66ch;margin-top:18px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.pill{font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:5px 11px;border-radius:999px;border:1px solid var(--bLine);background:var(--bSoft);color:var(--bDeep)}
+.pill.a{background:var(--aSoft);border-color:transparent;color:var(--a)}
+.pill.g{background:var(--goldSoft);border-color:transparent;color:var(--gold)}
+
+section{padding:46px 0;border-bottom:1px solid var(--line)}
+.sec-k{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
+.k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+/* FR scorecard */
+.fr{display:flex;gap:13px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--lineSoft)}
+.fr:first-child{border-top:none}
+.fr .code{font-family:var(--mono);font-size:12px;color:var(--b);font-weight:500;min-width:52px;padding-top:2px}
+.fr .body{flex:1}
+.fr .t{font-weight:600;color:var(--ink);font-size:14px}
+.fr .d{font-size:13px;color:var(--muted);margin-top:2px}
+.badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;padding:3px 9px;border-radius:6px;white-space:nowrap;height:fit-content;margin-top:2px}
+.bDone{background:var(--greenSoft);color:var(--green)}
+.bPart{background:var(--goldSoft);color:var(--gold)}
+
+/* stat tiles */
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.stat .n{font-family:var(--serif);font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px}
+.stat .n.tealc{color:var(--bDeep)}
+
+ul.clean{list-style:none;margin:0;padding:0}
+ul.clean li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:13.7px;color:var(--ink2)}
+ul.clean li svg{flex:none;margin-top:3px}
+.note{font-size:12.5px;color:var(--muted);font-style:italic}
+.callout{background:var(--bSoft);border:1px solid var(--bLine);border-radius:13px;padding:16px 18px;color:var(--bDeep);font-size:14px}
+.callout.g{background:var(--goldSoft);border-color:transparent;color:#6a4a10}
+footer{padding:40px 0 70px;color:var(--muted);font-size:13px}
+a.link{color:var(--b);text-decoration:none;border-bottom:1px solid var(--bLine)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="mark">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="#0E9C8B" stroke-width="1.4"/>
+      <circle cx="12" cy="12" r="2.4" fill="#0E9C8B"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#0E9C8B" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    <div><b>Orchestra</b><span>HUMAN-AGENT OS · FOUNDER B</span></div>
+  </div>
+  <span class="eyebrow">Workspace Intelligence Domain · Báo cáo hoàn thành</span>
+  <h1 style="margin:14px 0 0">Không gian làm việc &amp; đo lường<br><span class="serif-i" style="color:var(--muted)">cho lực lượng lao động lai người + AI.</span></h1>
+  <p class="lead">Lát dọc trọn vẹn của Founder B — từ schema, API, realtime board, đến dashboard đo lường và <strong>niềm tin kiểm chứng</strong> giữa người và AI — đã xây xong, chạy thật trên Supabase, và hợp nhất sạch với domain A trên nhánh <code>dev</code>.</p>
+  <div class="pills">
+    <span class="pill">Chạy thật · không phải demo</span>
+    <span class="pill">6/6 FR chính · hoàn thành</span>
+    <span class="pill a">Test plan 19/19 live</span>
+    <span class="pill g">dev @ 46c647a · sync với A</span>
+  </div>
+</header>
+
+<!-- ══ SCORECARD ══ -->
+<section>
+  <div class="sec-k">01 · Yêu cầu chức năng — bảng điểm</div>
+  <h2>Sáu FR chính của B: hoàn thành</h2>
+  <p>Mỗi yêu cầu đã có API thật, UI gọi API, và qua Definition of Done (loading · empty · error · mobile · dark · a11y · unit test).</p>
+  <div class="card" style="margin-top:16px">
+    <div class="fr"><div class="code">FR-1</div><div class="body"><div class="t">Nhập task bằng ngôn ngữ tự nhiên</div><div class="d">Trang Command: ô nhập lớn + lịch sử gần đây → <code>POST /tasks</code>.</div></div><span class="badge bDone">DONE</span></div>
+    <div class="fr"><div class="code">FR-8</div><div class="body"><div class="t">Verdict human → assign lên Task Board</div><div class="d">Gán người trong Pool, trạng thái <code>awaiting_human</code>.</div></div><span class="badge bDone">DONE</span></div>
+    <div class="fr"><div class="code">FR-10</div><div class="body"><div class="t">Task Board realtime</div><div class="d">Kanban 8 trạng thái + Supabase realtime (subscribe → invalidate).</div></div><span class="badge bDone">DONE</span></div>
+    <div class="fr"><div class="code">FR-11</div><div class="body"><div class="t">Feedback → cập nhật trust ±1</div><div class="d">Ghi log bất biến + <strong>reputation kiểm chứng</strong> (Wilson · Bayesian · EWMA).</div></div><span class="badge bDone">DONE +</span></div>
+    <div class="fr"><div class="code">FR-12</div><div class="body"><div class="t">Performance Dashboard</div><div class="d">Bảng Người vs AI cùng đơn vị · biểu đồ phân bổ · KPI · <strong>DORA flow</strong> (lead time, throughput).</div></div><span class="badge bDone">DONE +</span></div>
+    <div class="fr"><div class="code">FR-13</div><div class="body"><div class="t">Quản lý Capability Pool</div><div class="d">Xem/thêm/sửa người + agent qua UI; ép taxonomy chung (Feature 0).</div></div><span class="badge bDone">DONE</span></div>
+    <div class="fr"><div class="code">FR-7</div><div class="body"><div class="t">Hybrid: AI nháp → người review (đồng chủ với A)</div><div class="d">Task tới được trạng thái <code>review</code>; UI duyệt bản nháp chờ executor của A.</div></div><span class="badge bPart">MỘT PHẦN</span></div>
+  </div>
+  <p class="note" style="margin-top:12px">“DONE +” = hoàn thành và được củng cố vượt đề bài dựa trên nghiên cứu (xem mục 03).</p>
+</section>
+
+<!-- ══ ARCHITECTURE ══ -->
+<section>
+  <div class="sec-k">02 · Kiến trúc — lát dọc Workspace Intelligence</div>
+  <h2>Một chủ, trọn vẹn từ DB tới UI</h2>
+  <p>Sở hữu <code>features/task</code>, <code>features/dashboard</code>, <code>packages/db</code> (chủ schema). Giao với domain A đúng ba điểm: <code>POST /route</code> · <code>task_id</code> · <code>decision_id</code>.</p>
+  <div class="card" style="margin-top:14px;overflow-x:auto">
+  <svg viewBox="0 0 900 300" width="100%" style="min-width:560px" xmlns="http://www.w3.org/2000/svg" aria-label="Kiến trúc domain B">
+    <defs>
+      <marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#0E9C8B" stroke-width="1.3"/></marker>
+      <marker id="arm" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#9AA0BA" stroke-width="1.2"/></marker>
+    </defs>
+    <g font-family="Inter,system-ui,sans-serif" font-size="12" fill="#141A2E">
+      <!-- layer labels -->
+      <text x="14" y="26" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9AA0BA" letter-spacing="1">DB · [B chủ schema]</text>
+      <rect x="14" y="36" width="200" height="52" rx="10" fill="#DFF4F0" stroke="#B9E6DF"/>
+      <text x="28" y="60" font-weight="600">packages/db</text>
+      <text x="28" y="78" font-size="10.5" fill="#39415F">7 bảng · RLS · seed · constraints</text>
+
+      <text x="14" y="122" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9AA0BA" letter-spacing="1">CONTRACT · [S shared]</text>
+      <rect x="14" y="132" width="200" height="46" rx="10" fill="#fff" stroke="#E6E9F3"/>
+      <text x="28" y="152" font-weight="600">@orchestra/contracts</text>
+      <text x="28" y="168" font-size="10.5" fill="#39415F">envelope · task · agent · api</text>
+
+      <!-- API -->
+      <text x="330" y="26" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9AA0BA" letter-spacing="1">API ROUTES · [B]</text>
+      <g font-size="10.5" fill="#0a6b60" font-family="'JetBrains Mono',monospace">
+        <rect x="330" y="36" width="235" height="142" rx="10" fill="#fff" stroke="#B9E6DF"/>
+        <text x="346" y="58">POST·GET /tasks · PATCH /tasks/:id</text>
+        <text x="346" y="80">POST /feedback  → trust ±1</text>
+        <text x="346" y="102">GET/POST/PATCH /agents</text>
+        <text x="346" y="124">GET /capabilities</text>
+        <text x="346" y="146">GET /metrics · /metrics/breakdown</text>
+        <text x="346" y="166">GET /metrics/flow · /agents/reputation</text>
+      </g>
+
+      <!-- UI -->
+      <text x="682" y="26" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9AA0BA" letter-spacing="1">UI · [B]</text>
+      <g>
+        <rect x="682" y="36" width="204" height="30" rx="8" fill="#EDE9FF" stroke="#D8D0FA"/><text x="696" y="56" font-size="11">/ · Command (nhập task)</text>
+        <rect x="682" y="72" width="204" height="30" rx="8" fill="#DFF4F0" stroke="#B9E6DF"/><text x="696" y="92" font-size="11">/board · Kanban realtime</text>
+        <rect x="682" y="108" width="204" height="30" rx="8" fill="#DFF4F0" stroke="#B9E6DF"/><text x="696" y="128" font-size="11">/dashboard · KPI + charts</text>
+        <rect x="682" y="144" width="204" height="30" rx="8" fill="#DFF4F0" stroke="#B9E6DF"/><text x="696" y="164" font-size="11">/pool · người + agent + uy tín</text>
+      </g>
+
+      <!-- engines -->
+      <text x="14" y="220" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9AA0BA" letter-spacing="1">ENGINE THUẦN · [B] · unit-tested</text>
+      <rect x="14" y="230" width="872" height="50" rx="10" fill="#F7EED8" stroke="#EAD9AE"/>
+      <g font-size="11.5" fill="#5B3F0E" font-family="'JetBrains Mono',monospace">
+        <text x="30" y="252">trust.ts (±1, bounded)</text>
+        <text x="250" y="252">metrics.ts (split, automation, DORA flow)</text>
+        <text x="600" y="252">reputation.ts (Wilson · Bayesian · EWMA)</text>
+        <text x="30" y="270" font-family="Inter,sans-serif" fill="#6A7291">Logic tách khỏi I/O → kiểm thử độc lập, không cần DB.</text>
+      </g>
+    </g>
+    <g stroke="#0E9C8B" stroke-width="1.3" fill="none" marker-end="url(#ar)">
+      <path d="M214 62 L326 78"/><path d="M214 155 L326 120"/>
+      <path d="M565 107 L678 90"/><path d="M565 120 L678 123"/>
+    </g>
+    <!-- A seam -->
+    <path d="M448 178 L448 226" stroke="#5A4BD4" stroke-width="1.2" stroke-dasharray="3 4" fill="none" marker-end="url(#arm)"/>
+  </svg>
+  </div>
+</section>
+
+<!-- ══ HIGHLIGHTS ══ -->
+<section>
+  <div class="sec-k">03 · Củng cố vượt đề bài — dựa trên nghiên cứu</div>
+  <h2>Đo “niềm tin” như một hệ thống trưởng thành</h2>
+  <p>Đề bài chỉ yêu cầu trust ±1. Nhưng một điểm cộng-trừ ngây thơ để “1 lần đạt = 100%” vượt mặt “48/50 đạt”, và không bao giờ quên lỗi cũ. Đối chiếu cách Reddit, Stack&nbsp;Overflow, IMDB và các marketplace làm, tôi thêm một lớp <strong>reputation kiểm chứng</strong> — mà <em>không</em> đổi <code>agents.trust</code> mà Router của A đang đọc.</p>
+  <div class="grid g2" style="margin-top:6px">
+    <div class="card">
+      <div class="k">Reputation · FR-11</div>
+      <h3>Wilson · Bayesian · EWMA</h3>
+      <!-- mini bar viz: 1/1 raw vs wilson vs 48/50 -->
+      <svg viewBox="0 0 300 120" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="Wilson phạt mẫu nhỏ">
+        <g font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#6A7291">
+          <text x="0" y="24">1/1 · raw</text>
+          <rect x="86" y="15" width="200" height="11" rx="5" fill="#EFF1F8"/><rect x="86" y="15" width="200" height="11" rx="5" fill="#B9E6DF"/><text x="250" y="24" fill="#0a6b60">100%</text>
+          <text x="0" y="52">1/1 · Wilson</text>
+          <rect x="86" y="43" width="200" height="11" rx="5" fill="#EFF1F8"/><rect x="86" y="43" width="42" height="11" rx="5" fill="#0E9C8B"/><text x="134" y="52" fill="#0a6b60">21%</text>
+          <text x="0" y="80">48/50 · Wilson</text>
+          <rect x="86" y="71" width="200" height="11" rx="5" fill="#EFF1F8"/><rect x="86" y="71" width="170" height="11" rx="5" fill="#0E9C8B"/><text x="262" y="80" fill="#0a6b60">85%</text>
+        </g>
+        <text x="0" y="106" font-family="Inter,sans-serif" font-size="10.5" fill="#39415F">Wilson phạt mẫu nhỏ: cần bằng chứng mới lên cao.</text>
+      </svg>
+      <ul class="clean" style="margin-top:6px">
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Wilson lower bound</b> — điểm “uy tín kiểm chứng” chống may rủi.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Bayesian prior</b> — agent ít dữ liệu kéo về trung bình chung.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><b>EWMA time-decay</b> — hành vi gần đây nặng hơn, cho phép phục hồi.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="k">Đo lường · FR-12 · DORA</div>
+      <h3>Lead time &amp; Throughput</h3>
+      <svg viewBox="0 0 300 120" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="Flow metrics">
+        <g font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#6A7291">
+          <line x1="10" y1="90" x2="290" y2="90" stroke="#E6E9F3"/>
+          <!-- throughput bars -->
+          <rect x="30" y="55" width="26" height="35" rx="3" fill="#DFF4F0"/><rect x="70" y="40" width="26" height="50" rx="3" fill="#B9E6DF"/><rect x="110" y="30" width="26" height="60" rx="3" fill="#0E9C8B"/>
+          <text x="18" y="106">throughput / tuần</text>
+          <!-- lead time median dot -->
+          <circle cx="210" cy="50" r="6" fill="#5A4BD4"/><text x="224" y="46" fill="#5A4BD4">lead P50</text><text x="224" y="60" fill="#6A7291">trung vị, chống outlier</text>
+        </g>
+      </svg>
+      <ul class="clean" style="margin-top:6px">
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Lead time <b>P50</b> từ log chuyển trạng thái (observability mục 24).</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Throughput</b> theo cửa sổ thời gian.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Bảng Người vs AI cùng đơn vị · cost/time người gắn <code>ESTIMATED</code>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:16px"><strong>Nguyên tắc:</strong> đo <em>sự thật công bằng</em> chứ không phải slide đẹp. Điểm uy tín tính bằng thống kê, minh bạch, tái dựng được từ log bất biến — thứ tổ chức cần để tin vào đội hình người + AI, và bền vững dù model AI nào thắng.</div>
+</section>
+
+<!-- ══ VERIFICATION ══ -->
+<section>
+  <div class="sec-k">04 · Kiểm chứng — “chạy thật”, không assert suông</div>
+  <h2>Bằng chứng bằng con số</h2>
+  <div class="grid g4" style="margin-top:14px">
+    <div class="stat"><div class="n tealc">19/19</div><div class="l">Test Plan track B — live trên Supabase</div></div>
+    <div class="stat"><div class="n tealc">20/20</div><div class="l">Unit test engine (trust · metrics · reputation)</div></div>
+    <div class="stat"><div class="n tealc">19/19</div><div class="l">DB integration — Postgres thật (migrations · RLS · seed)</div></div>
+    <div class="stat"><div class="n tealc">15</div><div class="l">API/route build sạch (Next 15)</div></div>
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card"><div class="k">Live</div><p style="margin:0;font-size:13.5px">Supabase <code>ap-northeast-2</code> · 11 agent (6 người, 5 AI) · 9 capability taxonomy · luồng tạo task → done → feedback → trust → reputation chạy thật.</p></div>
+    <div class="card"><div class="k">RLS / bảo mật</div><p style="margin:0;font-size:13.5px">Đã test: anon không đọc được task; client không ghi được <code>logs</code>/<code>decisions</code> (bảng của A); đọc được decisions. Deny-by-default.</p></div>
+    <div class="card"><div class="k">Feature 0</div><p style="margin:0;font-size:13.5px">Pool caps ép đúng taxonomy chung — <code>POST /agents</code> từ chối capability lạ (400). Không ai tự bịa năng lực.</p></div>
+  </div>
+</section>
+
+<!-- ══ INTEGRATION ══ -->
+<section>
+  <div class="sec-k">05 · Hợp tác với Founder A — không đè, không vỡ</div>
+  <h2>Hợp nhất sạch trên <code>dev</code></h2>
+  <p>Domain A chạy song song (Decision Intelligence: planner · scoring · router · pipeline — 119 test pass). Mỗi vòng tôi fetch + merge, giữ nguyên bản của A cho file shared và conform theo:</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Nguyên tắc hợp nhất</h3>
+      <ul class="clean">
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Giữ bản A: <code>decision.ts</code>, capability taxonomy, <code>tsconfig.base</code>, <code>turbo</code>, packageManager.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Conform seed + <code>/agents</code> + <code>/capabilities</code> theo taxonomy 9 cap của A.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Sửa lại <code>contracts/index.ts</code> khi merge của team bị hỏng cú pháp — verify cả A 119/119.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#1E9A69" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Không bao giờ force-push; xung đột duy nhất là lockfile → regenerate.</li>
+      </ul>
+    </div>
+    <div class="card g" style="background:var(--goldSoft);border-color:transparent">
+      <h3 style="color:#6a4a10">Đề xuất mở cho A (chưa tự sửa)</h3>
+      <ul class="clean" style="color:#6a4a10">
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 2 v12 M2 8 h12" stroke="#B27916" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Router dùng <code>wilson</code> reputation thay <code>trust</code> thô trong công thức <code>fit</code>.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 2 v12 M2 8 h12" stroke="#B27916" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Thêm <code>legal</code>, <code>finance</code> vào taxonomy cho Test Plan #2/#4.</li>
+        <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 2 v12 M2 8 h12" stroke="#B27916" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Ghi ở <code>docs/PENDING-A-APPROVAL.md</code> — chờ A duyệt trước khi đổi file shared.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PENDING ══ -->
+<section>
+  <div class="sec-k">06 · Còn lại &amp; ranh giới</div>
+  <h2>Trung thực về phạm vi</h2>
+  <div class="grid g3">
+    <div class="card"><div class="k">Một phần</div><p style="margin:0;font-size:13.5px"><b>FR-7 hybrid review</b> — task tới <code>review</code>; UI duyệt bản nháp cần executor AI (domain A).</p></div>
+    <div class="card"><div class="k">Chờ shared</div><p style="margin:0;font-size:13.5px"><b>Animation</b> (Framer Motion) thuộc <code>packages/ui</code> [S] — cần A đồng thiết kế; UI kit tạm để local.</p></div>
+    <div class="card"><div class="k">Cần trình duyệt</div><p style="margin:0;font-size:13.5px"><b>Realtime</b> đã wire ở client; data-correctness đã verify, cần mở trình duyệt để kiểm tận tay.</p></div>
+  </div>
+  <p class="note" style="margin-top:12px">Kịch bản Test Plan mục 19 #1–7, #9 (verdict, executor thật, governance, fallback) thuộc domain A — ngoài track B.</p>
+</section>
+
+<!-- ══ RUN ══ -->
+<section style="border-bottom:none">
+  <div class="sec-k">07 · Chạy &amp; công nghệ</div>
+  <h2>Mở thử trong 1 phút</h2>
+  <div class="grid g2">
+    <div class="card">
+      <div class="k">Docker (đang chạy)</div>
+      <p style="margin:0 0 8px;font-size:13.5px">Container <code>orchestra-web</code> nối Supabase thật:</p>
+      <p style="margin:0"><a class="link" href="http://localhost:3000">http://localhost:3000</a></p>
+      <p class="note" style="margin-top:8px">Command → Board (realtime) → Pool (uy tín) → Dashboard (KPI + flow).</p>
+    </div>
+    <div class="card">
+      <div class="k">Stack</div>
+      <ul class="clean" style="font-size:13px">
+        <li><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#0E9C8B"/></svg>Next.js 15 · React 19 · TypeScript strict</li>
+        <li><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#0E9C8B"/></svg>Supabase (Postgres · RLS · Realtime · Auth)</li>
+        <li><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#0E9C8B"/></svg>TanStack Query · Tailwind · Zod · Vitest</li>
+        <li><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#0E9C8B"/></svg>pnpm workspaces · Turborepo · Docker</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="serif-i" style="color:var(--ink2);font-size:16px;margin-bottom:8px">Xây để chạy được mà không cần ai giải thích — đo được sự thật, không chỉ slide đẹp — và còn dùng được kể cả khi không còn ai ở đây.</p>
+  <p>Orchestra · Founder B — Workspace Intelligence. Nhánh <code>dev</code> @ <code>46c647a</code>, đồng bộ với domain A. Đồ hoạ SVG vẽ tay, không icon font. Số liệu từ lần chạy thật trên Supabase (2026-07-12).</p>
+</footer>
+
+</div>
+</body>
+</html>
