@@ -28,7 +28,7 @@ const persistenceInput: DecisionPersistenceInput = {
   ],
   verdict: "ai",
   chosen: ["ai-summarize"],
-  confidence: null,
+  confidence: 0.87,
   ambiguity: null,
   reason: {
     code: "TOP_CANDIDATE_AI_LOW_RISK",

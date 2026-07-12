@@ -3,20 +3,45 @@
 @tailwind utilities;
 
 :root {
-  --paper: #f7f8fc;
+  --paper: #ffffff;
   --card: #ffffff;
-  --ink: #141a2e;
-  --ink2: #39415f;
-  --muted: #6a7291;
-  --line: #e6e9f3;
+  --surface-raised: #f4f8ff;
+  --ink: #16181d;
+  --ink2: #3a4657;
+  --muted: #55647a;
+  --line: #e3ecfb;
+  --line-strong: #d2e0f7;
+  --blue: #2563eb;
+  --blue-strong: #1d4ed8;
+  --blue-soft: #eaf1fe;
+  --human: #12b5a5;
+  --human-soft: #cffaf2;
+  --ai: #7c3aed;
+  --ai-soft: #ebe3fd;
+  --gold-ui: #f7b01f;
+  --gold-soft-ui: #fef0c7;
+  --elev-1: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(37, 99, 235, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --elev-2: 0 2px 4px rgba(16, 24, 40, 0.05), 0 16px 40px rgba(37, 99, 235, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --grad-hero: linear-gradient(135deg, #2563eb 0%, #3b7bf6 45%, #12b5a5 100%);
+  --grad-cta: linear-gradient(120deg, #1d4ed8 0%, #2563eb 100%);
+  --wash: linear-gradient(160deg, #f4f8ff 0%, #eef4ff 100%);
 }
 .dark {
-  --paper: #0b0e18;
-  --card: #141a2e;
-  --ink: #eef1fb;
-  --ink2: #c3c9e0;
-  --muted: #8b93b4;
-  --line: #232a44;
+  --paper: #0b1220;
+  --card: #121c2e;
+  --surface-raised: #16233a;
+  --ink: #f2f6fd;
+  --ink2: #c3d0e4;
+  --muted: #8a9bb6;
+  --line: #24344f;
+  --line-strong: #2e4166;
+  --blue-soft: #17274a;
+  --human-soft: #0c3a36;
+  --ai-soft: #2a1b4d;
+  --gold-soft-ui: #3a2a0a;
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --elev-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --wash: linear-gradient(160deg, #121c2e 0%, #16233a 100%);
 }
 
 html {
@@ -25,6 +50,27 @@ html {
 body {
   background: var(--paper);
   color: var(--ink);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.app-atmosphere {
+  background:
+    radial-gradient(circle at 78% 0%, rgba(37, 99, 235, 0.10), transparent 26%),
+    radial-gradient(circle at 12% 12%, rgba(18, 181, 165, 0.10), transparent 30%),
+    var(--paper);
+}
+
+.dark .app-atmosphere {
+  background:
+    radial-gradient(circle at 78% 0%, rgba(37, 99, 235, 0.20), transparent 28%),
+    radial-gradient(circle at 12% 12%, rgba(18, 181, 165, 0.14), transparent 30%),
+    var(--paper);
+}
+
+.human-strip {
+  background: var(--grad-hero);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -38,7 +84,42 @@ body {
 
 /* visible keyboard focus (a11y) */
 :focus-visible {
-  outline: 2px solid #0e9c8b;
-  outline-offset: 2px;
-  border-radius: 6px;
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--blue);
+  border-radius: 10px;
+}
+
+/* thin, theme-aware scrollbars for the dense command-center surfaces */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 9999px;
+}
+
+/* streaming caret for the assistant message */
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.stream-caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: caret-blink 1s step-end infinite;
 }

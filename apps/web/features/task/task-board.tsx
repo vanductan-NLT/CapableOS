@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Agent, DecisionResponse, ExecuteResponse, Task } from "@orchestra/contracts";
-import { Badge, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
+import { Badge, Card, EmptyState, ErrorState, Icon, Skeleton } from "@/components/ui";
 import { HttpError } from "@/lib/http";
 import { useSubmitFeedback } from "@/features/dashboard/hooks";
 import { useAgents, useRealtimeTasks, useTasks } from "./hooks";
@@ -10,6 +10,7 @@ import { BOARD_COLUMNS, STATUS_META } from "./status";
 import { useRouteDecision } from "@/lib/queries/use-route-decision";
 import { useExecute } from "@/lib/queries/use-execute";
 import { useReview } from "@/lib/queries/use-review";
+import { useDecision } from "@/lib/queries/use-decision";
 
 export function TaskBoard() {
   const { data: tasks, isLoading, isError, error, refetch } = useTasks();
@@ -31,12 +32,13 @@ export function TaskBoard() {
     return <ErrorState message={error instanceof HttpError ? error.message : "Không tải được board"} onRetry={refetch} />;
   }
   if (!tasks || tasks.length === 0) {
-    return <EmptyState title="Board trống" hint="Tạo task ở trang Command để nó xuất hiện ở đây." />;
+    return <EmptyState title="Chưa có việc" hint="Tạo yêu cầu ở trang Giao việc để hệ thống định tuyến người hoặc AI." />;
   }
 
   const byStatus = new Map(BOARD_COLUMNS.map((s) => [s, [] as Task[]]));
   for (const t of tasks) byStatus.get(t.status)?.push(t);
   const visible = BOARD_COLUMNS.filter((s, i) => i === 0 || (byStatus.get(s)?.length ?? 0) > 0);
+  const maxCardsPerColumn = 8;
 
   return (
     <div className="grid auto-cols-[minmax(240px,1fr)] grid-flow-col gap-3 overflow-x-auto pb-3">
@@ -49,9 +51,14 @@ export function TaskBoard() {
               <span className="font-mono text-xs text-muted">{list.length}</span>
             </div>
             <div className="flex flex-col gap-2">
-              {list.map((t) => (
+              {list.slice(0, maxCardsPerColumn).map((t) => (
                 <TaskCard key={t.id} task={t} agent={t.assignee_id ? agentById.get(t.assignee_id) : undefined} />
               ))}
+              {list.length > maxCardsPerColumn ? (
+                <div className="rounded-lg border border-dashed border-line px-3 py-2 text-center text-xs text-muted">
+                  Còn {list.length - maxCardsPerColumn} việc khác trong trạng thái này
+                </div>
+              ) : null}
             </div>
           </section>
         );
@@ -61,6 +68,11 @@ export function TaskBoard() {
 }
 
 function TaskCard({ task, agent }: { task: Task; agent?: Agent }) {
+  const decision = useDecision(task.decision_id);
+  const chosenCandidate = decision.data?.candidates.find((candidate) => decision.data?.chosen.includes(candidate.id));
+  const assignmentLabel = agent?.name ?? chosenCandidate?.name;
+  const assignmentType = agent?.type ?? chosenCandidate?.type;
+
   return (
     <Card className="p-3">
       <p className="text-sm font-medium">{task.title}</p>
@@ -68,10 +80,18 @@ function TaskCard({ task, agent }: { task: Task; agent?: Agent }) {
       <div className="mt-2 flex items-center gap-2">
         {agent ? (
           <Badge tone={agent.type === "ai" ? "a" : "b"}>
-            {agent.type === "ai" ? "🤖" : "🧑"} {agent.name}
+            <Icon name={agent.type === "ai" ? "bot" : "user"} size={13} />
+            {agent.name}
           </Badge>
+        ) : assignmentLabel ? (
+          <Badge tone={assignmentType === "ai" ? "a" : "b"}>
+            <Icon name={assignmentType === "ai" ? "bot" : "user"} size={13} />
+            {assignmentLabel}
+          </Badge>
+        ) : task.decision_id && decision.isLoading ? (
+          <span className="text-xs text-muted">Đang đọc nguồn lực đã chọn…</span>
         ) : (
-          <span className="text-xs text-muted">Chưa gán</span>
+          <span className="text-xs text-muted">Chưa chọn nguồn lực</span>
         )}
       </div>
 
@@ -129,7 +149,7 @@ function RouteAction({ taskId }: { taskId: string }) {
           onClick={handleRouteAndExecute}
           className="w-full rounded-md bg-a px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
         >
-          {isPending ? "Đang xử lý…" : "Định tuyến & Thực thi"}
+          {isPending ? "Đang so sánh nguồn lực…" : "Chọn nguồn lực tốt nhất"}
         </button>
       )}
       {route.isError && (
@@ -142,7 +162,7 @@ function RouteAction({ taskId }: { taskId: string }) {
               {decision.verdict.toUpperCase()}
             </Badge>
             <span className="text-[10px] text-muted">
-              {((decision.confidence ?? 0) * 100).toFixed(0)}% confidence
+              Độ tin cậy {((decision.confidence ?? 0) * 100).toFixed(0)}%
             </span>
           </div>
         </div>
@@ -150,9 +170,7 @@ function RouteAction({ taskId }: { taskId: string }) {
       {execResult?.kind === "ai_success" && (
         <p className="text-xs text-good">✓ AI đã xong · {execResult.ms}ms</p>
       )}
-      {execute.isError && (
-        <p className="text-xs text-bad">Lỗi thực thi</p>
-      )}
+      {execute.isError && <p className="text-xs text-bad">{execute.error instanceof HttpError ? execute.error.message : "Không bắt đầu xử lý được"}</p>}
     </div>
   );
 }
@@ -179,9 +197,13 @@ function ExecuteAction({ decisionId }: { decisionId: string }) {
         onClick={() => execute.mutate({ decisionId }, { onSuccess: (r) => setResult(r) })}
         className="w-full rounded-md bg-a px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
       >
-        {execute.isPending ? "Đang thực thi…" : "Thực thi"}
+        {execute.isPending ? "Đang bắt đầu…" : "Bắt đầu xử lý"}
       </button>
-      {execute.isError && <p className="mt-1 text-xs text-bad">Lỗi thực thi</p>}
+      {execute.isError && (
+        <p className="mt-1 text-xs text-bad">
+          {execute.error instanceof HttpError ? execute.error.message : "Không bắt đầu xử lý được"}
+        </p>
+      )}
     </div>
   );
 }
@@ -200,21 +222,17 @@ function ReviewAction({ decisionId }: { decisionId: string }) {
     if (!executionId) {
       setLoading(true);
       try {
-        const res = await fetch(`/api/execute`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ decision_id: decisionId }),
-        });
+        const res = await fetch(`/api/execution/by-decision/${decisionId}`);
         const data = await res.json();
-        if (data.ok && data.data.execution_id) {
-          setExecutionId(data.data.execution_id);
+        if (data.ok && data.data.id) {
+          setExecutionId(data.data.id);
           review.mutate(
-            { executionId: data.data.execution_id, outcome },
+            { executionId: data.data.id, outcome },
             { onSuccess: () => setDone(true) },
           );
         }
-      } catch {
-        // fallback
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -225,7 +243,7 @@ function ReviewAction({ decisionId }: { decisionId: string }) {
 
   return (
     <div className="mt-2 space-y-1">
-      <p className="text-[10px] font-medium uppercase text-muted">AI đã xong — cần duyệt:</p>
+      <p className="text-[10px] font-medium uppercase text-muted">Kết quả cần xác nhận:</p>
       <div className="flex gap-1.5">
         <button
           type="button"
@@ -244,7 +262,7 @@ function ReviewAction({ decisionId }: { decisionId: string }) {
           Từ chối
         </button>
       </div>
-      {review.isError && <p className="text-xs text-bad">Lỗi duyệt</p>}
+      {review.isError && <p className="text-xs text-bad">{review.error instanceof HttpError ? review.error.message : "Không duyệt được"}</p>}
     </div>
   );
 }

@@ -191,7 +191,7 @@ export interface ReviewResult {
   task_status: "done" | "rejected";
 }
 
-// ── Execute API response (Feature 4.4) ──────────────────────
+// ── Execute API response (Feature 4.4 + Phase 5 governance) ─
 /**
  * Discriminated union for POST /api/execute response.
  * Each variant has a clear `kind` discriminator.
@@ -201,7 +201,8 @@ export type ExecuteResponse =
   | ExecuteAiFailed
   | ExecuteHumanPending
   | ExecuteEscalate
-  | ExecuteExisting;
+  | ExecuteExisting
+  | ExecuteDenied;
 
 export interface ExecuteAiSuccess {
   kind: "ai_success";
@@ -243,5 +244,14 @@ export interface ExecuteExisting {
   execution_id: string;
   verdict: Verdict;
   status: ExecutionStatus;
+}
+
+// ── Governance denied (Phase 5) ─────────────────────────────
+
+export interface ExecuteDenied {
+  kind: "denied";
+  verdict: "ai" | "hybrid";
+  execution_id: null;
+  reason: string;
 }
 

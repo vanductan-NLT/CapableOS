@@ -11,12 +11,18 @@ const nextConfig = {
   // Workspace packages are shipped as raw TS source → let Next transpile them.
   transpilePackages: ["@orchestra/contracts", "@orchestra/ai"],
   reactStrictMode: true,
-  experimental: {
-    typedRoutes: true,
-  },
   // @orchestra/prompts uses fs.readFileSync + import.meta.url to load .md files.
   // Webpack mangles import.meta.url → must run natively in Node, not bundled.
   serverExternalPackages: ["@orchestra/prompts"],
+
+  // ── Windows stability: reduce .next cache corruption ──────
+  // Use filesystem cache with longer intervals to reduce write contention.
+  onDemandEntries: {
+    // Keep pages in memory longer (default 15s is too aggressive on Windows)
+    maxInactiveAge: 120 * 1000,
+    // More pages in memory = fewer disk writes
+    pagesBufferLength: 5,
+  },
 };
 
 export default nextConfig;

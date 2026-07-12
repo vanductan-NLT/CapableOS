@@ -1,13 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import type { Agent, AgentType } from "@orchestra/contracts";
-import { Badge, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
+import { CAPABILITIES, type Agent, type AgentType } from "@orchestra/contracts";
+import { Badge, Card, EmptyState, ErrorState, Icon, Skeleton } from "@/components/ui";
 import { HttpError } from "@/lib/http";
 import type { Reputation } from "@/lib/reputation";
 import { useAgents } from "@/features/task/hooks";
 import { useReputation } from "@/features/dashboard/hooks";
-import { useCreateAgent, useUpdateAgent } from "./hooks";
+import { useCreateAgent } from "./hooks";
+
+const CAPABILITY_LABELS: Record<string, string> = {
+  analysis: "Phân tích",
+  writing: "Viết nội dung",
+  research: "Nghiên cứu",
+  summarization: "Tóm tắt",
+  translation: "Dịch thuật",
+  email_drafting: "Soạn email",
+  meeting_notes: "Ghi chú họp",
+  design: "Thiết kế",
+  coding: "Lập trình",
+};
 
 export function PoolView() {
   const { data, isLoading, isError, error, refetch } = useAgents();
@@ -15,8 +27,15 @@ export function PoolView() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div>
-        <h1 className="mb-1 text-lg font-semibold">Capability Pool</h1>
-        <p className="mb-4 text-sm text-muted">Người + AI agent, năng lực và độ tin cậy (trust).</p>
+        <h1 className="mb-1 text-lg font-semibold">Danh sách người & AI</h1>
+        <p className="mb-4 text-sm text-muted">
+          Nơi hệ thống biết ai có năng lực gì, nên giao việc nào cho người, việc nào cho AI, và khi nào cần kết hợp.
+        </p>
+        <div className="mb-4 grid gap-2 sm:grid-cols-3">
+          <PoolPurpose title="Chọn đúng năng lực" body="Router dùng năng lực và độ tin cậy ở đây để đề xuất nguồn lực." />
+          <PoolPurpose title="So sánh người vs AI" body="Người chịu trách nhiệm, AI tối ưu tốc độ; cả hai cùng dùng một thước đo." />
+          <PoolPurpose title="Cải thiện theo feedback" body="Đánh giá sau việc làm thay đổi uy tín và quyết định lần sau." />
+        </div>
         {isLoading ? (
           <div className="flex flex-col gap-2">
             {[0, 1, 2, 3].map((i) => (
@@ -26,7 +45,7 @@ export function PoolView() {
         ) : isError ? (
           <ErrorState message={error instanceof HttpError ? error.message : "Không tải được Pool"} onRetry={refetch} />
         ) : !data || data.length === 0 ? (
-          <EmptyState title="Pool trống" hint="Thêm người hoặc AI agent ở form bên phải." />
+          <EmptyState title="Chưa có nguồn lực" hint="Thêm nhân sự hoặc AI agent ở form bên phải." />
         ) : (
           <div className="flex flex-col gap-2">
             {data.map((a) => (
@@ -36,6 +55,15 @@ export function PoolView() {
         )}
       </div>
       <AddAgentForm />
+    </div>
+  );
+}
+
+function PoolPurpose({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-lg border border-line bg-card p-3">
+      <p className="text-sm font-semibold text-ink">{title}</p>
+      <p className="mt-1 text-xs leading-5 text-muted">{body}</p>
     </div>
   );
 }
@@ -70,48 +98,36 @@ function ReputationLine({ rep }: { rep?: Reputation }) {
 }
 
 function AgentRow({ agent, rep }: { agent: Agent; rep?: Reputation }) {
-  const update = useUpdateAgent();
   const caps = Object.entries(agent.caps).sort((a, b) => b[1] - a[1]);
   return (
     <Card className="p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-2">
-            <Badge tone={agent.type === "ai" ? "a" : "b"}>{agent.type === "ai" ? "🤖 AI" : "🧑 Human"}</Badge>
+            <Badge tone={agent.type === "ai" ? "a" : "b"}>
+              <Icon name={agent.type === "ai" ? "bot" : "user"} size={13} />
+              {agent.type === "ai" ? "AI" : "Con người"}
+            </Badge>
             <span className="font-medium">{agent.name}</span>
             {agent.role ? <span className="text-xs text-muted">· {agent.role}</span> : null}
           </div>
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {caps.map(([k, v]) => (
-              <span key={k} className="rounded bg-line/60 px-1.5 py-0.5 font-mono text-[10px] text-ink2">
-                {k} {v.toFixed(2)}
+              <span key={k} className="inline-flex items-center gap-1.5 rounded-md bg-line/60 px-2 py-1 text-xs text-ink2">
+                {CAPABILITY_LABELS[k] ?? k}
+                <span className="h-1.5 w-9 overflow-hidden rounded-full bg-card" aria-hidden>
+                  <span className="block h-full rounded-full bg-b" style={{ width: `${Math.round(v * 100)}%` }} />
+                </span>
+                <span className="font-mono text-[10px]">{Math.round(v * 100)}%</span>
               </span>
             ))}
           </div>
           <ReputationLine rep={rep} />
+          <p className="mt-1.5 text-xs text-muted">{agent.type === "ai" ? "Dùng tốt cho việc lặp lại, tốc độ cao, rủi ro thấp." : "Dùng tốt cho việc cần trách nhiệm, bối cảnh và phê duyệt."}</p>
         </div>
         <div className="flex flex-col items-end gap-1.5">
           <TrustBar value={agent.trust} />
-          <div className="flex gap-1">
-            <button
-              type="button"
-              disabled={update.isPending || agent.trust >= 100}
-              onClick={() => update.mutate({ id: agent.id, patch: { trust: Math.min(100, agent.trust + 1) } })}
-              className="rounded border border-line px-1.5 text-xs disabled:opacity-40"
-              aria-label={`Tăng trust của ${agent.name}`}
-            >
-              +
-            </button>
-            <button
-              type="button"
-              disabled={update.isPending || agent.trust <= 0}
-              onClick={() => update.mutate({ id: agent.id, patch: { trust: Math.max(0, agent.trust - 1) } })}
-              className="rounded border border-line px-1.5 text-xs disabled:opacity-40"
-              aria-label={`Giảm trust của ${agent.name}`}
-            >
-              −
-            </button>
-          </div>
+          <span className="text-[11px] text-muted">uy tín</span>
         </div>
       </div>
     </Card>
@@ -163,7 +179,7 @@ function AddAgentForm() {
 
   return (
     <Card>
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Thêm vào Pool</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Thêm nguồn lực</h2>
       <form onSubmit={submit} className="mt-3 flex flex-col gap-2.5">
         <div className="flex gap-2">
           {(["human", "ai"] as const).map((t) => (
@@ -174,11 +190,11 @@ function AddAgentForm() {
               className={`flex-1 rounded-lg border px-3 py-1.5 text-sm ${type === t ? "border-b bg-b-soft text-b" : "border-line"}`}
               aria-pressed={type === t}
             >
-              {t === "human" ? "🧑 Người" : "🤖 AI"}
+              {t === "human" ? "Người" : "AI"}
             </button>
           ))}
         </div>
-        <input className={field} placeholder="Tên" value={name} onChange={(e) => setName(e.target.value)} aria-label="Tên agent" />
+        <input className={field} placeholder="Tên" value={name} onChange={(e) => setName(e.target.value)} aria-label="Tên nguồn lực" />
         <input className={field} placeholder="Vai trò (tuỳ chọn)" value={role} onChange={(e) => setRole(e.target.value)} aria-label="Vai trò" />
         <div className="flex gap-2">
           <input className={field + " w-full"} placeholder="Chi phí (ESTIMATED)" inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} aria-label="Chi phí ước tính" />
@@ -188,20 +204,32 @@ function AddAgentForm() {
           <span className="text-xs font-medium text-muted">Năng lực (0–1)</span>
           {caps.map((c, i) => (
             <div key={i} className="flex gap-2">
-              <input
+              <select
                 className={field + " w-full"}
-                placeholder="vd: analysis"
                 value={c.cap}
                 onChange={(e) => setCaps((cs) => cs.map((x, j) => (j === i ? { ...x, cap: e.target.value } : x)))}
                 aria-label={`Tên năng lực ${i + 1}`}
-              />
-              <input
-                className={field + " w-20"}
-                inputMode="decimal"
-                value={c.val}
-                onChange={(e) => setCaps((cs) => cs.map((x, j) => (j === i ? { ...x, val: e.target.value } : x)))}
-                aria-label={`Mức năng lực ${i + 1}`}
-              />
+              >
+                <option value="">Chọn năng lực</option>
+                {CAPABILITIES.map((cap) => (
+                  <option key={cap} value={cap}>
+                    {CAPABILITY_LABELS[cap] ?? cap}
+                  </option>
+                ))}
+              </select>
+              <div className="flex w-32 items-center gap-2 rounded-lg border border-line bg-paper px-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  className="min-w-0 flex-1 accent-[color:var(--b)]"
+                  value={c.val}
+                  onChange={(e) => setCaps((cs) => cs.map((x, j) => (j === i ? { ...x, val: e.target.value } : x)))}
+                  aria-label={`Mức năng lực ${i + 1}`}
+                />
+                <span className="w-8 text-right text-xs tabular-nums text-muted">{Math.round(Number(c.val) * 100)}%</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setCaps((cs) => (cs.length > 1 ? cs.filter((_, j) => j !== i) : cs))}
@@ -213,7 +241,7 @@ function AddAgentForm() {
             </div>
           ))}
           <button type="button" onClick={() => setCaps((cs) => [...cs, { cap: "", val: "0.7" }])} className="self-start text-xs text-b">
-            + thêm năng lực
+            + chọn thêm năng lực
           </button>
         </div>
         <button
@@ -221,12 +249,12 @@ function AddAgentForm() {
           disabled={!name.trim() || create.isPending}
           className="mt-1 rounded-lg bg-b px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
-          {create.isPending ? "Đang thêm…" : "Thêm agent"}
+          {create.isPending ? "Đang thêm…" : "Thêm nguồn lực"}
         </button>
         {create.isError ? (
           <span className="text-sm text-bad">{create.error instanceof HttpError ? create.error.message : "Lỗi"}</span>
         ) : null}
-        {create.isSuccess ? <span className="text-sm text-good">✓ Đã thêm vào Pool</span> : null}
+        {create.isSuccess ? <span className="text-sm text-good">Đã thêm vào danh sách</span> : null}
       </form>
     </Card>
   );

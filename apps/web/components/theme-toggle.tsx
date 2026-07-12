@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/ui";
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
@@ -22,9 +23,9 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={dark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-      className="rounded-lg border border-line px-2.5 py-1.5 text-sm text-ink2 hover:bg-line/60"
+      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-card text-ink2 shadow-[var(--elev-1)] transition-colors hover:bg-blue-soft"
     >
-      {dark ? "☀️" : "🌙"}
+      <Icon name={dark ? "sun" : "moon"} size={18} />
     </button>
   );
 }
