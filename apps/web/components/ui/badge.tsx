@@ -1,5 +1,8 @@
+"use client";
+
 import { clsx } from "clsx";
 import type { ReactNode } from "react";
+import { useT } from "@/lib/i18n";
 import type { Tone } from "./verdict";
 
 const TONE_MAP: Record<Tone, string> = {
@@ -35,9 +38,10 @@ export function Badge({
 
 /** ESTIMATED marker for un-validated cost/time (FR-14). */
 export function EstimatedTag() {
+  const t = useT();
   return (
     <Badge tone="gold" className="uppercase tracking-wide">
-      ước tính
+      {t("ước tính", "estimated")}
     </Badge>
   );
 }

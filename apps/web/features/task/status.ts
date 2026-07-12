@@ -1,17 +1,23 @@
 import type { TaskStatus } from "@orchestra/contracts";
 
 type Tone = "muted" | "a" | "b" | "gold" | "good" | "bad";
+type Translate = (vi: string, en: string) => string;
 
-export const STATUS_META: Record<TaskStatus, { label: string; tone: Tone }> = {
-  created: { label: "Chưa chọn nguồn lực", tone: "b" },
-  routed: { label: "Đã chọn nguồn lực", tone: "a" },
-  executing: { label: "Đang xử lý", tone: "a" },
-  awaiting_approval: { label: "Cần duyệt", tone: "gold" },
-  awaiting_human: { label: "Cần người làm", tone: "gold" },
-  review: { label: "Cần kiểm tra", tone: "gold" },
-  done: { label: "Hoàn thành", tone: "good" },
-  rejected: { label: "Từ chối", tone: "bad" },
+export const STATUS_META: Record<TaskStatus, { label: { vi: string; en: string }; tone: Tone }> = {
+  created: { label: { vi: "Chưa chọn nguồn lực", en: "No resource selected" }, tone: "b" },
+  routed: { label: { vi: "Đã chọn nguồn lực", en: "Resource selected" }, tone: "a" },
+  executing: { label: { vi: "Đang xử lý", en: "Processing" }, tone: "a" },
+  awaiting_approval: { label: { vi: "Cần duyệt", en: "Needs approval" }, tone: "gold" },
+  awaiting_human: { label: { vi: "Cần người làm", en: "Needs a person" }, tone: "gold" },
+  review: { label: { vi: "Cần kiểm tra", en: "Needs review" }, tone: "gold" },
+  done: { label: { vi: "Hoàn thành", en: "Done" }, tone: "good" },
+  rejected: { label: { vi: "Từ chối", en: "Rejected" }, tone: "bad" },
 };
+
+/** Active-language label for a task status. */
+export function statusLabel(status: TaskStatus, t: Translate): string {
+  return t(STATUS_META[status].label.vi, STATUS_META[status].label.en);
+}
 
 // Column order for the Kanban board (Playbook /board).
 export const BOARD_COLUMNS: TaskStatus[] = [

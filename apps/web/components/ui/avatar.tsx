@@ -1,6 +1,9 @@
+"use client";
+
 import { clsx } from "clsx";
 import type { CSSProperties } from "react";
 import { Icon } from "./icon";
+import { useT } from "@/lib/i18n";
 import { agentTypeMeta } from "./verdict";
 
 /**
@@ -18,7 +21,9 @@ export function Avatar({
   size?: number;
   selected?: boolean;
 }) {
+  const t = useT();
   const meta = agentTypeMeta(type);
+  const label = t(meta.label.vi, meta.label.en);
   return (
     <span
       className={clsx(
@@ -36,7 +41,7 @@ export function Avatar({
         } as CSSProperties
       }
       role="img"
-      aria-label={name ? `${meta.label}: ${name}` : meta.label}
+      aria-label={name ? `${label}: ${name}` : label}
     >
       <Icon name={meta.icon} size={Math.round(size * 0.55)} />
     </span>

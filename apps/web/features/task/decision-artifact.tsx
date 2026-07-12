@@ -13,23 +13,61 @@ import {
   VERDICT_PRESENTATION,
   confidenceLabel,
 } from "@/components/ui";
+import { useT } from "@/lib/i18n";
+
+type Translate = (vi: string, en: string) => string;
 
 const mins = (n: number) => `~${Math.round(n)}′`;
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 const humanMoney = (n: number) => (n >= 1 ? `$${Math.round(n)}` : `$${n.toFixed(2)}`);
 
-const REASON_COPY: Record<string, string> = {
-  NO_REQUIRED_CAPABILITIES: "Yêu cầu chưa đủ rõ về năng lực, cần người làm rõ trước.",
-  NO_CANDIDATES: "Chưa có người hoặc AI phù hợp trong danh sách nguồn lực.",
-  TOP_FIT_BELOW_THRESHOLD: "Ứng viên tốt nhất chưa đủ phù hợp, nên chuyển người quản lý xem xét.",
-  AMBIGUOUS_HUMAN_AI_HYBRID: "Người và AI đang sát điểm nhau, phương án kết hợp an toàn hơn.",
-  AMBIGUOUS_HUMAN_CANDIDATES: "Có nhiều người phù hợp gần nhau, cần chọn theo bối cảnh thực tế.",
-  AMBIGUOUS_AI_CANDIDATES: "Có nhiều AI phù hợp gần nhau, nên chọn theo độ tin cậy và chi phí.",
-  TOP_CANDIDATE_HUMAN: "Ứng viên phù hợp nhất là con người, phù hợp với việc cần phán đoán hoặc trách nhiệm.",
-  TOP_CANDIDATE_AI_LOW_RISK: "Ứng viên phù hợp nhất là AI và rủi ro thấp, có thể giao cho AI để tiết kiệm thời gian.",
-  HIGH_RISK_AI_REQUIRES_HUMAN: "AI có thể hỗ trợ, nhưng việc rủi ro cao nên có người kiểm tra.",
-  NO_HUMAN_REVIEWER_AVAILABLE: "Chưa có người phù hợp để kiểm tra đầu ra, cần quản lý can thiệp.",
+const REASON_COPY: Record<string, { vi: string; en: string }> = {
+  NO_REQUIRED_CAPABILITIES: {
+    vi: "Yêu cầu chưa đủ rõ về năng lực, cần người làm rõ trước.",
+    en: "The request isn't specific enough about capabilities; a person should clarify it first.",
+  },
+  NO_CANDIDATES: {
+    vi: "Chưa có người hoặc AI phù hợp trong danh sách nguồn lực.",
+    en: "No suitable person or AI in the resource directory yet.",
+  },
+  TOP_FIT_BELOW_THRESHOLD: {
+    vi: "Ứng viên tốt nhất chưa đủ phù hợp, nên chuyển người quản lý xem xét.",
+    en: "The best candidate isn't a strong enough fit; escalate to a manager for review.",
+  },
+  AMBIGUOUS_HUMAN_AI_HYBRID: {
+    vi: "Người và AI đang sát điểm nhau, phương án kết hợp an toàn hơn.",
+    en: "People and AI score closely; a combined option is safer.",
+  },
+  AMBIGUOUS_HUMAN_CANDIDATES: {
+    vi: "Có nhiều người phù hợp gần nhau, cần chọn theo bối cảnh thực tế.",
+    en: "Several people fit closely; choose based on the real context.",
+  },
+  AMBIGUOUS_AI_CANDIDATES: {
+    vi: "Có nhiều AI phù hợp gần nhau, nên chọn theo độ tin cậy và chi phí.",
+    en: "Several AIs fit closely; choose by reliability and cost.",
+  },
+  TOP_CANDIDATE_HUMAN: {
+    vi: "Ứng viên phù hợp nhất là con người, phù hợp với việc cần phán đoán hoặc trách nhiệm.",
+    en: "The best-fit candidate is a person, suited to work needing judgment or accountability.",
+  },
+  TOP_CANDIDATE_AI_LOW_RISK: {
+    vi: "Ứng viên phù hợp nhất là AI và rủi ro thấp, có thể giao cho AI để tiết kiệm thời gian.",
+    en: "The best-fit candidate is AI and risk is low; assign to AI to save time.",
+  },
+  HIGH_RISK_AI_REQUIRES_HUMAN: {
+    vi: "AI có thể hỗ trợ, nhưng việc rủi ro cao nên có người kiểm tra.",
+    en: "AI can assist, but this high-risk work should be checked by a person.",
+  },
+  NO_HUMAN_REVIEWER_AVAILABLE: {
+    vi: "Chưa có người phù hợp để kiểm tra đầu ra, cần quản lý can thiệp.",
+    en: "No suitable person to review the output; a manager needs to step in.",
+  },
 };
+
+function reasonCopy(code: string, t: Translate): string | null {
+  const r = REASON_COPY[code];
+  return r ? t(r.vi, r.en) : null;
+}
 
 /**
  * The decision "artifact": surfaces the ranked candidate comparison
@@ -47,6 +85,7 @@ export function DecisionArtifact({
   onExecute?: () => void;
   executing?: boolean;
 }) {
+  const t = useT();
   const v = VERDICT_PRESENTATION[decision.verdict];
   const candidates = [...decision.candidates].sort((a, b) => b.fit - a.fit);
   const selectedCandidates = candidates.filter((candidate) => decision.chosen.includes(candidate.id));
@@ -75,11 +114,11 @@ export function DecisionArtifact({
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="font-semibold text-ink">{decisionTitle(decision, primary)}</h3>
-              <Badge tone={v.tone}>{v.label}</Badge>
+              <h3 className="font-semibold text-ink">{decisionTitle(t, decision, primary)}</h3>
+              <Badge tone={v.tone}>{t(v.label.vi, v.label.en)}</Badge>
             </div>
             <p className="mt-0.5 text-sm text-ink2">
-              {REASON_COPY[decision.reason.code] ?? "Hệ thống đã so sánh năng lực, độ tin cậy, chi phí và thời gian để đề xuất phương án này."}
+              {reasonCopy(decision.reason.code, t) ?? t("Hệ thống đã so sánh năng lực, độ tin cậy, chi phí và thời gian để đề xuất phương án này.", "The system compared capability, confidence, cost and time to recommend this option.")}
             </p>
           </div>
         </div>
@@ -88,26 +127,26 @@ export function DecisionArtifact({
           {confidence != null ? (
             <Meter
               value={confidence}
-              label="Độ tin cậy"
-              caption={`${confidenceLabel(confidence)} · ${pct(confidence)}`}
+              label={t("Độ tin cậy", "Confidence")}
+              caption={`${confidenceLabel(confidence, t)} · ${pct(confidence)}`}
               tone={v.tone}
             />
           ) : (
-            <p className="self-center text-xs text-muted">Độ tin cậy: chưa đủ dữ liệu</p>
+            <p className="self-center text-xs text-muted">{t("Độ tin cậy: chưa đủ dữ liệu", "Confidence: not enough data")}</p>
           )}
-          <DecisionMetric label="Nguồn lực đã so sánh" value={`${candidates.length}`} />
-          <DecisionMetric label="Rủi ro" value={decision.risk === "high" ? "Cao" : "Thấp"} tone={decision.risk === "high" ? "text-gold" : "text-good"} />
+          <DecisionMetric label={t("Nguồn lực đã so sánh", "Resources compared")} value={`${candidates.length}`} />
+          <DecisionMetric label={t("Rủi ro", "Risk")} value={decision.risk === "high" ? t("Cao", "High") : t("Thấp", "Low")} tone={decision.risk === "high" ? "text-gold" : "text-good"} />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
           <BriefCard
-            title="Phương án"
-            body={primary ? `${primary.name} ${primary.type === "ai" ? "xử lý tự động" : "chịu trách nhiệm xử lý"}` : "Cần quản lý phân công"}
+            title={t("Phương án", "Option")}
+            body={primary ? `${primary.name} ${primary.type === "ai" ? t("xử lý tự động", "handles it automatically") : t("chịu trách nhiệm xử lý", "is responsible for handling it")}` : t("Cần quản lý phân công", "Needs a manager to assign")}
           />
-          <BriefCard title="Kiểm soát" body={controlCopy(decision)} />
+          <BriefCard title={t("Kiểm soát", "Control")} body={controlCopy(t, decision)} />
           <BriefCard
-            title="Dự kiến"
-            body={`${decision.minutes_est != null ? mins(decision.minutes_est) : "chưa rõ thời gian"} · ${decision.cost_est != null ? humanMoney(decision.cost_est) : "chưa rõ chi phí"}`}
+            title={t("Dự kiến", "Estimate")}
+            body={`${decision.minutes_est != null ? mins(decision.minutes_est) : t("chưa rõ thời gian", "time unknown")} · ${decision.cost_est != null ? humanMoney(decision.cost_est) : t("chưa rõ chi phí", "cost unknown")}`}
             estimated={decision.estimated}
           />
         </div>
@@ -115,7 +154,7 @@ export function DecisionArtifact({
         {candidates.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-wide text-muted">
-              Phương án được cân nhắc
+              {t("Phương án được cân nhắc", "Options considered")}
             </p>
             <ul className="flex flex-col gap-2">
               {visibleCandidates.map((c) => (
@@ -123,7 +162,7 @@ export function DecisionArtifact({
               ))}
               {candidates.length > visibleCandidates.length ? (
                 <li className="rounded-lg border border-dashed border-line px-3 py-2 text-center text-xs text-muted">
-                  Đã so sánh thêm {candidates.length - visibleCandidates.length} nguồn lực khác
+                  {t(`Đã so sánh thêm ${candidates.length - visibleCandidates.length} nguồn lực khác`, `${candidates.length - visibleCandidates.length} more resources compared`)}
                 </li>
               ) : null}
             </ul>
@@ -133,7 +172,7 @@ export function DecisionArtifact({
         {execution && <ExecutionResult execution={execution} />}
         {canExecute && (
           <Button onClick={onExecute} loading={executing} icon="play">
-            Chạy phương án đề xuất
+            {t("Chạy phương án đề xuất", "Run the recommended option")}
           </Button>
         )}
       </div>
@@ -141,18 +180,21 @@ export function DecisionArtifact({
   );
 }
 
-function decisionTitle(decision: DecisionResponse, primary?: ScoredCandidate): string {
-  if (decision.verdict === "escalate") return "Cần quản lý quyết định";
-  if (decision.verdict === "hybrid") return "Đề xuất người và AI cùng xử lý";
-  if (!primary) return VERDICT_PRESENTATION[decision.verdict].headline;
-  return decision.verdict === "ai" ? `Đề xuất giao cho ${primary.name}` : `Đề xuất giao cho ${primary.name}`;
+function decisionTitle(t: Translate, decision: DecisionResponse, primary?: ScoredCandidate): string {
+  if (decision.verdict === "escalate") return t("Cần quản lý quyết định", "Needs a manager decision");
+  if (decision.verdict === "hybrid") return t("Đề xuất người và AI cùng xử lý", "Recommend a person and AI handle it together");
+  if (!primary) {
+    const h = VERDICT_PRESENTATION[decision.verdict].headline;
+    return t(h.vi, h.en);
+  }
+  return decision.verdict === "ai" ? t(`Đề xuất giao cho ${primary.name}`, `Recommend assigning to ${primary.name}`) : t(`Đề xuất giao cho ${primary.name}`, `Recommend assigning to ${primary.name}`);
 }
 
-function controlCopy(decision: DecisionResponse): string {
-  if (decision.verdict === "escalate") return "Chưa giao tự động; cần quản lý xem xét.";
-  if (decision.verdict === "hybrid" || decision.risk === "high") return "AI hỗ trợ, con người kiểm tra trước khi hoàn tất.";
-  if (decision.verdict === "human") return "Con người chịu trách nhiệm kết quả cuối.";
-  return "Rủi ro thấp, có thể tự động hóa và đo lại bằng feedback.";
+function controlCopy(t: Translate, decision: DecisionResponse): string {
+  if (decision.verdict === "escalate") return t("Chưa giao tự động; cần quản lý xem xét.", "Not auto-assigned; needs a manager to review.");
+  if (decision.verdict === "hybrid" || decision.risk === "high") return t("AI hỗ trợ, con người kiểm tra trước khi hoàn tất.", "AI assists, a person checks before it is finalized.");
+  if (decision.verdict === "human") return t("Con người chịu trách nhiệm kết quả cuối.", "A person is responsible for the final result.");
+  return t("Rủi ro thấp, có thể tự động hóa và đo lại bằng feedback.", "Low risk; can be automated and remeasured via feedback.");
 }
 
 function DecisionMetric({ label, value, tone = "text-ink" }: { label: string; value: string; tone?: string }) {
@@ -189,6 +231,7 @@ function CandidateRow({
   verdictHex: string;
   verdictTone: "a" | "b" | "gold" | "bad" | "good" | "muted";
 }) {
+  const t = useT();
   return (
     <li
       className={clsx(
@@ -204,7 +247,7 @@ function CandidateRow({
             <span className="truncate font-medium text-ink">{c.name}</span>
             {chosen && (
               <Badge tone={verdictTone}>
-                <Icon name="check" size={12} /> Được chọn
+                <Icon name="check" size={12} /> {t("Được chọn", "Selected")}
               </Badge>
             )}
           </div>
@@ -218,12 +261,12 @@ function CandidateRow({
               <Icon name="clock" size={13} />
               {mins(c.minutes)}
             </span>
-            <span>Khớp năng lực {pct(c.match)}</span>
+            <span>{t("Khớp năng lực", "Capability match")} {pct(c.match)}</span>
           </div>
         </div>
         <div className="w-20 shrink-0 sm:w-24">
           <Meter value={c.fit} caption={pct(c.fit)} tone={chosen ? verdictTone : "muted"} />
-          <p className="mt-0.5 text-right text-[10px] text-muted">độ phù hợp</p>
+          <p className="mt-0.5 text-right text-[10px] text-muted">{t("độ phù hợp", "fit")}</p>
         </div>
       </div>
     </li>
@@ -231,11 +274,12 @@ function CandidateRow({
 }
 
 function ExecutionResult({ execution }: { execution: ExecuteResponse }) {
+  const t = useT();
   if (execution.kind === "ai_success") {
     return (
       <div className="rounded-lg border border-good/30 bg-good/5 p-3">
         <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-good">
-          <Icon name="check-circle" size={14} /> AI đã thực thi xong
+          <Icon name="check-circle" size={14} /> {t("AI đã thực thi xong", "AI finished execution")}
         </p>
         <p className="mt-2 whitespace-pre-wrap text-sm text-ink">{execution.output}</p>
         {(execution.tokens != null || execution.ms != null) && (
@@ -251,14 +295,14 @@ function ExecutionResult({ execution }: { execution: ExecuteResponse }) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-line bg-paper p-3 text-sm text-ink2">
         <Icon name="user" size={16} />
-        Đã giao cho người: <strong>{execution.assignee_id}</strong>. Đang chờ hoàn thành.
+        {t("Đã giao cho người:", "Assigned to a person:")} <strong>{execution.assignee_id}</strong>. {t("Đang chờ hoàn thành.", "Waiting for completion.")}
       </div>
     );
   }
   if (execution.kind === "denied") {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-bad/30 bg-bad/5 p-3 text-sm text-bad">
-        <Icon name="ban" size={16} /> Bị chặn bởi governance: {execution.reason}
+        <Icon name="ban" size={16} /> {t("Bị chặn bởi governance:", "Blocked by governance:")} {execution.reason}
       </div>
     );
   }

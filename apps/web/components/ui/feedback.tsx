@@ -1,6 +1,9 @@
+"use client";
+
 import { clsx } from "clsx";
 import type { ReactNode } from "react";
 import { Icon } from "./icon";
+import { useT } from "@/lib/i18n";
 
 export function EmptyState({
   title,
@@ -24,6 +27,7 @@ export function EmptyState({
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const t = useT();
   return (
     <div
       role="alert"
@@ -31,7 +35,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
     >
       <p className="flex items-center gap-1.5 font-medium">
         <Icon name="alert" size={16} />
-        Có lỗi xảy ra
+        {t("Có lỗi xảy ra", "Something went wrong")}
       </p>
       <p className="mt-1 text-bad/90">{message}</p>
       {onRetry ? (
@@ -40,7 +44,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
           onClick={onRetry}
           className="mt-2 rounded-full border border-bad/40 px-3 py-1 text-xs font-semibold transition-colors hover:bg-bad/10"
         >
-          Thử lại
+          {t("Thử lại", "Try again")}
         </button>
       ) : null}
     </div>

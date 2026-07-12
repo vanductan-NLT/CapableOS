@@ -4,35 +4,51 @@ import type { ExecuteResponse, Task } from "@orchestra/contracts";
 import { useState } from "react";
 import { Badge, Card, EmptyState, ErrorState, Icon, Skeleton } from "@/components/ui";
 import { HttpError, api } from "@/lib/http";
+import { useT } from "@/lib/i18n";
 import { useReview } from "@/lib/queries/use-review";
 import { useRealtimeTasks, useTasks } from "./hooks";
-import { STATUS_META } from "./status";
+import { STATUS_META, statusLabel } from "./status";
 
-const DEFAULT_RISK = {
-  label: "Cần xem lại",
+type Bilingual = { vi: string; en: string };
+
+const DEFAULT_RISK: { label: Bilingual; tone: "gold" | "bad" | "b"; reason: Bilingual } = {
+  label: { vi: "Cần xem lại", en: "Needs review" },
   tone: "gold",
-  reason: "Việc đang ở trạng thái cần người có trách nhiệm kiểm tra trước khi đi tiếp.",
-} as const;
+  reason: {
+    vi: "Việc đang ở trạng thái cần người có trách nhiệm kiểm tra trước khi đi tiếp.",
+    en: "This work is in a state that needs a responsible person to check before continuing.",
+  },
+};
 
-const RISK_COPY: Record<string, { label: string; tone: "gold" | "bad" | "b"; reason: string }> = {
+const RISK_COPY: Record<string, { label: Bilingual; tone: "gold" | "bad" | "b"; reason: Bilingual }> = {
   awaiting_approval: {
-    label: "Cần duyệt trước khi chạy tiếp",
+    label: { vi: "Cần duyệt trước khi chạy tiếp", en: "Needs approval before continuing" },
     tone: "gold",
-    reason: "AI đã tham gia hoặc hành động có tác động ra ngoài. Chủ doanh nghiệp cần chốt.",
+    reason: {
+      vi: "AI đã tham gia hoặc hành động có tác động ra ngoài. Chủ doanh nghiệp cần chốt.",
+      en: "AI was involved, or the action has external impact. The owner needs to sign off.",
+    },
   },
   review: {
-    label: "Cần kiểm tra chất lượng",
+    label: { vi: "Cần kiểm tra chất lượng", en: "Needs a quality check" },
     tone: "gold",
-    reason: "Đầu ra đã có, cần người xác nhận trước khi tính là hoàn thành.",
+    reason: {
+      vi: "Đầu ra đã có, cần người xác nhận trước khi tính là hoàn thành.",
+      en: "Output is ready; a person must confirm it before it counts as done.",
+    },
   },
   rejected: {
-    label: "Bị từ chối",
+    label: { vi: "Bị từ chối", en: "Rejected" },
     tone: "bad",
-    reason: "Việc không đạt yêu cầu hoặc vi phạm luật kiểm soát.",
+    reason: {
+      vi: "Việc không đạt yêu cầu hoặc vi phạm luật kiểm soát.",
+      en: "The work didn't meet requirements or violated a control rule.",
+    },
   },
 };
 
 export function GovernanceWorkbench() {
+  const t = useT();
   const { data: tasks, isLoading, isError, error, refetch } = useTasks();
   useRealtimeTasks();
 
@@ -49,7 +65,7 @@ export function GovernanceWorkbench() {
   if (isError) {
     return (
       <ErrorState
-        message={error instanceof HttpError ? error.message : "Không tải được hàng đợi phê duyệt"}
+        message={error instanceof HttpError ? error.message : t("Không tải được hàng đợi phê duyệt", "Could not load the approval queue")}
         onRetry={refetch}
       />
     );
@@ -62,34 +78,34 @@ export function GovernanceWorkbench() {
 
   return (
     <div className="space-y-5">
-      <section className="grid gap-3 sm:grid-cols-3" aria-label="Tổng quan kiểm soát">
-        <ControlTile label="Cần quyết định" value={queue.length} tone="bg-gold" />
-        <ControlTile label="Đang chờ người" value={highTouch} tone="bg-b" />
-        <ControlTile label="Luật đang bật" value={3} tone="bg-a" />
+      <section className="grid gap-3 sm:grid-cols-3" aria-label={t("Tổng quan kiểm soát", "Control overview")}>
+        <ControlTile label={t("Cần quyết định", "Needs decision")} value={queue.length} tone="bg-gold" />
+        <ControlTile label={t("Đang chờ người", "Waiting on a person")} value={highTouch} tone="bg-b" />
+        <ControlTile label={t("Luật đang bật", "Active rules")} value={3} tone="bg-a" />
       </section>
 
-      <section className="grid gap-2 sm:grid-cols-3" aria-label="Luồng phê duyệt">
-        <FlowTile step="1" title="AI hoặc người tạo kết quả" />
-        <FlowTile step="2" title="Luật kiểm soát giữ lại việc rủi ro" />
-        <FlowTile step="3" title="Chủ doanh nghiệp duyệt hoặc từ chối" />
+      <section className="grid gap-2 sm:grid-cols-3" aria-label={t("Luồng phê duyệt", "Approval flow")}>
+        <FlowTile step="1" title={t("AI hoặc người tạo kết quả", "AI or a person produces output")} />
+        <FlowTile step="2" title={t("Luật kiểm soát giữ lại việc rủi ro", "Control rules hold risky work")} />
+        <FlowTile step="3" title={t("Chủ doanh nghiệp duyệt hoặc từ chối", "The owner approves or rejects")} />
       </section>
 
       <section className="rounded-xl border border-line bg-card p-4 shadow-sm">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Hàng đợi phê duyệt</h2>
+            <h2 className="text-base font-semibold">{t("Hàng đợi phê duyệt", "Approval queue")}</h2>
             <p className="mt-1 text-sm text-muted">
-              Nơi chủ doanh nghiệp xem rủi ro, quyết định duyệt hoặc từ chối trước khi AI tác động ra ngoài.
+              {t("Nơi chủ doanh nghiệp xem rủi ro, quyết định duyệt hoặc từ chối trước khi AI tác động ra ngoài.", "Where the owner reviews risk and decides to approve or reject before AI acts externally.")}
             </p>
           </div>
-          <Badge tone={queue.length ? "gold" : "good"}>{queue.length ? "cần xử lý" : "ổn định"}</Badge>
+          <Badge tone={queue.length ? "gold" : "good"}>{queue.length ? t("cần xử lý", "needs action") : t("ổn định", "stable")}</Badge>
         </div>
 
         {queue.length === 0 ? (
           <EmptyState
             icon={<Icon name="shield" size={28} />}
-            title="Không có việc đang kẹt phê duyệt"
-            hint="Khi AI tạo đầu ra cần người xác nhận hoặc luật governance kích hoạt, việc sẽ xuất hiện tại đây."
+            title={t("Không có việc đang kẹt phê duyệt", "No work stuck in approval")}
+            hint={t("Khi AI tạo đầu ra cần người xác nhận hoặc luật governance kích hoạt, việc sẽ xuất hiện tại đây.", "When AI produces output needing confirmation or a governance rule triggers, the work appears here.")}
           />
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">
@@ -100,10 +116,10 @@ export function GovernanceWorkbench() {
         )}
       </section>
 
-      <section className="grid gap-3 lg:grid-cols-3" aria-label="Luật kiểm soát">
-        <RuleCard title="Tác động khách hàng" detail="Email, phản hồi khách hàng, nội dung gửi ra ngoài phải được duyệt." />
-        <RuleCard title="Chi phí chưa xác thực" detail="Chi phí và thời gian chưa kiểm chứng luôn gắn nhãn ước tính." />
-        <RuleCard title="Rủi ro chất lượng" detail="Việc quan trọng do AI hỗ trợ phải có người kiểm tra trước khi hoàn thành." />
+      <section className="grid gap-3 lg:grid-cols-3" aria-label={t("Luật kiểm soát", "Control rules")}>
+        <RuleCard title={t("Tác động khách hàng", "Customer impact")} detail={t("Email, phản hồi khách hàng, nội dung gửi ra ngoài phải được duyệt.", "Emails, customer replies and outbound content must be approved.")} />
+        <RuleCard title={t("Chi phí chưa xác thực", "Unverified cost")} detail={t("Chi phí và thời gian chưa kiểm chứng luôn gắn nhãn ước tính.", "Unverified cost and time are always labeled as estimates.")} />
+        <RuleCard title={t("Rủi ro chất lượng", "Quality risk")} detail={t("Việc quan trọng do AI hỗ trợ phải có người kiểm tra trước khi hoàn thành.", "Important AI-assisted work must be checked by a person before completion.")} />
       </section>
     </div>
   );
@@ -122,6 +138,7 @@ function ControlTile({ label, value, tone }: { label: string; value: number; ton
 }
 
 function ApprovalCard({ task }: { task: Task }) {
+  const t = useT();
   const review = useReview();
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -129,7 +146,7 @@ function ApprovalCard({ task }: { task: Task }) {
 
   async function decide(outcome: "approve" | "reject") {
     if (!task.decision_id) {
-      setMessage("Task này chưa có decision_id để phê duyệt.");
+      setMessage(t("Task này chưa có decision_id để phê duyệt.", "This task has no decision_id to approve."));
       return;
     }
     setBusy(true);
@@ -137,7 +154,7 @@ function ApprovalCard({ task }: { task: Task }) {
     try {
       const executionId = await resolveExecutionId(task);
       if (!executionId) {
-        setMessage("Chưa có kết quả để duyệt. Hãy bắt đầu xử lý ở Luồng xử lý trước.");
+        setMessage(t("Chưa có kết quả để duyệt. Hãy bắt đầu xử lý ở Luồng xử lý trước.", "No result to approve yet. Start processing in the Pipeline first."));
         return;
       }
       review.mutate(
@@ -146,10 +163,10 @@ function ApprovalCard({ task }: { task: Task }) {
           outcome,
           note: outcome === "approve" ? "Duyệt từ tab Phê duyệt" : "Từ chối từ tab Phê duyệt",
         },
-        { onSuccess: () => setMessage(outcome === "approve" ? "Đã duyệt." : "Đã từ chối.") },
+        { onSuccess: () => setMessage(outcome === "approve" ? t("Đã duyệt.", "Approved.") : t("Đã từ chối.", "Rejected.")) },
       );
     } catch (e) {
-      setMessage(e instanceof HttpError ? e.message : "Không phê duyệt được.");
+      setMessage(e instanceof HttpError ? e.message : t("Không phê duyệt được.", "Could not approve."));
     } finally {
       setBusy(false);
     }
@@ -158,22 +175,22 @@ function ApprovalCard({ task }: { task: Task }) {
   return (
     <article className="rounded-lg border border-line bg-paper/55 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone={STATUS_META[task.status].tone}>{STATUS_META[task.status].label}</Badge>
-        <Badge tone={risk.tone}>{risk.label}</Badge>
+        <Badge tone={STATUS_META[task.status].tone}>{statusLabel(task.status, t)}</Badge>
+        <Badge tone={risk.tone}>{t(risk.label.vi, risk.label.en)}</Badge>
       </div>
       <h3 className="mt-3 text-sm font-semibold text-ink">{task.title}</h3>
       {task.description ? <p className="mt-1 line-clamp-2 text-sm text-muted">{task.description}</p> : null}
-      <p className="mt-3 rounded-md bg-card p-3 text-xs leading-5 text-ink2">{risk.reason}</p>
+      <p className="mt-3 rounded-md bg-card p-3 text-xs leading-5 text-ink2">{t(risk.reason.vi, risk.reason.en)}</p>
       {task.result ? (
         <details className="mt-3">
-          <summary className="cursor-pointer text-xs font-medium text-b">Xem đầu ra cần duyệt</summary>
+          <summary className="cursor-pointer text-xs font-medium text-b">{t("Xem đầu ra cần duyệt", "View output to approve")}</summary>
           <p className="mt-2 max-h-36 overflow-auto whitespace-pre-wrap rounded-md border border-line bg-card p-3 text-xs text-ink2">
             {task.result}
           </p>
         </details>
       ) : null}
       <p className="mt-3 text-xs text-muted">
-        Duyệt sẽ xác nhận kết quả và cho phép quy trình đi tiếp. Từ chối sẽ giữ việc ở trạng thái không đạt.
+        {t("Duyệt sẽ xác nhận kết quả và cho phép quy trình đi tiếp. Từ chối sẽ giữ việc ở trạng thái không đạt.", "Approving confirms the result and lets the process continue. Rejecting keeps the work in a failed state.")}
       </p>
       <div className="mt-4 flex gap-2">
         <button
@@ -183,7 +200,7 @@ function ApprovalCard({ task }: { task: Task }) {
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-b px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
           <Icon name="check" size={16} />
-          Duyệt
+          {t("Duyệt", "Approve")}
         </button>
         <button
           type="button"
@@ -192,7 +209,7 @@ function ApprovalCard({ task }: { task: Task }) {
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-bad/40 px-3 py-2 text-sm font-medium text-bad disabled:opacity-50"
         >
           <Icon name="x" size={16} />
-          Từ chối
+          {t("Từ chối", "Reject")}
         </button>
       </div>
       {message ? <p className="mt-2 text-xs text-muted" role="status">{message}</p> : null}

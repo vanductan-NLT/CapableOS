@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Icon } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 /**
  * Bottom-docked chat composer (Claude/ChatGPT pattern): auto-grows with
@@ -18,6 +19,7 @@ export function CommandComposer({
   onSubmit: () => void;
   pending: boolean;
 }) {
+  const t = useT();
   const ref = useRef<HTMLTextAreaElement>(null);
 
   function autosize(el: HTMLTextAreaElement) {
@@ -45,8 +47,11 @@ export function CommandComposer({
             }}
             onKeyDown={onKeyDown}
             rows={1}
-            placeholder="Nhập việc cần giao, ví dụ: phân tích doanh số tháng này và đề xuất ai xử lý"
-            aria-label="Nội dung công việc"
+            placeholder={t(
+              "Nhập việc cần giao, ví dụ: phân tích doanh số tháng này và đề xuất ai xử lý",
+              "Enter the task to assign, e.g. analyze this month's sales and suggest who should handle it",
+            )}
+            aria-label={t("Nội dung công việc", "Task content")}
             maxLength={4000}
             className="max-h-[200px] flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none [touch-action:manipulation]"
           />
@@ -54,14 +59,17 @@ export function CommandComposer({
             type="button"
             onClick={onSubmit}
             disabled={!value.trim() || pending}
-            aria-label="Gửi"
+            aria-label={t("Gửi", "Send")}
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[image:var(--grad-cta)] text-white shadow-[var(--elev-1)] transition-opacity disabled:opacity-40 [touch-action:manipulation]"
           >
             <Icon name={pending ? "loader" : "send"} size={18} />
           </button>
         </div>
         <p className="mt-1.5 px-1 text-center text-[11px] text-muted">
-          Hệ thống tự đề xuất người, AI hoặc đội kết hợp; việc rủi ro sẽ chuyển sang phê duyệt.
+          {t(
+            "Hệ thống tự đề xuất người, AI hoặc đội kết hợp; việc rủi ro sẽ chuyển sang phê duyệt.",
+            "The system suggests a person, AI, or a combined team; risky tasks are routed to approval.",
+          )}
         </p>
       </div>
     </div>
