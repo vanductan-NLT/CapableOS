@@ -4,6 +4,7 @@ import type { AllocationSplit } from "@orchestra/contracts";
 import { Badge, Card, EmptyState, ErrorState, EstimatedTag, Skeleton } from "@/components/ui";
 import type { SideStat } from "@/lib/metrics";
 import { HttpError } from "@/lib/http";
+import { useT } from "@/lib/i18n";
 import { useBreakdown, useFlow, useMetrics } from "./hooks";
 
 const dur = (ms: number) => {
@@ -27,6 +28,7 @@ const pct = (v: number) => `${Math.round(v * 100)}%`;
 const num = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 
 export function DashboardView() {
+  const t = useT();
   const m = useMetrics();
   const b = useBreakdown();
   const flow = useFlow();
@@ -43,7 +45,7 @@ export function DashboardView() {
   if (m.isError) {
     return (
       <ErrorState
-        message={m.error instanceof HttpError ? m.error.message : "Không tải được metrics"}
+        message={m.error instanceof HttpError ? m.error.message : t("Không tải được metrics", "Couldn't load metrics")}
         onRetry={() => m.refetch()}
       />
     );
@@ -56,8 +58,11 @@ export function DashboardView() {
   if (total === 0 && feedbackCount === 0) {
     return (
       <EmptyState
-        title="Chưa có dữ liệu đo lường"
-        hint="Khi task được định tuyến (domain A) và có feedback, các chỉ số sẽ xuất hiện ở đây."
+        title={t("Chưa có dữ liệu đo lường", "No measurement data yet")}
+        hint={t(
+          "Khi task được định tuyến (domain A) và có feedback, các chỉ số sẽ xuất hiện ở đây.",
+          "Once tasks are routed (domain A) and feedback arrives, metrics will show up here.",
+        )}
       />
     );
   }
@@ -65,13 +70,13 @@ export function DashboardView() {
   return (
     <div className="flex flex-col gap-6">
       <section aria-label="KPI" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Tự động hoá" value={pct(metrics.automation)} hint="AI + Hybrid / tổng" />
-        <StatTile label="Chi phí tiết kiệm" value={num(metrics.cost_saving)} estimated />
-        <StatTile label="Thời gian TB / lần" value={`${num(metrics.avg_ms)} ms`} />
+        <StatTile label={t("Tự động hoá", "Automation")} value={pct(metrics.automation)} hint={t("AI + Hybrid / tổng", "AI + Hybrid / total")} />
+        <StatTile label={t("Chi phí tiết kiệm", "Cost saved")} value={num(metrics.cost_saving)} estimated />
+        <StatTile label={t("Thời gian TB / lần", "Avg time / run")} value={`${num(metrics.avg_ms)} ms`} />
         <StatTile
-          label="Chất lượng"
+          label={t("Chất lượng", "Quality")}
           value={feedbackCount ? pct(metrics.quality) : "—"}
-          hint={feedbackCount ? `${feedbackCount} đánh giá` : "chưa có đánh giá"}
+          hint={feedbackCount ? `${feedbackCount} ${t("đánh giá", "reviews")}` : t("chưa có đánh giá", "no reviews yet")}
         />
       </section>
 
@@ -86,12 +91,12 @@ export function DashboardView() {
 
       {flow.data && flow.data.completed > 0 ? (
         <section aria-label="Flow (DORA)" className="grid gap-3 sm:grid-cols-3">
-          <StatTile label="Việc hoàn thành" value={num(flow.data.completed)} hint="tổng luỹ kế" />
-          <StatTile label="Thời gian hoàn thành (P50)" value={dur(flow.data.leadTimeMsP50)} hint="tạo → xong, trung vị" />
+          <StatTile label={t("Việc hoàn thành", "Completed")} value={num(flow.data.completed)} hint={t("tổng luỹ kế", "cumulative total")} />
+          <StatTile label={t("Thời gian hoàn thành (P50)", "Completion time (P50)")} value={dur(flow.data.leadTimeMsP50)} hint={t("tạo → xong, trung vị", "created → done, median")} />
           <StatTile
-            label={`Sản lượng ${flow.data.windowDays} ngày`}
+            label={`${t("Sản lượng", "Throughput")} ${flow.data.windowDays} ${t("ngày", "days")}`}
             value={num(flow.data.throughput)}
-            hint="việc xong gần đây"
+            hint={t("việc xong gần đây", "recently completed")}
           />
         </section>
       ) : null}
@@ -128,11 +133,14 @@ function StatTile({
 }
 
 function Allocation({ split, total }: { split: AllocationSplit; total: number }) {
+  const t = useT();
   const max = Math.max(1, ...VERDICTS.map((v) => split[v.key]));
   return (
     <Card>
-      <h2 className="text-sm font-semibold">Phân bổ quyết định</h2>
-      <p className="mb-3 text-xs text-muted">Người, AI, đội kết hợp và việc cần quản lý ({total} quyết định)</p>
+      <h2 className="text-sm font-semibold">{t("Phân bổ quyết định", "Decision allocation")}</h2>
+      <p className="mb-3 text-xs text-muted">
+        {t("Người, AI, đội kết hợp và việc cần quản lý", "People, AI, hybrid teams and work needing management")} ({total} {t("quyết định", "decisions")})
+      </p>
       <ul className="flex flex-col gap-2.5" role="list">
         {VERDICTS.map((v) => {
           const count = split[v.key];
@@ -158,23 +166,24 @@ function Allocation({ split, total }: { split: AllocationSplit; total: number })
 }
 
 function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
+  const t = useT();
   const rows: { label: string; icon: string; s: SideStat }[] = [
-    { label: "Người", icon: "Người", s: human },
+    { label: t("Người", "Human"), icon: t("Người", "Human"), s: human },
     { label: "AI", icon: "AI", s: ai },
   ];
   return (
     <Card>
-      <h2 className="text-sm font-semibold">So sánh hiệu suất người và AI</h2>
-      <p className="mt-1 text-xs text-muted">Cùng một thước đo: số việc, thời gian, chi phí và chất lượng sau feedback.</p>
+      <h2 className="text-sm font-semibold">{t("So sánh hiệu suất người và AI", "Human vs AI performance")}</h2>
+      <p className="mt-1 text-xs text-muted">{t("Cùng một thước đo: số việc, thời gian, chi phí và chất lượng sau feedback.", "One shared measure: task count, time, cost and post-feedback quality.")}</p>
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left font-mono text-[10px] uppercase tracking-wide text-muted">
-              <th className="py-2 pr-2 font-medium">Bên</th>
-              <th className="py-2 pr-2 font-medium">Việc</th>
-              <th className="py-2 pr-2 font-medium">Phút TB</th>
-              <th className="py-2 pr-2 font-medium">Chi phí</th>
-              <th className="py-2 font-medium">Chất lượng</th>
+              <th className="py-2 pr-2 font-medium">{t("Bên", "Side")}</th>
+              <th className="py-2 pr-2 font-medium">{t("Việc", "Tasks")}</th>
+              <th className="py-2 pr-2 font-medium">{t("Phút TB", "Avg min")}</th>
+              <th className="py-2 pr-2 font-medium">{t("Chi phí", "Cost")}</th>
+              <th className="py-2 font-medium">{t("Chất lượng", "Quality")}</th>
             </tr>
           </thead>
           <tbody>
@@ -201,43 +210,44 @@ function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-muted">Chi phí/thời gian của người là ESTIMATED; của AI đo từ log thực thi.</p>
+      <p className="mt-2 text-xs text-muted">{t("Chi phí/thời gian của người là ESTIMATED; của AI đo từ log thực thi.", "Human cost/time is ESTIMATED; AI is measured from execution logs.")}</p>
     </Card>
   );
 }
 
 function ExecutiveScorecard({ metrics, feedbackCount }: { metrics: { automation: number; quality: number; split: AllocationSplit }; feedbackCount: number }) {
+  const t = useT();
   const rows = [
     {
-      label: "Tốc độ",
+      label: t("Tốc độ", "Speed"),
       value: pct(metrics.automation),
-      note: "Tỷ lệ việc có thể giao cho AI hoặc đội người + AI.",
+      note: t("Tỷ lệ việc có thể giao cho AI hoặc đội người + AI.", "Share of work that can go to AI or human + AI teams."),
       tone: metrics.automation >= 0.6 ? "good" : "gold",
     },
     {
-      label: "Chất lượng",
-      value: feedbackCount ? pct(metrics.quality) : "Chưa đủ dữ liệu",
-      note: feedbackCount ? "Dựa trên feedback sau khi hoàn thành." : "Cần thêm đánh giá ở Luồng xử lý.",
+      label: t("Chất lượng", "Quality"),
+      value: feedbackCount ? pct(metrics.quality) : t("Chưa đủ dữ liệu", "Not enough data"),
+      note: feedbackCount ? t("Dựa trên feedback sau khi hoàn thành.", "Based on post-completion feedback.") : t("Cần thêm đánh giá ở Luồng xử lý.", "Needs more reviews in the Workflow."),
       tone: feedbackCount && metrics.quality >= 0.75 ? "good" : "gold",
     },
     {
       label: "Governance",
       value: `${metrics.split.escalate + metrics.split.hybrid}`,
-      note: "Việc cần quản lý hoặc người kiểm tra trước khi hoàn tất.",
+      note: t("Việc cần quản lý hoặc người kiểm tra trước khi hoàn tất.", "Work needing management or a human check before completion."),
       tone: metrics.split.escalate > 0 ? "gold" : "good",
     },
   ] as const;
 
   return (
     <Card>
-      <h2 className="text-sm font-semibold">Scorecard cho người ra quyết định</h2>
-      <p className="mt-1 text-xs text-muted">Tóm tắt trực tiếp theo mục tiêu đề bài: tốc độ, chất lượng, kiểm soát.</p>
+      <h2 className="text-sm font-semibold">{t("Scorecard cho người ra quyết định", "Scorecard for decision-makers")}</h2>
+      <p className="mt-1 text-xs text-muted">{t("Tóm tắt trực tiếp theo mục tiêu đề bài: tốc độ, chất lượng, kiểm soát.", "A direct summary against the goals: speed, quality, control.")}</p>
       <div className="mt-3 grid gap-2 md:grid-cols-3">
         {rows.map((row) => (
           <div key={row.label} className="rounded-lg border border-line bg-paper/60 p-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium uppercase tracking-wide text-muted">{row.label}</p>
-              <Badge tone={row.tone}>{row.tone === "good" ? "ổn" : "cần chú ý"}</Badge>
+              <Badge tone={row.tone}>{row.tone === "good" ? t("ổn", "OK") : t("cần chú ý", "needs attention")}</Badge>
             </div>
             <p className="mt-2 text-2xl font-semibold">{row.value}</p>
             <p className="mt-1 text-xs leading-5 text-muted">{row.note}</p>
@@ -259,27 +269,28 @@ function BehaviorHeatmap({
   waiting: number;
   total: number;
 }) {
+  const t = useT();
   const cells = [
     {
-      label: "Tin AI để giao việc",
+      label: t("Tin AI để giao việc", "Trust AI to take work"),
       value: automation,
-      detail: "Tỷ lệ việc AI/hybrid có thể nhận",
+      detail: t("Tỷ lệ việc AI/hybrid có thể nhận", "Share of work AI/hybrid can take"),
     },
     {
-      label: "Việc cần người kiểm tra",
+      label: t("Việc cần người kiểm tra", "Work needing a human check"),
       value: total ? waiting / total : 0,
-      detail: "AI không nên tự hoàn tất",
+      detail: t("AI không nên tự hoàn tất", "AI shouldn't finish on its own"),
       inverse: true,
     },
     {
-      label: "Chất lượng sau review",
+      label: t("Chất lượng sau review", "Quality after review"),
       value: quality ?? 0,
-      detail: quality == null ? "Chưa đủ feedback" : "Tỷ lệ đạt từ phản hồi",
+      detail: quality == null ? t("Chưa đủ feedback", "Not enough feedback") : t("Tỷ lệ đạt từ phản hồi", "Pass rate from feedback"),
     },
     {
-      label: "Tốc độ ra quyết định",
+      label: t("Tốc độ ra quyết định", "Decision speed"),
       value: Math.min(1, automation + 0.15),
-      detail: "Ước lượng từ split hiện tại",
+      detail: t("Ước lượng từ split hiện tại", "Estimated from the current split"),
     },
   ];
 
@@ -287,8 +298,8 @@ function BehaviorHeatmap({
     <Card>
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold">Bản đồ nhiệt hành vi vận hành</h2>
-          <p className="mt-1 text-xs text-muted">Đọc nhanh nơi đội ngũ tin hệ thống, kẹt phê duyệt hoặc thiếu dữ liệu.</p>
+          <h2 className="text-sm font-semibold">{t("Bản đồ nhiệt hành vi vận hành", "Operational behavior heatmap")}</h2>
+          <p className="mt-1 text-xs text-muted">{t("Đọc nhanh nơi đội ngũ tin hệ thống, kẹt phê duyệt hoặc thiếu dữ liệu.", "A quick read on where the team trusts the system, gets stuck on approvals or lacks data.")}</p>
         </div>
         <EstimatedTag />
       </div>
