@@ -29,8 +29,26 @@ Taxonomy hiện **thiếu `legal`, `finance`, `compliance`** mà Test Plan mục
 - **Chính sách duyệt feedback (FR-11):** ai được gửi, ngưỡng nào cần approval, chống gian lận?
   Mặc định MVP đề xuất: mọi user đăng nhập gửi được, trust ±1 tự động, bounded 0..100, full audit log. Cần chốt.
 
-## 4. UI kit dùng chung (tương lai, chưa làm — cần A)
-- Domain B tạm để UI kit **local** trong `apps/web/components/ui.tsx` để không chặn MVP. Việc gộp thành `packages/ui` [S] (design system dùng chung A+B) là hạng mục shared tương lai → cần A đồng thiết kế.
+## 4. `packages/ui` — design system dùng chung ✅ ĐÃ DỰNG · nhánh `s/ui-design-system` (chờ A duyệt)
+Trước để UI kit local trong `apps/web/components/ui.tsx`. **2026-07-12** B đã hợp nhất thành package
+shared `@orchestra/ui` và nâng cấp giao diện 4 màn hình B (Command · Board · Dashboard · Pool) sang chuẩn
+tinh tế enterprise: **bỏ hết emoji-làm-icon → bộ SVG vẽ tay** nhất quán (kiểu Linear/Vercel/Stripe),
+typography editorial (serif tiêu đề + mono nhãn) kế thừa từ report Founder B. **B không tự merge** — chờ A.
+
+**Gói `@orchestra/ui`:** `icons.tsx` (30+ icon SVG stroke, `currentColor`, không icon font) · primitives
+`Card·Badge·Button·IconButton·Input·Textarea·Field·EmptyState·ErrorState·Skeleton·StatTile·Meter·AgentAvatar·SegmentedControl`.
+Ship raw TS/TSX, Next transpile, không bước build. Xem `packages/ui/README.md`.
+
+**File chạm cần A xác nhận (không đụng vùng A):**
+| File | Thay đổi | Rủi ro với A |
+| --- | --- | --- |
+| `packages/ui/**` | tạo mới | không — A chưa import |
+| `apps/web/next.config.mjs` | `+@orchestra/ui` vào `transpilePackages` | thấp, cộng thêm |
+| `apps/web/tailwind.config.ts` · `app/globals.css` | palette→CSS vars (light/dark) + fonts/shadow + content glob | **theme chung**: trang A cũng theo — cần A xác nhận token màu |
+| `apps/web/app/layout.tsx` | nạp font `next/font` (Inter/Newsreader/JetBrains Mono) | thấp, áp cả app |
+| `apps/web/package.json` | `+@orchestra/ui: workspace:*` | cần `pnpm install` tạo symlink |
+
+_Đề nghị A review token màu + tên component. OK thì B chạy gate `/nhi` và mở PR `s/ui-design-system` → `dev` (2 reviewer)._
 
 ## Những gì B ĐƯỢC tự merge (thuần B, 1 review)
 - `packages/db` (migrations, RLS, seed, scripts) — B là chủ schema (mục 10). Đã verify 19/19 trên Postgres thật.
