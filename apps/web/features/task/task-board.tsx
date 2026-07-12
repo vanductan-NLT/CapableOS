@@ -7,7 +7,7 @@ import { HttpError } from "@/lib/http";
 import { useT } from "@/lib/i18n";
 import { useSubmitFeedback } from "@/features/dashboard/hooks";
 import { useAgents, useRealtimeTasks, useTasks } from "./hooks";
-import { BOARD_COLUMNS, STATUS_META } from "./status";
+import { BOARD_COLUMNS, STATUS_META, statusLabel } from "./status";
 import { useRouteDecision } from "@/lib/queries/use-route-decision";
 import { useExecute } from "@/lib/queries/use-execute";
 import { useReview } from "@/lib/queries/use-review";
@@ -47,9 +47,9 @@ export function TaskBoard() {
       {visible.map((status) => {
         const list = byStatus.get(status) ?? [];
         return (
-          <section key={status} aria-label={STATUS_META[status].label} className="min-w-[240px]">
+          <section key={status} aria-label={statusLabel(status, t)} className="min-w-[240px]">
             <div className="mb-2 flex items-center justify-between px-1">
-              <Badge tone={STATUS_META[status].tone}>{STATUS_META[status].label}</Badge>
+              <Badge tone={STATUS_META[status].tone}>{statusLabel(status, t)}</Badge>
               <span className="font-mono text-xs text-muted">{list.length}</span>
             </div>
             <div className="flex flex-col gap-2">

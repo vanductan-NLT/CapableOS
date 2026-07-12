@@ -21,18 +21,53 @@ const mins = (n: number) => `~${Math.round(n)}′`;
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 const humanMoney = (n: number) => (n >= 1 ? `$${Math.round(n)}` : `$${n.toFixed(2)}`);
 
-const REASON_COPY: Record<string, string> = {
-  NO_REQUIRED_CAPABILITIES: "Yêu cầu chưa đủ rõ về năng lực, cần người làm rõ trước.",
-  NO_CANDIDATES: "Chưa có người hoặc AI phù hợp trong danh sách nguồn lực.",
-  TOP_FIT_BELOW_THRESHOLD: "Ứng viên tốt nhất chưa đủ phù hợp, nên chuyển người quản lý xem xét.",
-  AMBIGUOUS_HUMAN_AI_HYBRID: "Người và AI đang sát điểm nhau, phương án kết hợp an toàn hơn.",
-  AMBIGUOUS_HUMAN_CANDIDATES: "Có nhiều người phù hợp gần nhau, cần chọn theo bối cảnh thực tế.",
-  AMBIGUOUS_AI_CANDIDATES: "Có nhiều AI phù hợp gần nhau, nên chọn theo độ tin cậy và chi phí.",
-  TOP_CANDIDATE_HUMAN: "Ứng viên phù hợp nhất là con người, phù hợp với việc cần phán đoán hoặc trách nhiệm.",
-  TOP_CANDIDATE_AI_LOW_RISK: "Ứng viên phù hợp nhất là AI và rủi ro thấp, có thể giao cho AI để tiết kiệm thời gian.",
-  HIGH_RISK_AI_REQUIRES_HUMAN: "AI có thể hỗ trợ, nhưng việc rủi ro cao nên có người kiểm tra.",
-  NO_HUMAN_REVIEWER_AVAILABLE: "Chưa có người phù hợp để kiểm tra đầu ra, cần quản lý can thiệp.",
+const REASON_COPY: Record<string, { vi: string; en: string }> = {
+  NO_REQUIRED_CAPABILITIES: {
+    vi: "Yêu cầu chưa đủ rõ về năng lực, cần người làm rõ trước.",
+    en: "The request isn't specific enough about capabilities; a person should clarify it first.",
+  },
+  NO_CANDIDATES: {
+    vi: "Chưa có người hoặc AI phù hợp trong danh sách nguồn lực.",
+    en: "No suitable person or AI in the resource directory yet.",
+  },
+  TOP_FIT_BELOW_THRESHOLD: {
+    vi: "Ứng viên tốt nhất chưa đủ phù hợp, nên chuyển người quản lý xem xét.",
+    en: "The best candidate isn't a strong enough fit; escalate to a manager for review.",
+  },
+  AMBIGUOUS_HUMAN_AI_HYBRID: {
+    vi: "Người và AI đang sát điểm nhau, phương án kết hợp an toàn hơn.",
+    en: "People and AI score closely; a combined option is safer.",
+  },
+  AMBIGUOUS_HUMAN_CANDIDATES: {
+    vi: "Có nhiều người phù hợp gần nhau, cần chọn theo bối cảnh thực tế.",
+    en: "Several people fit closely; choose based on the real context.",
+  },
+  AMBIGUOUS_AI_CANDIDATES: {
+    vi: "Có nhiều AI phù hợp gần nhau, nên chọn theo độ tin cậy và chi phí.",
+    en: "Several AIs fit closely; choose by reliability and cost.",
+  },
+  TOP_CANDIDATE_HUMAN: {
+    vi: "Ứng viên phù hợp nhất là con người, phù hợp với việc cần phán đoán hoặc trách nhiệm.",
+    en: "The best-fit candidate is a person, suited to work needing judgment or accountability.",
+  },
+  TOP_CANDIDATE_AI_LOW_RISK: {
+    vi: "Ứng viên phù hợp nhất là AI và rủi ro thấp, có thể giao cho AI để tiết kiệm thời gian.",
+    en: "The best-fit candidate is AI and risk is low; assign to AI to save time.",
+  },
+  HIGH_RISK_AI_REQUIRES_HUMAN: {
+    vi: "AI có thể hỗ trợ, nhưng việc rủi ro cao nên có người kiểm tra.",
+    en: "AI can assist, but this high-risk work should be checked by a person.",
+  },
+  NO_HUMAN_REVIEWER_AVAILABLE: {
+    vi: "Chưa có người phù hợp để kiểm tra đầu ra, cần quản lý can thiệp.",
+    en: "No suitable person to review the output; a manager needs to step in.",
+  },
 };
+
+function reasonCopy(code: string, t: Translate): string | null {
+  const r = REASON_COPY[code];
+  return r ? t(r.vi, r.en) : null;
+}
 
 /**
  * The decision "artifact": surfaces the ranked candidate comparison
@@ -80,10 +115,10 @@ export function DecisionArtifact({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold text-ink">{decisionTitle(t, decision, primary)}</h3>
-              <Badge tone={v.tone}>{v.label}</Badge>
+              <Badge tone={v.tone}>{t(v.label.vi, v.label.en)}</Badge>
             </div>
             <p className="mt-0.5 text-sm text-ink2">
-              {REASON_COPY[decision.reason.code] ?? t("Hệ thống đã so sánh năng lực, độ tin cậy, chi phí và thời gian để đề xuất phương án này.", "The system compared capability, confidence, cost and time to recommend this option.")}
+              {reasonCopy(decision.reason.code, t) ?? t("Hệ thống đã so sánh năng lực, độ tin cậy, chi phí và thời gian để đề xuất phương án này.", "The system compared capability, confidence, cost and time to recommend this option.")}
             </p>
           </div>
         </div>
@@ -93,7 +128,7 @@ export function DecisionArtifact({
             <Meter
               value={confidence}
               label={t("Độ tin cậy", "Confidence")}
-              caption={`${confidenceLabel(confidence)} · ${pct(confidence)}`}
+              caption={`${confidenceLabel(confidence, t)} · ${pct(confidence)}`}
               tone={v.tone}
             />
           ) : (
@@ -148,7 +183,10 @@ export function DecisionArtifact({
 function decisionTitle(t: Translate, decision: DecisionResponse, primary?: ScoredCandidate): string {
   if (decision.verdict === "escalate") return t("Cần quản lý quyết định", "Needs a manager decision");
   if (decision.verdict === "hybrid") return t("Đề xuất người và AI cùng xử lý", "Recommend a person and AI handle it together");
-  if (!primary) return VERDICT_PRESENTATION[decision.verdict].headline;
+  if (!primary) {
+    const h = VERDICT_PRESENTATION[decision.verdict].headline;
+    return t(h.vi, h.en);
+  }
   return decision.verdict === "ai" ? t(`Đề xuất giao cho ${primary.name}`, `Recommend assigning to ${primary.name}`) : t(`Đề xuất giao cho ${primary.name}`, `Recommend assigning to ${primary.name}`);
 }
 

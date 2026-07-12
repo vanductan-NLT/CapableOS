@@ -7,29 +7,43 @@ import { HttpError, api } from "@/lib/http";
 import { useT } from "@/lib/i18n";
 import { useReview } from "@/lib/queries/use-review";
 import { useRealtimeTasks, useTasks } from "./hooks";
-import { STATUS_META } from "./status";
+import { STATUS_META, statusLabel } from "./status";
 
-const DEFAULT_RISK = {
-  label: "Cần xem lại",
+type Bilingual = { vi: string; en: string };
+
+const DEFAULT_RISK: { label: Bilingual; tone: "gold" | "bad" | "b"; reason: Bilingual } = {
+  label: { vi: "Cần xem lại", en: "Needs review" },
   tone: "gold",
-  reason: "Việc đang ở trạng thái cần người có trách nhiệm kiểm tra trước khi đi tiếp.",
-} as const;
+  reason: {
+    vi: "Việc đang ở trạng thái cần người có trách nhiệm kiểm tra trước khi đi tiếp.",
+    en: "This work is in a state that needs a responsible person to check before continuing.",
+  },
+};
 
-const RISK_COPY: Record<string, { label: string; tone: "gold" | "bad" | "b"; reason: string }> = {
+const RISK_COPY: Record<string, { label: Bilingual; tone: "gold" | "bad" | "b"; reason: Bilingual }> = {
   awaiting_approval: {
-    label: "Cần duyệt trước khi chạy tiếp",
+    label: { vi: "Cần duyệt trước khi chạy tiếp", en: "Needs approval before continuing" },
     tone: "gold",
-    reason: "AI đã tham gia hoặc hành động có tác động ra ngoài. Chủ doanh nghiệp cần chốt.",
+    reason: {
+      vi: "AI đã tham gia hoặc hành động có tác động ra ngoài. Chủ doanh nghiệp cần chốt.",
+      en: "AI was involved, or the action has external impact. The owner needs to sign off.",
+    },
   },
   review: {
-    label: "Cần kiểm tra chất lượng",
+    label: { vi: "Cần kiểm tra chất lượng", en: "Needs a quality check" },
     tone: "gold",
-    reason: "Đầu ra đã có, cần người xác nhận trước khi tính là hoàn thành.",
+    reason: {
+      vi: "Đầu ra đã có, cần người xác nhận trước khi tính là hoàn thành.",
+      en: "Output is ready; a person must confirm it before it counts as done.",
+    },
   },
   rejected: {
-    label: "Bị từ chối",
+    label: { vi: "Bị từ chối", en: "Rejected" },
     tone: "bad",
-    reason: "Việc không đạt yêu cầu hoặc vi phạm luật kiểm soát.",
+    reason: {
+      vi: "Việc không đạt yêu cầu hoặc vi phạm luật kiểm soát.",
+      en: "The work didn't meet requirements or violated a control rule.",
+    },
   },
 };
 
@@ -161,12 +175,12 @@ function ApprovalCard({ task }: { task: Task }) {
   return (
     <article className="rounded-lg border border-line bg-paper/55 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone={STATUS_META[task.status].tone}>{STATUS_META[task.status].label}</Badge>
-        <Badge tone={risk.tone}>{risk.label}</Badge>
+        <Badge tone={STATUS_META[task.status].tone}>{statusLabel(task.status, t)}</Badge>
+        <Badge tone={risk.tone}>{t(risk.label.vi, risk.label.en)}</Badge>
       </div>
       <h3 className="mt-3 text-sm font-semibold text-ink">{task.title}</h3>
       {task.description ? <p className="mt-1 line-clamp-2 text-sm text-muted">{task.description}</p> : null}
-      <p className="mt-3 rounded-md bg-card p-3 text-xs leading-5 text-ink2">{risk.reason}</p>
+      <p className="mt-3 rounded-md bg-card p-3 text-xs leading-5 text-ink2">{t(risk.reason.vi, risk.reason.en)}</p>
       {task.result ? (
         <details className="mt-3">
           <summary className="cursor-pointer text-xs font-medium text-b">{t("Xem đầu ra cần duyệt", "View output to approve")}</summary>

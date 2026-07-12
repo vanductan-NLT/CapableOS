@@ -6,7 +6,7 @@ import { Badge, Card, EmptyState, ErrorState, Icon, Skeleton } from "@/component
 import { HttpError } from "@/lib/http";
 import { useT } from "@/lib/i18n";
 import { useAgents, useRealtimeTasks, useTasks, useUpdateTask } from "./hooks";
-import { STATUS_META } from "./status";
+import { STATUS_META, statusLabel } from "./status";
 
 const WORK_STATUSES = new Set(["awaiting_human", "review", "routed", "executing"]);
 
@@ -147,7 +147,7 @@ function WorkCard({ task, agent }: { task: Task; agent?: Agent }) {
   return (
     <article className="rounded-xl border border-line bg-card p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone={STATUS_META[task.status].tone}>{STATUS_META[task.status].label}</Badge>
+        <Badge tone={STATUS_META[task.status].tone}>{statusLabel(task.status, t)}</Badge>
         <Badge tone={agent?.type === "ai" ? "a" : "b"}>{agent ? agent.name : t("Chưa rõ người xử lý", "Assignee unknown")}</Badge>
       </div>
       <h3 className="mt-3 text-sm font-semibold">{task.title}</h3>
@@ -189,7 +189,7 @@ function AssistiveCard({ task, agent }: { task: Task; agent?: Agent }) {
   return (
     <article className="rounded-xl border border-line bg-card p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone={STATUS_META[task.status].tone}>{STATUS_META[task.status].label}</Badge>
+        <Badge tone={STATUS_META[task.status].tone}>{statusLabel(task.status, t)}</Badge>
         <Badge tone={agent?.type === "ai" ? "a" : "b"}>{agent ? agent.name : t("Đã có quyết định, chờ chạy", "Decided, waiting to run")}</Badge>
       </div>
       <h3 className="mt-3 text-sm font-semibold">{task.title}</h3>

@@ -7,22 +7,24 @@ import { HttpError } from "@/lib/http";
 import { useT } from "@/lib/i18n";
 import { useBreakdown, useFlow, useMetrics } from "./hooks";
 
-const dur = (ms: number) => {
+type Translate = (vi: string, en: string) => string;
+
+const dur = (ms: number, t: Translate) => {
   if (!ms || ms < 0) return "—";
   const m = ms / 60000;
-  if (m < 60) return `${Math.round(m)} phút`;
+  if (m < 60) return `${Math.round(m)} ${t("phút", "min")}`;
   const h = m / 60;
-  if (h < 24) return `${h.toFixed(1)} giờ`;
-  return `${(h / 24).toFixed(1)} ngày`;
+  if (h < 24) return `${h.toFixed(1)} ${t("giờ", "h")}`;
+  return `${(h / 24).toFixed(1)} ${t("ngày", "days")}`;
 };
 
 // Validated categorical palette (dataviz skill: CVD ΔE≥20; dark purple relieved by labels+table).
 const VERDICTS = [
-  { key: "human", label: "Người", color: "#0E9C8B" },
-  { key: "ai", label: "AI", color: "#5A4BD4" },
-  { key: "hybrid", label: "Người + AI", color: "#B27916" },
-  { key: "escalate", label: "Cần quản lý xem", color: "#BB4C3B" },
-] as const satisfies readonly { key: keyof AllocationSplit; label: string; color: string }[];
+  { key: "human", label: { vi: "Người", en: "Human" }, color: "#0E9C8B" },
+  { key: "ai", label: { vi: "AI", en: "AI" }, color: "#5A4BD4" },
+  { key: "hybrid", label: { vi: "Người + AI", en: "Human + AI" }, color: "#B27916" },
+  { key: "escalate", label: { vi: "Cần quản lý xem", en: "Needs manager review" }, color: "#BB4C3B" },
+] as const satisfies readonly { key: keyof AllocationSplit; label: { vi: string; en: string }; color: string }[];
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 const num = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
@@ -92,7 +94,7 @@ export function DashboardView() {
       {flow.data && flow.data.completed > 0 ? (
         <section aria-label="Flow (DORA)" className="grid gap-3 sm:grid-cols-3">
           <StatTile label={t("Việc hoàn thành", "Completed")} value={num(flow.data.completed)} hint={t("tổng luỹ kế", "cumulative total")} />
-          <StatTile label={t("Thời gian hoàn thành (P50)", "Completion time (P50)")} value={dur(flow.data.leadTimeMsP50)} hint={t("tạo → xong, trung vị", "created → done, median")} />
+          <StatTile label={t("Thời gian hoàn thành (P50)", "Completion time (P50)")} value={dur(flow.data.leadTimeMsP50, t)} hint={t("tạo → xong, trung vị", "created → done, median")} />
           <StatTile
             label={`${t("Sản lượng", "Throughput")} ${flow.data.windowDays} ${t("ngày", "days")}`}
             value={num(flow.data.throughput)}
@@ -144,13 +146,14 @@ function Allocation({ split, total }: { split: AllocationSplit; total: number })
       <ul className="flex flex-col gap-2.5" role="list">
         {VERDICTS.map((v) => {
           const count = split[v.key];
+          const label = t(v.label.vi, v.label.en);
           return (
             <li key={v.key} className="grid grid-cols-[80px_1fr_auto] items-center gap-2">
               <span className="flex items-center gap-1.5 text-sm">
                 <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: v.color }} aria-hidden />
-                {v.label}
+                {label}
               </span>
-              <span className="h-3 overflow-hidden rounded-full bg-line" role="img" aria-label={`${v.label}: ${count}`}>
+              <span className="h-3 overflow-hidden rounded-full bg-line" role="img" aria-label={`${label}: ${count}`}>
                 <span
                   className="block h-full rounded-full"
                   style={{ width: `${(count / max) * 100}%`, background: v.color, minWidth: count ? 4 : 0 }}

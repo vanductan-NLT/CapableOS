@@ -10,17 +10,22 @@ import { useAgents } from "@/features/task/hooks";
 import { useReputation } from "@/features/dashboard/hooks";
 import { useCreateAgent } from "./hooks";
 
-const CAPABILITY_LABELS: Record<string, string> = {
-  analysis: "Phân tích",
-  writing: "Viết nội dung",
-  research: "Nghiên cứu",
-  summarization: "Tóm tắt",
-  translation: "Dịch thuật",
-  email_drafting: "Soạn email",
-  meeting_notes: "Ghi chú họp",
-  design: "Thiết kế",
-  coding: "Lập trình",
+const CAPABILITY_LABELS: Record<string, { vi: string; en: string }> = {
+  analysis: { vi: "Phân tích", en: "Analysis" },
+  writing: { vi: "Viết nội dung", en: "Writing" },
+  research: { vi: "Nghiên cứu", en: "Research" },
+  summarization: { vi: "Tóm tắt", en: "Summarization" },
+  translation: { vi: "Dịch thuật", en: "Translation" },
+  email_drafting: { vi: "Soạn email", en: "Email drafting" },
+  meeting_notes: { vi: "Ghi chú họp", en: "Meeting notes" },
+  design: { vi: "Thiết kế", en: "Design" },
+  coding: { vi: "Lập trình", en: "Coding" },
 };
+
+function capLabel(key: string, t: (vi: string, en: string) => string): string {
+  const l = CAPABILITY_LABELS[key];
+  return l ? t(l.vi, l.en) : key;
+}
 
 export function PoolView() {
   const t = useT();
@@ -121,7 +126,7 @@ function AgentRow({ agent, rep }: { agent: Agent; rep?: Reputation }) {
           <div className="mt-2 flex flex-wrap gap-1.5">
             {caps.map(([k, v]) => (
               <span key={k} className="inline-flex items-center gap-1.5 rounded-md bg-line/60 px-2 py-1 text-xs text-ink2">
-                {CAPABILITY_LABELS[k] ?? k}
+                {capLabel(k, t)}
                 <span className="h-1.5 w-9 overflow-hidden rounded-full bg-card" aria-hidden>
                   <span className="block h-full rounded-full bg-b" style={{ width: `${Math.round(v * 100)}%` }} />
                 </span>
@@ -221,7 +226,7 @@ function AddAgentForm() {
                 <option value="">{t("Chọn năng lực", "Select capability")}</option>
                 {CAPABILITIES.map((cap) => (
                   <option key={cap} value={cap}>
-                    {CAPABILITY_LABELS[cap] ?? cap}
+                    {capLabel(cap, t)}
                   </option>
                 ))}
               </select>
