@@ -86,7 +86,7 @@ export function decisionResultToPersistenceInput(
     candidates: result.scoring.candidates,
     verdict: result.route.verdict,
     chosen: result.route.selectedCandidateIds,
-    confidence: null,
+    confidence: calculateConfidence(result.route, result.scoring.candidates),
     ambiguity: result.route.ambiguity,
     reason,
     reasoning: formatDecisionReason(reason),
@@ -95,6 +95,21 @@ export function decisionResultToPersistenceInput(
     minutes_est: estimates.minutes_est,
     estimated: true,
   };
+}
+
+function calculateConfidence(
+  route: RouteResultForPersistence,
+  candidates: ScoredCandidate[],
+): number | null {
+  const selected = route.selectedCandidateIds
+    .map((id) => candidates.find((candidate) => candidate.id === id))
+    .filter((candidate): candidate is ScoredCandidate => candidate !== undefined);
+
+  if (selected.length === 0) {
+    return route.topFit ?? null;
+  }
+
+  return selected.reduce((sum, candidate) => sum + candidate.fit, 0) / selected.length;
 }
 
 export function decisionRowToResponse(row: DecisionRow): DecisionResponse {

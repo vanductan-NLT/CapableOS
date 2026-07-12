@@ -1,13 +1,13 @@
 import { TaskBoard } from "@/features/task/task-board";
+import { PageContainer } from "@/components/page-container";
 
 export default function BoardPage() {
   return (
-    <div>
-      <div className="mb-4">
-        <h1 className="text-lg font-semibold">Task Board</h1>
-        <p className="text-sm text-muted">Mọi task + trạng thái + người/agent xử lý · cập nhật realtime.</p>
-      </div>
+    <PageContainer
+      title="Luồng xử lý"
+      description="Toàn bộ việc, trạng thái, người hoặc AI đang chịu trách nhiệm."
+    >
       <TaskBoard />
-    </div>
+    </PageContainer>
   );
 }

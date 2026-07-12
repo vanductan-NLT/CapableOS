@@ -104,14 +104,14 @@ describe("agentRowToPoolCandidate", () => {
 });
 
 describe("decisionResultToPersistenceInput", () => {
-  it("maps an AI decision with null confidence, null governance, and selected estimate", () => {
+  it("maps an AI decision with calculated confidence, null governance, and selected estimate", () => {
     const input = decisionResultToPersistenceInput(taskRow.id, resultFor("ai", ["ai-summarize"]));
 
     expect(input).toMatchObject({
       task_id: taskRow.id,
       verdict: "ai",
       chosen: ["ai-summarize"],
-      confidence: null,
+      confidence: 0.87,
       ambiguity: 0.11,
       governance: null,
       cost_est: 0.3,

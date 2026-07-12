@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Nav } from "@/components/nav";
+import { AppShell } from "@/components/app-shell";
 import { ThemeScript } from "@/components/theme-script";
+
+const inter = Inter({ subsets: ["latin", "vietnamese"], variable: "--font-sans", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Orchestra · Human-AgentOS",
@@ -11,14 +15,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" suppressHydrationWarning>
-      <head>
+    <html lang="vi" className={`${inter.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head suppressHydrationWarning>
         <ThemeScript />
       </head>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-dvh antialiased" suppressHydrationWarning>
         <Providers>
-          <Nav />
-          <main className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 md:py-8">{children}</main>
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>

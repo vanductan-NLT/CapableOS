@@ -1,13 +1,10 @@
 import { DashboardView } from "@/features/dashboard/dashboard-view";
+import { PageContainer } from "@/components/page-container";
 
 export default function DashboardPage() {
   return (
-    <div>
-      <div className="mb-4">
-        <h1 className="text-lg font-semibold">Performance Dashboard</h1>
-        <p className="text-sm text-muted">Năng suất người và AI trên cùng thước đo.</p>
-      </div>
+    <PageContainer title="Hiệu quả vận hành" description="So sánh người và AI trên tốc độ, chi phí, chất lượng và điểm kẹt.">
       <DashboardView />
-    </div>
+    </PageContainer>
   );
 }
