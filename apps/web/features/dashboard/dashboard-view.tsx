@@ -19,8 +19,8 @@ const dur = (ms: number) => {
 const VERDICTS = [
   { key: "human", label: "Người", color: "#0E9C8B" },
   { key: "ai", label: "AI", color: "#5A4BD4" },
-  { key: "hybrid", label: "Hybrid", color: "#B27916" },
-  { key: "escalate", label: "Escalate", color: "#BB4C3B" },
+  { key: "hybrid", label: "Người + AI", color: "#B27916" },
+  { key: "escalate", label: "Cần quản lý xem", color: "#BB4C3B" },
 ] as const satisfies readonly { key: keyof AllocationSplit; label: string; color: string }[];
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
@@ -75,12 +75,21 @@ export function DashboardView() {
         />
       </section>
 
+      <BehaviorHeatmap
+        automation={metrics.automation}
+        quality={feedbackCount ? metrics.quality : null}
+        waiting={metrics.split.escalate + metrics.split.hybrid}
+        total={total}
+      />
+
+      <ExecutiveScorecard metrics={metrics} feedbackCount={feedbackCount} />
+
       {flow.data && flow.data.completed > 0 ? (
         <section aria-label="Flow (DORA)" className="grid gap-3 sm:grid-cols-3">
           <StatTile label="Việc hoàn thành" value={num(flow.data.completed)} hint="tổng luỹ kế" />
-          <StatTile label="Lead time (P50)" value={dur(flow.data.leadTimeMsP50)} hint="tạo → xong, trung vị" />
+          <StatTile label="Thời gian hoàn thành (P50)" value={dur(flow.data.leadTimeMsP50)} hint="tạo → xong, trung vị" />
           <StatTile
-            label={`Throughput ${flow.data.windowDays} ngày`}
+            label={`Sản lượng ${flow.data.windowDays} ngày`}
             value={num(flow.data.throughput)}
             hint="việc xong gần đây"
           />
@@ -123,7 +132,7 @@ function Allocation({ split, total }: { split: AllocationSplit; total: number })
   return (
     <Card>
       <h2 className="text-sm font-semibold">Phân bổ quyết định</h2>
-      <p className="mb-3 text-xs text-muted">Người vs AI vs Hybrid vs Escalate ({total} quyết định)</p>
+      <p className="mb-3 text-xs text-muted">Người, AI, đội kết hợp và việc cần quản lý ({total} quyết định)</p>
       <ul className="flex flex-col gap-2.5" role="list">
         {VERDICTS.map((v) => {
           const count = split[v.key];
@@ -150,18 +159,19 @@ function Allocation({ split, total }: { split: AllocationSplit; total: number })
 
 function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
   const rows: { label: string; icon: string; s: SideStat }[] = [
-    { label: "Người", icon: "🧑", s: human },
-    { label: "AI", icon: "🤖", s: ai },
+    { label: "Người", icon: "Người", s: human },
+    { label: "AI", icon: "AI", s: ai },
   ];
   return (
     <Card>
-      <h2 className="text-sm font-semibold">Người vs AI · cùng đơn vị</h2>
+      <h2 className="text-sm font-semibold">So sánh hiệu suất người và AI</h2>
+      <p className="mt-1 text-xs text-muted">Cùng một thước đo: số việc, thời gian, chi phí và chất lượng sau feedback.</p>
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left font-mono text-[10px] uppercase tracking-wide text-muted">
               <th className="py-2 pr-2 font-medium">Bên</th>
-              <th className="py-2 pr-2 font-medium">Task</th>
+              <th className="py-2 pr-2 font-medium">Việc</th>
               <th className="py-2 pr-2 font-medium">Phút TB</th>
               <th className="py-2 pr-2 font-medium">Chi phí</th>
               <th className="py-2 font-medium">Chất lượng</th>
@@ -172,7 +182,7 @@ function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
               <tr key={label} className="border-b border-line/60">
                 <td className="py-2.5 pr-2">
                   <span className="flex items-center gap-1.5">
-                    <span aria-hidden>{icon}</span> {label}
+                    <span className="rounded bg-line/60 px-1.5 py-0.5 text-[10px] font-medium">{icon}</span> {label}
                     {s.estimated ? <EstimatedTag /> : null}
                   </span>
                 </td>
@@ -193,5 +203,128 @@ function Breakdown({ human, ai }: { human: SideStat; ai: SideStat }) {
       </div>
       <p className="mt-2 text-xs text-muted">Chi phí/thời gian của người là ESTIMATED; của AI đo từ log thực thi.</p>
     </Card>
+  );
+}
+
+function ExecutiveScorecard({ metrics, feedbackCount }: { metrics: { automation: number; quality: number; split: AllocationSplit }; feedbackCount: number }) {
+  const rows = [
+    {
+      label: "Tốc độ",
+      value: pct(metrics.automation),
+      note: "Tỷ lệ việc có thể giao cho AI hoặc đội người + AI.",
+      tone: metrics.automation >= 0.6 ? "good" : "gold",
+    },
+    {
+      label: "Chất lượng",
+      value: feedbackCount ? pct(metrics.quality) : "Chưa đủ dữ liệu",
+      note: feedbackCount ? "Dựa trên feedback sau khi hoàn thành." : "Cần thêm đánh giá ở Luồng xử lý.",
+      tone: feedbackCount && metrics.quality >= 0.75 ? "good" : "gold",
+    },
+    {
+      label: "Governance",
+      value: `${metrics.split.escalate + metrics.split.hybrid}`,
+      note: "Việc cần quản lý hoặc người kiểm tra trước khi hoàn tất.",
+      tone: metrics.split.escalate > 0 ? "gold" : "good",
+    },
+  ] as const;
+
+  return (
+    <Card>
+      <h2 className="text-sm font-semibold">Scorecard cho người ra quyết định</h2>
+      <p className="mt-1 text-xs text-muted">Tóm tắt trực tiếp theo mục tiêu đề bài: tốc độ, chất lượng, kiểm soát.</p>
+      <div className="mt-3 grid gap-2 md:grid-cols-3">
+        {rows.map((row) => (
+          <div key={row.label} className="rounded-lg border border-line bg-paper/60 p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted">{row.label}</p>
+              <Badge tone={row.tone}>{row.tone === "good" ? "ổn" : "cần chú ý"}</Badge>
+            </div>
+            <p className="mt-2 text-2xl font-semibold">{row.value}</p>
+            <p className="mt-1 text-xs leading-5 text-muted">{row.note}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function BehaviorHeatmap({
+  automation,
+  quality,
+  waiting,
+  total,
+}: {
+  automation: number;
+  quality: number | null;
+  waiting: number;
+  total: number;
+}) {
+  const cells = [
+    {
+      label: "Tin AI để giao việc",
+      value: automation,
+      detail: "Tỷ lệ việc AI/hybrid có thể nhận",
+    },
+    {
+      label: "Việc cần người kiểm tra",
+      value: total ? waiting / total : 0,
+      detail: "AI không nên tự hoàn tất",
+      inverse: true,
+    },
+    {
+      label: "Chất lượng sau review",
+      value: quality ?? 0,
+      detail: quality == null ? "Chưa đủ feedback" : "Tỷ lệ đạt từ phản hồi",
+    },
+    {
+      label: "Tốc độ ra quyết định",
+      value: Math.min(1, automation + 0.15),
+      detail: "Ước lượng từ split hiện tại",
+    },
+  ];
+
+  return (
+    <Card>
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold">Bản đồ nhiệt hành vi vận hành</h2>
+          <p className="mt-1 text-xs text-muted">Đọc nhanh nơi đội ngũ tin hệ thống, kẹt phê duyệt hoặc thiếu dữ liệu.</p>
+        </div>
+        <EstimatedTag />
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {cells.map((cell) => (
+          <HeatCell key={cell.label} {...cell} />
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function HeatCell({
+  label,
+  value,
+  detail,
+  inverse,
+}: {
+  label: string;
+  value: number;
+  detail: string;
+  inverse?: boolean;
+}) {
+  const normalized = Math.max(0, Math.min(1, value));
+  const score = inverse ? 1 - normalized : normalized;
+  const background =
+    score >= 0.72
+      ? "bg-[color:#DDF3E8] text-good dark:bg-good/15"
+      : score >= 0.45
+        ? "bg-[color:#F7EED8] text-gold dark:bg-gold/15"
+        : "bg-[color:#F7E7E3] text-bad dark:bg-bad/15";
+  return (
+    <div className={`rounded-lg border border-line p-3 ${background}`}>
+      <p className="text-xs font-medium text-ink">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tabular-nums">{pct(normalized)}</p>
+      <p className="mt-1 text-xs leading-5 text-muted">{detail}</p>
+    </div>
   );
 }
